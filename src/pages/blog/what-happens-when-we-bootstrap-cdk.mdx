@@ -6,7 +6,8 @@ date: "2025-03-31"
 category: "AWS"
 subcategories: ["CDK"]
 description: "เรารันคำสั่ง cdk bootstrap ไปทำไม รันแล้วเกิดอะไรขึ้น บทความนี้มีคำตอบครับ"
-thumbnail: "https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/thumbnail.png"
+slug: "what-happens-when-we-bootstrap-cdk"
+thumbnail: true
 ---
 
 ย้อนกลับไปสมัยที่ผมพึ่งเคยใช้ CDK เป็นครั้งแรก ในเอกสารของ CDK จะเขียนเอาไว้ว่าให้เริ่มจากการรัน cdk bootstrap ก่อน ตัวผมในตอนนั้นที่แค่อยากจะให้ CDK มันสร้าง EC2 ให้ซักตัว ก็เลยรันคำสั่งตามที่มันบอกโดยไม่ขัดขืนซักนิดครับ
@@ -29,13 +30,23 @@ thumbnail: "https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/thumbn
 
 จากนั้นก็รันคำสั่ง cdk bootstrap ครั้งนี้ผมรันบน CloudShell จะได้ไม่ตัองเสียเวลาลง CDK
 
-![01.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/01.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/01.png`}
+    alt="01.png"
+  />
+</p>
 
 หลังการ bootstrap เสร็จสิ้นก็จะเห็น resource ตามด้านบนถูกสร้างขึ้น
 
 ## S3 bucket
 
-![02.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/02.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/02.png`}
+    alt="02.png"
+  />
+</p>
 
 S3 bucket อันนี้ตอนแรกผมก็คิดว่าเอาไว้เก็บไฟล์ CloudFormation template ที่ CDK สร้างขึ้นมา เพื่อที่ CDK จะได้มาหยิบไปใช้ deploy ในขั้นตอนต่อไป แต่จริง ๆ แล้วไม่เชิงเป็นแบบนั้นครับ เพราะพอ CDK สร้างไฟล์ CloudFormation เสร็จแล้ว มันก็โยนไปให้ CloudFormation ตรง ๆ เลย ไม่จำเป็นต้องเอามาพักไว้ที่ S3
 
@@ -43,13 +54,23 @@ S3 bucket อันนี้ตอนแรกผมก็คิดว่าเ�
 
 ## ECR repository
 
-![03.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/03.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/03.png`}
+    alt="03.png"
+  />
+</p>
 
 ECR repository นี่ก็จะคล้าย ๆ กับ S3 ครับ แต่เอาไว้เก็บ container image แทน ซึ่ง container image พวกนีัจะเกิดขึ้นมาเวลาเราสร้าง resource ที่ต้องใช้ container image แล้วเราส่งพวก Dockerfile ให้กับ resource นั้นไปด้วย โดยตอน deploy CDK ก็จะ build image แล้ว push ขึ้นไปที่ ECR repository นี้ครับ
 
 ## IAM role
 
-![04.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/04.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/04.png`}
+    alt="04.png"
+  />
+</p>
 
 iam role จะมีทั้งหมด 5 อัน ซึ่งจะมีชื่อขึ้นต้นด้วย “cdk-” ทั้งหมด แต่ละอันก็จะมี permission คนละแบบ สำหรับ task ที่แตกต่างกัน โดย CDK จะ assume role พวกนี้ในขณะที่ deploy IaC ของเรา
 
@@ -2709,7 +2730,12 @@ role ตัวนี้เป็น role สำหรับใช้ในกา
 
 role นี้เป็น role เพียงตัวเดียวที่เราสามารถกำหนด permission ได้ในตอน bootstrap ซึ่งการกำหนด permission ให้ role ตัวนี้ก็คือการกำหนดว่าจะอนุญาตให้ CDK deploy อะไรได้บ้าง (จริง ๆ คือคุม CloudFormation แต่คนที่ deploy CloudFormation ก็คือ CDK อยู่ดี) ซึ่งถ้าตอน bootstrap เราไม่ได้กำหนด permission อะไรเป็นพิเศษ role นี้จะมี permission เป็น AdministratorAccess ครับ
 
-![05.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/05.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/05.png`}
+    alt="05.png"
+  />
+</p>
 
 แต่ถ้าสมมติผมอยากติด policy อื่น เช่น AmazonS3ReadOnlyAccess แทน AdministratorAccess เราก็แค่ระบุ ARN ของ policy ที่ต้องการเข้าไปที่ option `--cloudformation-execution-policies` ด้วยแค่นั้นก็พอครับ เช่น
 
@@ -2717,7 +2743,12 @@ role นี้เป็น role เพียงตัวเดียวที่
 cdk bootstrap aws://<account_id>/<region> --cloudformation-execution-policies arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
 ```
 
-![06.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/06.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/06.png`}
+    alt="06.png"
+  />
+</p>
 
 ## แล้ว CDK จะ Assume role ยังไง
 
@@ -2752,7 +2783,12 @@ cdk bootstrap aws://<account_id>/<region> --cloudformation-execution-policies ar
 3. Assume role เพื่อเอาไฟล์ CloudFormation template ที่สร้างไป deploy บน CloudFormation พร้อมให้ execution role
 4. Cloudformation ใช้ execution role สร้าง resource
 
-![07.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/07.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/07.png`}
+    alt="07.png"
+  />
+</p>
 
 ## Cross-account deployment
 
@@ -2762,7 +2798,12 @@ cdk bootstrap aws://<account_id>/<region> --cloudformation-execution-policies ar
 
 นั่นก็หมายความว่าถ้า CDK ของเราสามารถ assume role ที่อยู่ใน account อื่นได้ CDK ก็สามารถ deploy resource ใน account นั้นได้เหมือนกัน แต่ว่าโดย default แล้ว role ที่ถูกสร้างขึ้นจากการทำ bootstrap จะอนุญาตให้ principle ของ account ตัวเองเท่านั้นที่ assume ตัวมันได้
 
-![08.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/08.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/08.png`}
+    alt="08.png"
+  />
+</p>
 
 ซึ่งเราสามารถเปลี่ยนเงื่อนไขนี้ได้ด้วยการใช้ option `--trust <account_id>` และ `--trust-for-lookup <account_id>` เพื่อให้ role ที่ถูกสร้างขึ้นจากการ bootstrap เหล่านี้อนุญาตให้ principle จากอีก account หนึ่งมา assume มันได้
 
@@ -2799,7 +2840,7 @@ export class CdkStack extends cdk.Stack {
 
     new lambda.DockerImageFunction(this, "DockerImageFunction", {
       code: lambda.DockerImageCode.fromImageAsset(
-        path.join(__dirname, "codes")
+        path.join(__dirname, "codes"),
       ),
     });
   }
@@ -2838,17 +2879,37 @@ CMD [ "index.handler" ]
 
 พอรันคำสั่ง `cdk deploy` ปุ๊ป CDK ก็จะ zip source code ของ Lambda แล้วอัพโหลดขึ้นไปที่ S3 bucket รวมถึง build Docker image แล้ว push ขึ้นไปที่ ECR repository
 
-![09.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/09.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/09.png`}
+    alt="09.png"
+  />
+</p>
 
-![10.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/10.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/10.png`}
+    alt="10.png"
+  />
+</p>
 
 ได้ Lambda function มา 2 ตัว package type เป็น zip (index.mjs) และ image (Dockerfile) ตามที่เขียนไว้ใน CDK
 
-![11.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/11.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/11.png`}
+    alt="11.png"
+  />
+</p>
 
 ส่วน execution role ของ CloudFormation stack ก็เป็น cnf-exec-role ตามที่บอกไว้ก่อนหน้า
 
-![12.png](https://prpblog.com/assets/what-happens-when-we-bootstrap-cdk/12.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/what-happens-when-we-bootstrap-cdk/12.png`}
+    alt="12.png"
+  />
+</p>
 
 ## อ้างอิง
 

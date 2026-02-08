@@ -57,15 +57,7 @@ resource "aws_route53_record" "cloudfront_cert_validation" {
 locals {
   cloudfront_origins = {
     s3_origin_bucket      = var.s3_origin_cache_behavior,
-    s3_blog_assets_bucket = var.s3_blog_assets_cache_behavior,
     api_gateway           = var.api_gateway_cache_behavior
-  }
-}
-
-locals {
-  s3_buckets = {
-    s3_origin_bucket      = var.s3_origin_bucket,
-    s3_blog_assets_bucket = var.s3_blog_assets_bucket
   }
 }
 
@@ -142,28 +134,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   origin {
-    domain_name              = var.s3_blog_assets_bucket.bucket_regional_domain_name
-    origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
-    origin_id                = var.s3_blog_assets_bucket.id
-  }
-
-  ordered_cache_behavior {
-    path_pattern               = "/assets/*"
-    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
-    cached_methods             = ["GET", "HEAD", "OPTIONS"]
-    viewer_protocol_policy     = "redirect-to-https"
-    target_origin_id           = var.s3_blog_assets_bucket.id
-    cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["s3_blog_assets_bucket"].id
-    origin_request_policy_id   = trimspace(try(coalesce(var.s3_blog_assets_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["s3_blog_assets_bucket"].id : null
-    response_headers_policy_id = trimspace(try(coalesce(var.s3_blog_assets_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["s3_blog_assets_bucket"].id : null
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.remove_path_cf_function.arn
-    }
-  }
-
-  origin {
     domain_name = trimprefix(trimsuffix(var.api.url, "/${var.global_variables.environment}"), "https://")
     origin_id   = var.api.id
     origin_path = "/${var.global_variables.environment}"
@@ -210,7 +180,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 # ==========================================================================================
 
 data "aws_iam_policy_document" "allow_public_access" {
-  for_each  = local.s3_buckets
   policy_id = "PolicyForCloudFrontPrivateContent"
 
   statement {
@@ -221,7 +190,7 @@ data "aws_iam_policy_document" "allow_public_access" {
       type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
     }
-    resources = ["${each.value.arn}/*"]
+    resources = ["${var.s3_origin_bucket.arn}/*"]
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
@@ -232,7 +201,7 @@ data "aws_iam_policy_document" "allow_public_access" {
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
-    resources = ["${each.value.arn}"]
+    resources = ["${var.s3_origin_bucket.arn}"]
 
     principals {
       type        = "AWS"
@@ -242,9 +211,8 @@ data "aws_iam_policy_document" "allow_public_access" {
 }
 
 resource "aws_s3_bucket_policy" "origin_bucket_policy" {
-  for_each = local.s3_buckets
-  bucket   = each.value.id
-  policy   = data.aws_iam_policy_document.allow_public_access[each.key].json
+  bucket   = var.s3_origin_bucket.id
+  policy   = data.aws_iam_policy_document.allow_public_access.json
 }
 
 # ==========================================================================================

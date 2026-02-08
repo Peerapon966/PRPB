@@ -19,16 +19,6 @@ variable "s3_origin_bucket" {
   description = "S3 origin bucket attributes"
 }
 
-variable "s3_blog_assets_bucket" {
-  type = object({
-    id                          = string
-    arn                         = string
-    bucket                      = string
-    bucket_regional_domain_name = string
-  })
-  description = "S3 blog asset bucket attributes"
-}
-
 variable "api" {
   type = object({
     id  = string
@@ -47,20 +37,6 @@ variable "s3_origin_cache_behavior" {
 
   validation {
     condition     = var.s3_origin_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
-    error_message = "S3 expects the origin's host and cannot resolve the distribution's host."
-  }
-}
-
-variable "s3_blog_assets_cache_behavior" {
-  type = object({
-    cloudfront_cache_policy_name            = string
-    cloudfront_origin_request_policy_name   = optional(string)
-    cloudfront_response_headers_policy_name = optional(string)
-  })
-  description = "(Required) Cache behavior for the S3 blog image bucket."
-
-  validation {
-    condition     = var.s3_blog_assets_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
     error_message = "S3 expects the origin's host and cannot resolve the distribution's host."
   }
 }

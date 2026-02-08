@@ -8,13 +8,7 @@ cleanup () {
 }
 
 deploy_code () {
-  export PUBLIC_CONFIGS="/configs.json"
   npm run build
-  cat > ../dist/configs.json << EOF
-{
-  "API_Endpoint": "https://$(terraform output -raw app_domain_name)/api"
-}
-EOF
   aws s3 sync ../dist/ "s3://$(terraform output -raw s3_origin_bucket_name)" --delete --profile $1
   aws cloudfront create-invalidation --distribution-id "$(terraform output -raw distribution_id)" --profile $1 --paths "/*"
 }

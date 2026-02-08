@@ -3,23 +3,13 @@ resource "aws_s3_bucket" "origin_bucket" {
   force_destroy = var.global_variables.is_production ? false : true
 }
 
-resource "aws_s3_bucket" "blog_assets_bucket" {
-  bucket        = substr("${var.global_variables.prefix}-blog-assets-bucket", 0, 63)
-  force_destroy = var.global_variables.is_production ? false : true
-}
-
 resource "aws_s3_bucket" "origin_access_log_bucket" {
   bucket        = substr("${var.global_variables.prefix}-origin-access-log-bucket", 0, 63)
   force_destroy = var.global_variables.is_production ? false : true
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "s3_bucket_sse" {
-  for_each = {
-    origin_bucket            = aws_s3_bucket.origin_bucket.id,
-    blog_assets_bucket       = aws_s3_bucket.blog_assets_bucket.id,
-    origin_access_log_bucket = aws_s3_bucket.origin_access_log_bucket.id
-  }
-  bucket = each.value
+  bucket = aws_s3_bucket.origin_bucket.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -30,11 +20,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_bucket_sse" {
 }
 
 resource "aws_s3_bucket_logging" "bucket_logging" {
-  for_each = {
-    origin_bucket      = aws_s3_bucket.origin_bucket.id,
-    blog_assets_bucket = aws_s3_bucket.blog_assets_bucket.id
-  }
-  bucket        = each.value
+  bucket        = aws_s3_bucket.origin_bucket.id
   target_bucket = aws_s3_bucket.origin_access_log_bucket.id
   target_prefix = "access_log/"
 
@@ -46,11 +32,7 @@ resource "aws_s3_bucket_logging" "bucket_logging" {
 }
 
 resource "aws_s3_bucket_public_access_block" "origin_bucket_public_access_block" {
-  for_each = {
-    origin_bucket      = aws_s3_bucket.origin_bucket.id,
-    blog_assets_bucket = aws_s3_bucket.blog_assets_bucket.id
-  }
-  bucket                  = each.value
+  bucket                  = aws_s3_bucket.origin_bucket.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -58,14 +40,10 @@ resource "aws_s3_bucket_public_access_block" "origin_bucket_public_access_block"
 }
 
 resource "aws_s3_bucket_cors_configuration" "origin_bucket_cors" {
-  for_each = {
-    origin_bucket      = aws_s3_bucket.origin_bucket.id,
-    blog_assets_bucket = aws_s3_bucket.blog_assets_bucket.id
-  }
-  bucket = each.value
+  bucket = aws_s3_bucket.origin_bucket.id
 
   cors_rule {
-    allowed_methods = ["GET"]
+    allowed_methods = ["HEAD", "GET"]
     allowed_origins = ["*"]
   }
 }

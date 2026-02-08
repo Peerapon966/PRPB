@@ -39,23 +39,6 @@ resource "aws_iam_role_policy_attachment" "api_execution_role_attachment" {
   policy_arn = aws_iam_policy.api_execution_role_policy.arn
 }
 
-resource "aws_iam_role" "api_account_role" {
-  count              = var.enable_account_logging ? 1 : 0
-  name               = "AWSAPIGatewayPushToCloudWatchLogsRole"
-  assume_role_policy = data.aws_iam_policy_document.api_gateway_assume_role.json
-}
-
-resource "aws_iam_role_policy_attachment" "api_account_role_attachment" {
-  count      = var.enable_account_logging ? 1 : 0
-  role       = aws_iam_role.api_account_role.0.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
-}
-
-resource "aws_api_gateway_account" "api_account" {
-  count               = var.enable_account_logging ? 1 : 0
-  cloudwatch_role_arn = aws_iam_role.api_account_role.0.arn
-}
-
 resource "aws_api_gateway_rest_api" "api" {
   name              = "${var.global_variables.prefix}-api"
   put_rest_api_mode = "merge"
@@ -89,7 +72,7 @@ resource "aws_cloudwatch_log_group" "api_access_log" {
 }
 
 resource "aws_api_gateway_stage" "api_stage" {
-  depends_on    = [aws_api_gateway_deployment.api_deployment]
+  depends_on    = [aws_api_gateway_deployment.api_deployment, aws_cloudwatch_log_group.api_access_log]
   stage_name    = var.global_variables.environment
   rest_api_id   = aws_api_gateway_rest_api.api.id
   deployment_id = aws_api_gateway_deployment.api_deployment.id
@@ -103,6 +86,21 @@ resource "aws_api_gateway_stage" "api_stage" {
     format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime]\"$context.httpMethod $context.resourcePath $context.protocol\" $context.status $context.error.responseType $context.responseLength $context.requestId $context.extendedRequestId"
   }
 }
+
+resource "aws_api_gateway_method_settings" "api_method_settings" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  stage_name  = aws_api_gateway_stage.api_stage.stage_name
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled = true
+    logging_level   = "INFO"
+    data_trace_enabled = var.global_variables.is_production ? false : true
+    throttling_burst_limit = var.throttling_burst_limit
+    throttling_rate_limit  = var.throttling_rate_limit
+  }
+}
+
 
 resource "aws_api_gateway_api_key" "api_key" {
   name = "${var.global_variables.prefix}-api-key"

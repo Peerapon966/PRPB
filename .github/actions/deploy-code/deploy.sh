@@ -6,7 +6,6 @@ pushd terraform > /dev/null 2>&1
 IS_PRODUCTION=$(awk -F' = ' '/^is_production/ {print $NF}' $TFVARS_FILE | tr -d '"')
 S3_ORIGIN_BUCKET_NAME=$(terraform output -raw s3_origin_bucket_name)
 CLOUDFRONT_DISTRIBUTION_ID=$(terraform output -raw distribution_id)
-API_ENDPOINT="https://$(terraform output -raw app_domain_name)/api"
 API_KEY=$(aws apigateway get-api-key --api-key $(terraform output -raw api_key_id) --include-value --query 'value' --output text)
 popd > /dev/null 2>&1
 
@@ -17,11 +16,6 @@ if [[ "$IS_PRODUCTION" != "true" ]]; then
   popd > /dev/null 2>&1
 fi
 
-cat > dist/configs.json << EOF
-{
-  "API_Endpoint": "$API_ENDPOINT"
-}
-EOF
 aws s3 sync dist/ "s3://$S3_ORIGIN_BUCKET_NAME/" --delete
 aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/*"
 

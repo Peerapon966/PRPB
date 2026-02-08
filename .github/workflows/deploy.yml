@@ -1,0 +1,98 @@
+name: Deploy Staging
+run-name: Deploy new commit '${{ github.head_ref }}' (${{ github.sha }}) to staging environment
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build -- --mode ${{ inputs.environment || 'staging'}}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: astro-build
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+          overwrite: true
+  deploy:
+    if: |
+      startsWith(github.head_ref, 'dependabot/') == false &&
+      github.event.pull_request.merged == true
+    needs: build
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Assume AWS role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: astro-build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ github.workspace }}/dist
+      - name: Init Terraform
+        id: init-terraform
+        uses: ./.github/actions/init-terraform
+        with:
+          s3-bucket-name: ${{ vars.TF_REMOTE_STATE_S3_BUCKET }}
+          dynamodb-table-name: ${{ vars.TF_REMOTE_STATE_DYNAMODB_TABLE }}
+          account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+          tfvars-file: tfvars/${{ inputs.environment || 'staging' }}.tfvars
+      - name: Deploy Application
+        uses: ./.github/actions/deploy-terraform
+        with:
+          workspace: ${{ steps.init-terraform.outputs.workspace }}
+          account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+          tfvars-file: tfvars/${{ inputs.environment || 'staging' }}.tfvars

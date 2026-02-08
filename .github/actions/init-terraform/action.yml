@@ -13,16 +13,10 @@ inputs:
   tfvars-file:
     description: "Path to the tfvars file (relative to the terraform directory)"
     required: true
-  domain-name:
-    description: "Domain name of the application"
-    required: true
 outputs:
   workspace:
     description: "Terraform workspace name"
     value: ${{ steps.init.outputs.workspace }}
-  tfvars-file:
-    description: "Path to the tfvars file (relative to the terraform directory)"
-    value: ${{ steps.init.outputs.tfvars-file }}
 runs:
   using: "composite"
   steps:
@@ -40,5 +34,4 @@ runs:
         S3_BUCKET_NAME: ${{ inputs.s3-bucket-name }}
         DYNAMODB_TABLE_NAME: ${{ inputs.dynamodb-table-name }}
         ACCOUNT_ID: ${{ inputs.account-id }}
-        DOMAIN_NAME: ${{ inputs.domain-name }}
         TFVARS_FILE: ${{ inputs.tfvars-file }}

@@ -38,18 +38,6 @@ variable "is_production" {
   default     = false
 }
 
-variable "include_branch_name_in_prefix" {
-  type        = string
-  description = "(Optional) Include the GitHub branch name in the prefix of the resources"
-  default     = false
-}
-
-variable "branch" {
-  type        = string
-  description = "(Optional) Name of the GitHub branch you are working on"
-  default     = null
-}
-
 variable "profile" {
   type        = string
   description = "(Optional) AWS CLI profile to use for authentication"
@@ -60,14 +48,21 @@ variable "profile" {
 # module: api
 # ==========================================================================================
 
-variable "enable_account_logging" {
-  type        = bool
-  description = "(Required) Enable account logging for the API Gateway"
-}
-
 variable "api_definition" {
   type        = string
   description = "(Required) Path to the API Gateway definition JSON file (relative to the Terraform root module directory)"
+}
+
+variable "throttling_burst_limit" {
+  type = number
+  description = "(Optional) The API Gateway stage throttling burst limit"
+  default = 500
+}
+
+variable "throttling_rate_limit" {
+  type = number
+  description = "(Optional) The API Gateway stage throttling rate limit"
+  default = 1000
 }
 
 # ==========================================================================================
@@ -108,20 +103,6 @@ variable "s3_origin_cache_behavior" {
 
   validation {
     condition     = var.s3_origin_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
-    error_message = "S3 expects the origin's host and cannot resolve the distribution's host."
-  }
-}
-
-variable "s3_blog_assets_cache_behavior" {
-  type = object({
-    cloudfront_cache_policy_name            = string
-    cloudfront_origin_request_policy_name   = optional(string)
-    cloudfront_response_headers_policy_name = optional(string)
-  })
-  description = "(Required) Cache behavior for the S3 blog image bucket."
-
-  validation {
-    condition     = var.s3_blog_assets_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
     error_message = "S3 expects the origin's host and cannot resolve the distribution's host."
   }
 }

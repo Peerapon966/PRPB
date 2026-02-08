@@ -40,7 +40,7 @@ const { frontmatter, headings } = Astro.props;
             "PRPB_THEME",
             document.documentElement.classList.contains("dark")
               ? "dark"
-              : "light"
+              : "light",
           );
         });
         observer.observe(document.documentElement, {
@@ -60,10 +60,10 @@ const { frontmatter, headings } = Astro.props;
       >
         <div id="content" class="py-4 md:py-6">
           {
-            frontmatter?.thumbnail && frontmatter?.thumbnail !== "" && (
+            frontmatter?.thumbnail && (
               <div class="w-full lg:w-2/3 mx-auto border rounded-xl">
                 <Image
-                  src={frontmatter?.thumbnail}
+                  src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/${frontmatter?.slug}/thumbnail.png`}
                   alt={frontmatter?.title + " thumbnail"}
                   class="rounded-xl select-none"
                   inferSize={true}

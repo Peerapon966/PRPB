@@ -31,7 +31,14 @@ variable "api_definition" {
   default     = "assets/api/api.json"
 }
 
-variable "enable_account_logging" {
-  type        = bool
-  description = "Enable account logging for the API Gateway"
+variable "throttling_burst_limit" {
+  type = number
+  description = "(Optional) The API Gateway stage throttling burst limit"
+  default = 500
+}
+
+variable "throttling_rate_limit" {
+  type = number
+  description = "(Optional) The API Gateway stage throttling rate limit"
+  default = 1000
 }

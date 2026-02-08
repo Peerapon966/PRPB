@@ -10,9 +10,6 @@ inputs:
   account-id:
     description: "AWS account ID to deploy to"
     required: true
-  domain-name:
-    description: "Domain name of the application"
-    required: true
 outputs:
   app-url:
     description: "URL of the deployed application"
@@ -34,4 +31,3 @@ runs:
         WORKSPACE: ${{ inputs.workspace }}
         TFVARS_FILE: ${{ inputs.tfvars-file }}
         ACCOUNT_ID: ${{ inputs.account-id }}
-        DOMAIN_NAME: ${{ inputs.domain-name }}

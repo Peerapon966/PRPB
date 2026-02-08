@@ -6,13 +6,14 @@ project                       = "prpb"
 region                        = "ap-southeast-1"
 is_production                 = false
 environment                   = "staging"
-include_branch_name_in_prefix = true
 
 # ==========================================================================================
 # module: api
 # ==========================================================================================
 
 api_definition = "assets/api/api.json"
+throttling_burst_limit = 250
+throttling_rate_limit  = 500
 
 # ==========================================================================================
 # module: db
@@ -30,10 +31,9 @@ tag_ref_table_max_write_request_units = 5
 s3_origin_cache_behavior = {
   cloudfront_cache_policy_name = "Managed-CachingOptimized"
 }
-s3_blog_assets_cache_behavior = {
-  cloudfront_cache_policy_name = "Managed-CachingOptimized"
-}
 api_gateway_cache_behavior = {
   cloudfront_cache_policy_name          = "Managed-CachingDisabled",
   cloudfront_origin_request_policy_name = "Managed-AllViewerExceptHostHeader"
 }
+hosted_zone_name    = "prpblog.com"
+app_sub_domain_name = "staging"
