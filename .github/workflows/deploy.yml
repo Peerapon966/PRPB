@@ -91,8 +91,9 @@ jobs:
           account-id: ${{ secrets.AWS_ACCOUNT_ID }}
           tfvars-file: tfvars/${{ inputs.environment || 'staging' }}.tfvars
       - name: Deploy Application
-        uses: ./.github/actions/deploy-terraform
+        uses: ./.github/actions/deploy
         with:
           workspace: ${{ steps.init-terraform.outputs.workspace }}
           account-id: ${{ secrets.AWS_ACCOUNT_ID }}
           tfvars-file: tfvars/${{ inputs.environment || 'staging' }}.tfvars
+          api-key: ${{ secrets.API_KEY }}

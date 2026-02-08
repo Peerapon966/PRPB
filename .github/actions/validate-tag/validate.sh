@@ -3,35 +3,43 @@
 set -e
 
 validation_failed () {
-  echo "The blog is categorized into non-exist category or subcategory or both. This is not allowed."
+  echo "Blog '$1' is categorized into non-exist category or subcategory or both. This is not allowed."
 }
 
-SLUG=${GITHUB_HEAD_REF#blog/}
-CATEGORY=$(head -n 10 "../src/pages/blog/$SLUG.mdx" | awk -F ': ' '/^category/ {print $NF}' | tr -d '"')
-SUBCATEGORIES=$(head -n 10 "../src/pages/blog/$SLUG.mdx" | awk -F ': ' '/^subcategories/ {print $NF}')
-TABLE_NAME="$(terraform output -raw tag_ref_table_name)"
+while read -r BLOG; do
+  SLUG="${BLOG#src/pages/blog/}"
+  SLUG="${SLUG%.mdx}"
+  echo "Validating blog: $SLUG"
 
-# Replace the table name in the template
-TEMPLATE=../.github/actions/validate-tag/transacItem.json
-jq --arg t $TABLE_NAME '.ConditionCheck.TableName = $t' $TEMPLATE > $TEMPLATE.tmp
-mv $TEMPLATE.tmp $TEMPLATE
+  CATEGORY=$(head -n 10 "../src/pages/blog/$SLUG.mdx" | awk -F ': ' '/^category/ {print $NF}' | tr -d '"')
+  SUBCATEGORIES=$(head -n 10 "../src/pages/blog/$SLUG.mdx" | awk -F ': ' '/^subcategories/ {print $NF}')
+  echo "Category: $CATEGORY"
+  echo "Subcategories: $SUBCATEGORIES"
 
-CATEGORY_ITEM=$(jq --arg c $CATEGORY '.ConditionCheck.Key.Category.S = "null" | .ConditionCheck.Key.Value.S = $c' $TEMPLATE)
-SUBCATEGORY_ITEMS="["
+  TABLE_NAME="$(terraform output -raw tag_ref_table_name)"
 
-while read -r SUBCATEGORY; do
-  ITEM=$(jq --arg c "$CATEGORY" --arg s "$SUBCATEGORY" '.ConditionCheck.Key.Category.S = $c | .ConditionCheck.Key.Value.S = $s' $TEMPLATE)
-  SUBCATEGORY_ITEMS+="$ITEM,"
-done < <(echo $SUBCATEGORIES | jq -r '.[]')
+  # Replace the table name in the template
+  TEMPLATE=../.github/actions/validate-tag/transacItem.json
+  jq --arg t $TABLE_NAME '.ConditionCheck.TableName = $t' $TEMPLATE > $TEMPLATE.tmp
+  mv $TEMPLATE.tmp $TEMPLATE
 
-SUBCATEGORY_ITEMS="${SUBCATEGORY_ITEMS%,}]"
-TRANSACT_ITEMS=$(mktemp)
-(echo $SUBCATEGORY_ITEMS | jq --argjson c "$CATEGORY_ITEM" '[$c] + .') > $TRANSACT_ITEMS
+  # Prepare tag validation transact items
+  CATEGORY_ITEM=$(jq --arg c $CATEGORY '.ConditionCheck.Key.Category.S = "null" | .ConditionCheck.Key.Value.S = $c' $TEMPLATE)
+  SUBCATEGORY_ITEMS="["
 
-cat $TRANSACT_ITEMS
+  while read -r SUBCATEGORY; do
+    ITEM=$(jq --arg c "$CATEGORY" --arg s "$SUBCATEGORY" '.ConditionCheck.Key.Category.S = $c | .ConditionCheck.Key.Value.S = $s' $TEMPLATE)
+    SUBCATEGORY_ITEMS+="$ITEM,"
+  done < <(echo $SUBCATEGORIES | jq -r '.[]')
 
-trap validation_failed ERR
-aws dynamodb transact-write-items \
-  --transact-items file://$TRANSACT_ITEMS
+  SUBCATEGORY_ITEMS="${SUBCATEGORY_ITEMS%,}]"
+  TRANSACT_ITEMS=$(mktemp)
+  (echo $SUBCATEGORY_ITEMS | jq --argjson c "$CATEGORY_ITEM" '[$c] + .') > $TRANSACT_ITEMS
 
-echo "Tag validation passed. The blog is categorized into existing category and subcategories."
+  # Execute the tag validation
+  trap 'validation_failed "$SLUG"' ERR
+  aws dynamodb transact-write-items \
+    --transact-items file://$TRANSACT_ITEMS
+  unset trap
+  echo "Tag validation passed. Blog '$SLUG' is categorized into existing category and subcategories."
+done < <(git diff --name-only origin/main...HEAD | grep 'src/pages/blog/.*\.mdx$' || true)
