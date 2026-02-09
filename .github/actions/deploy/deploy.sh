@@ -20,7 +20,7 @@ terraform apply \
 aws s3 sync ../dist/ "s3://$(terraform output -raw s3_origin_bucket_name)/" --delete ---exclude "assets/*"
 aws s3 sync ../src/assets/ "s3://$(terraform output -raw s3_origin_bucket_name)/assets/" --delete
 
-pushd ../.github/actions/publish-blog > /dev/null 2>&1
+pushd ../.github/actions/deploy > /dev/null 2>&1
 while read -r BLOG; do
   SLUG="${BLOG#src/pages/blog/}"
   SLUG="${SLUG%.mdx}"
@@ -43,14 +43,14 @@ while read -r BLOG; do
     --argjson subcategories "$SUBCATEGORIES" \
     --arg date "$DATE" \
     '.blogs = [{"title": $title, "description": $description, "thumbnail": $thumbnail, "slug": $slug, "category": $category, "subcategories": $subcategories, "publish_date": $date}]' \
-    items.json > items.json.tmp
-  mv items.json.tmp items.json
+    item.json > item.json.tmp
+  mv item.json.tmp item.json
 
   curl \
     -X POST \
     -H "Content-Type: application/json" \
     -H "X-API-Key: $API_KEY" \
-    -d @items.json \
+    -d @item.json \
     "$(terraform output -raw api_invoke_url)/blogs"
 done < <(git diff --name-only --diff-filter=A origin/main...HEAD | grep 'src/pages/blog/.*\.mdx$' || true)
 
