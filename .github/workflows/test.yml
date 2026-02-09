@@ -70,6 +70,24 @@ jobs:
       - name: Check blog updates
         run: |
           echo "updated_blog_count=$(git diff --name-only origin/main...HEAD | grep 'src/pages/blog/' | wc -l)" >> "$GITHUB_ENV"
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        if: ${{ env.updated_blog_count > '0' }}
+      - name: Assume AWS role
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ env.updated_blog_count > '0' }}
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Init Terraform
+        id: init-terraform
+        uses: ./.github/actions/init-terraform
+        if: ${{ env.updated_blog_count > '0' }}
+        with:
+          s3-bucket-name: ${{ vars.TF_REMOTE_STATE_S3_BUCKET }}
+          dynamodb-table-name: ${{ vars.TF_REMOTE_STATE_DYNAMODB_TABLE }}
+          account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+          tfvars-file: tfvars/production.tfvars
       - name: Validate Tag
         uses: ./.github/actions/validate-tag
         if: ${{ env.updated_blog_count > '0' }}
@@ -100,4 +118,4 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build
-        run: npm run build -- --mode staging
+        run: npm run build
