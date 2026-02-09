@@ -63,7 +63,7 @@ export function TagFilter({
 
   useEffect(() => {
     async function fetchTags() {
-      const response = await fetch(`${import.meta.env.SITE}/api/tags`, {
+      const response = await fetch(`${import.meta.env.SITE_URL}/api/tags`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

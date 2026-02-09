@@ -1,3 +1,5 @@
+resource "time_static" "api_version" {}
+
 data "aws_iam_policy_document" "api_gateway_assume_role" {
   statement {
     effect = "Allow"
@@ -24,6 +26,15 @@ data "aws_iam_policy_document" "api_execution_role_policy" {
   }
 }
 
+data "template_file" "api_definition" {
+  template = file(join("", [path.root, startswith(var.api_definition_path, "/") ? "${var.api_definition_path}" : "/${var.api_definition_path}"]))
+  vars = {
+    execution_role_arn = aws_iam_role.api_execution_role.arn
+    timestamp          = time_static.api_version.rfc3339
+    env                = var.global_variables.environment
+  }
+}
+
 resource "aws_iam_policy" "api_execution_role_policy" {
   name   = "${var.global_variables.prefix}-api-execution-policy"
   policy = data.aws_iam_policy_document.api_execution_role_policy.json
@@ -42,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "api_execution_role_attachment" {
 resource "aws_api_gateway_rest_api" "api" {
   name              = "${var.global_variables.prefix}-api"
   put_rest_api_mode = "merge"
-  body              = file(join("", [path.root, startswith(var.api_definition, "/") ? "${var.api_definition}" : "/${var.api_definition}"]))
+  body              = data.template_file.api_definition.rendered
 
   endpoint_configuration {
     types = ["REGIONAL"]
@@ -93,9 +104,9 @@ resource "aws_api_gateway_method_settings" "api_method_settings" {
   method_path = "*/*"
 
   settings {
-    metrics_enabled = true
-    logging_level   = "INFO"
-    data_trace_enabled = var.global_variables.is_production ? false : true
+    metrics_enabled        = true
+    logging_level          = "INFO"
+    data_trace_enabled     = var.global_variables.is_production ? false : true
     throttling_burst_limit = var.throttling_burst_limit
     throttling_rate_limit  = var.throttling_rate_limit
   }

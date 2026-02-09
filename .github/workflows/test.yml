@@ -61,7 +61,7 @@ jobs:
   validate-tag:
     if: startsWith(github.head_ref, 'dependabot/') == false
     runs-on: ubuntu-latest
-    environment: prod
+    environment: production
     permissions:
       id-token: write
       contents: read

@@ -2,16 +2,16 @@
 # Global Variables
 # ==========================================================================================
 
-project                       = "prpb"
-region                        = "ap-southeast-1"
-is_production                 = true
-environment                   = "prod"
+project       = "prpb"
+region        = "ap-southeast-1"
+is_production = true
+environment   = "prod"
 
 # ==========================================================================================
 # module: api
 # ==========================================================================================
 
-api_definition = "assets/api/api.json"
+api_definition_path = "assets/api/api.json.tftpl"
 
 # ==========================================================================================
 # module: db
@@ -33,4 +33,4 @@ api_gateway_cache_behavior = {
   cloudfront_cache_policy_name          = "Managed-CachingDisabled",
   cloudfront_origin_request_policy_name = "Managed-AllViewerExceptHostHeader"
 }
-hosted_zone_name    = "prpblog.com"
+hosted_zone_name = "prpblog.com"

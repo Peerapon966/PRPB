@@ -25,7 +25,7 @@ module "db" {
 module "api" {
   source                 = "./modules/api"
   global_variables       = local.global_variables
-  api_definition         = var.api_definition
+  api_definition_path    = var.api_definition_path
   dynamodb_blog_table    = module.db.dynamodb_blog_table
   dynamodb_tag_ref_table = module.db.dynamodb_tag_ref_table
   throttling_burst_limit = var.throttling_burst_limit

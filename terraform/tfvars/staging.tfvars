@@ -2,16 +2,16 @@
 # Global Variables
 # ==========================================================================================
 
-project                       = "prpb"
-region                        = "ap-southeast-1"
-is_production                 = false
-environment                   = "staging"
+project       = "prpb"
+region        = "ap-southeast-1"
+is_production = false
+environment   = "staging"
 
 # ==========================================================================================
 # module: api
 # ==========================================================================================
 
-api_definition = "assets/api/api.json"
+api_definition_path    = "assets/api/api.json.tftpl"
 throttling_burst_limit = 250
 throttling_rate_limit  = 500
 
@@ -35,5 +35,5 @@ api_gateway_cache_behavior = {
   cloudfront_cache_policy_name          = "Managed-CachingDisabled",
   cloudfront_origin_request_policy_name = "Managed-AllViewerExceptHostHeader"
 }
-hosted_zone_name    = "prpblog.com"
+hosted_zone_name    = "p-dev.click"
 app_sub_domain_name = "staging"

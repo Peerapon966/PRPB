@@ -25,20 +25,20 @@ variable "dynamodb_tag_ref_table" {
   description = "DynamoDB tag reference table attributes"
 }
 
-variable "api_definition" {
+variable "api_definition_path" {
   type        = string
   description = "(Optional) Path to the API Gateway definition JSON file (relative to the Terraform root module directory)"
-  default     = "assets/api/api.json"
+  default     = "assets/api/api.json.tftpl"
 }
 
 variable "throttling_burst_limit" {
-  type = number
+  type        = number
   description = "(Optional) The API Gateway stage throttling burst limit"
-  default = 500
+  default     = 500
 }
 
 variable "throttling_rate_limit" {
-  type = number
+  type        = number
   description = "(Optional) The API Gateway stage throttling rate limit"
-  default = 1000
+  default     = 1000
 }

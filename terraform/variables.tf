@@ -48,21 +48,21 @@ variable "profile" {
 # module: api
 # ==========================================================================================
 
-variable "api_definition" {
+variable "api_definition_path" {
   type        = string
   description = "(Required) Path to the API Gateway definition JSON file (relative to the Terraform root module directory)"
 }
 
 variable "throttling_burst_limit" {
-  type = number
+  type        = number
   description = "(Optional) The API Gateway stage throttling burst limit"
-  default = 500
+  default     = 500
 }
 
 variable "throttling_rate_limit" {
-  type = number
+  type        = number
   description = "(Optional) The API Gateway stage throttling rate limit"
-  default = 1000
+  default     = 1000
 }
 
 # ==========================================================================================

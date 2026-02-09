@@ -4,6 +4,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.84.0"
     }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2.2.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13.0"
+    }
   }
 
   backend "s3" {}

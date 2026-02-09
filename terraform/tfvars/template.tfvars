@@ -2,18 +2,18 @@
 # Global Variables
 # ==========================================================================================
 
-project                       = "prpb"
-region                        = "ap-southeast-1"
-account                       = "123456789012"
-environment                   = "dev"
-is_production                 = false
-profile                       = "default"
+project       = "prpb"
+region        = "ap-southeast-1"
+account       = "123456789012"
+environment   = "dev"
+is_production = false
+profile       = "default"
 
 # ==========================================================================================
 # module: api
 # ==========================================================================================
 
-api_definition         = "assets/api/api.json"
+api_definition_path    = "assets/api/api.json.tftpl"
 throttling_burst_limit = 250
 throttling_rate_limit  = 500
 

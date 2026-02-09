@@ -1,19 +1,9 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "<title>",
-    "version": "2025-04-12T19:51:23Z"
+    "title": "prpblog-api-${env}",
+    "version": "${timestamp}"
   },
-  "servers": [
-    {
-      "url": "https://oubny0l7w0.execute-api.ap-southeast-1.amazonaws.com/{basePath}",
-      "variables": {
-        "basePath": {
-          "default": "<env>"
-        }
-      }
-    }
-  ],
   "paths": {
     "/tags": {
       "get": {
@@ -38,7 +28,7 @@
         },
         "x-amazon-apigateway-integration": {
           "type": "aws",
-          "credentials": "<execution_role_arn>",
+          "credentials": "${execution_role_arn}",
           "httpMethod": "POST",
           "uri": "arn:aws:apigateway:ap-southeast-1:dynamodb:action/Scan",
           "responses": {
@@ -48,7 +38,7 @@
                 "method.response.header.Access-Control-Allow-Origin": "'*'"
               },
               "responseTemplates": {
-                "application/json": "#set($items = $util.parseJson($input.json('Items')))\r\n#set($q = '\"')\r\n#set($response = {})\r\n#foreach($item in $items)\r\n#set($category = \"#if($item.Category.S=='null')category#{else}$item.Category.S#end\")\r\n#set($value = $item.Value.S)\r\n#if(!$response.containsKey($category))\r\n#set($_ = $response.put($category, []))\r\n#end\r\n#set($_ = $response[$category].add(\"${q}${value}${q}\"))\r\n#end\r\n{\r\n    \"status\": 200,\r\n    \"categories\": $response.category,\r\n    \"subcategories\": {        \r\n    #foreach($category in $response.category)\r\n    #set($tags = $response[$util.escapeJavaScript($category).replaceAll('\\\\\"', '')])\r\n        $category: #if($!{tags}==\"\")[]#{else}$tags#end#if($foreach.hasNext),\r\n#end\r\n    #end\r\n    \r\n    }\r\n}"
+                "application/json": "#set($items = $util.parseJson($input.json('Items')))\r\n#set($q = '\"')\r\n#set($response = {})\r\n#foreach($item in $items)\r\n#set($category = \"#if($item.Category.S=='null')category#{else}$item.Category.S#end\")\r\n#set($value = $item.Value.S)\r\n#if(!$response.containsKey($category))\r\n#set($_ = $response.put($category, []))\r\n#end\r\n#set($_ = $response[$category].add(\"$${q}$${value}$${q}\"))\r\n#end\r\n{\r\n    \"status\": 200,\r\n    \"categories\": $response.category,\r\n    \"subcategories\": {        \r\n    #foreach($category in $response.category)\r\n    #set($tags = $response[$util.escapeJavaScript($category).replaceAll('\\\\\"', '')])\r\n        $category: #if($!{tags}==\"\")[]#{else}$tags#end#if($foreach.hasNext),\r\n#end\r\n    #end\r\n    \r\n    }\r\n}"
               }
             }
           },
@@ -89,7 +79,7 @@
         "x-amazon-apigateway-request-validator": "Validate body, query string parameters, and headers",
         "x-amazon-apigateway-integration": {
           "type": "aws",
-          "credentials": "<execution_role_arn>",
+          "credentials": "${execution_role_arn}",
           "httpMethod": "POST",
           "uri": "arn:aws:apigateway:ap-southeast-1:dynamodb:action/TransactWriteItems",
           "responses": {
@@ -206,7 +196,7 @@
         "x-amazon-apigateway-request-validator": "Validate query string parameters and headers",
         "x-amazon-apigateway-integration": {
           "type": "aws",
-          "credentials": "<execution_role_arn>",
+          "credentials": "${execution_role_arn}",
           "httpMethod": "POST",
           "uri": "arn:aws:apigateway:ap-southeast-1:dynamodb:action/Query",
           "responses": {
@@ -257,7 +247,7 @@
         "x-amazon-apigateway-request-validator": "Validate body, query string parameters, and headers",
         "x-amazon-apigateway-integration": {
           "type": "aws",
-          "credentials": "<execution_role_arn>",
+          "credentials": "${execution_role_arn}",
           "httpMethod": "POST",
           "uri": "arn:aws:apigateway:ap-southeast-1:dynamodb:action/TransactWriteItems",
           "responses": {
@@ -296,7 +286,7 @@
         },
         "x-amazon-apigateway-integration": {
           "type": "aws",
-          "credentials": "<execution_role_arn>",
+          "credentials": "${execution_role_arn}",
           "httpMethod": "POST",
           "uri": "arn:aws:apigateway:ap-southeast-1:dynamodb:action/TransactWriteItems",
           "responses": {

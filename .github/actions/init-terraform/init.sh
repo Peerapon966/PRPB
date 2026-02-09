@@ -15,10 +15,6 @@ terraform init \
 
 WORKSPACE="$PROJECT-$ENV"
 
-if ! terraform workspace list | grep -q "$WORKSPACE"; then
-  terraform workspace new "$WORKSPACE"
-else
-  terraform workspace select "$WORKSPACE"
-fi
+terraform workspace select -or-create "$WORKSPACE"
 
 echo "workspace=$WORKSPACE" >> "$GITHUB_OUTPUT"

@@ -71,7 +71,7 @@ export function BlogList() {
 
     const queryString = getQueryString(props);
     const response = await fetch(
-      `${import.meta.env.SITE}/api/blogs${queryString}`,
+      `${import.meta.env.SITE_URL}/api/blogs${queryString}`,
       {
         method: "GET",
         headers: {
