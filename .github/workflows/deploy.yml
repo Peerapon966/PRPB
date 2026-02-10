@@ -57,9 +57,6 @@ jobs:
           if-no-files-found: error
           overwrite: true
   deploy:
-    if: |
-      startsWith(github.head_ref, 'dependabot/') == false &&
-      github.event.pull_request.merged == true
     needs: build
     timeout-minutes: 60
     runs-on: ubuntu-latest
