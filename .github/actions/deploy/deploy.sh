@@ -8,7 +8,7 @@ terraform apply \
   -var="account=$ACCOUNT_ID" \
   -auto-approve
 
-aws s3 sync ../dist/ "s3://$(terraform output -raw s3_origin_bucket_name)/" --delete ---exclude "assets/*"
+aws s3 sync ../dist/ "s3://$(terraform output -raw s3_origin_bucket_name)/" --delete --exclude "assets/*"
 aws s3 sync ../src/assets/ "s3://$(terraform output -raw s3_origin_bucket_name)/assets/" --delete
 
 pushd ../.github/actions/deploy > /dev/null 2>&1
@@ -44,8 +44,9 @@ while read -r BLOG; do
     -d @item.json \
     "$(terraform output -raw api_invoke_url)/blogs"
 done < <(git diff --name-only --diff-filter=A origin/main...HEAD | grep 'src/pages/blog/.*\.mdx$' || true)
+popd > /dev/null 2>&1
 
-aws cloudfront create-invalidation --distribution-id "$(terraform output -raw distribution_id)" --paths "*"
+aws cloudfront create-invalidation --distribution-id "$(terraform output -raw distribution_id)" --paths "/*"
 
 echo "app-url=https://$(terraform output -raw app_domain_name)" >> "$GITHUB_OUTPUT"
 echo "Terraform apply complete!"
