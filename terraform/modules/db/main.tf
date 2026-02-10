@@ -58,4 +58,9 @@ resource "aws_dynamodb_table" "tag_ref_table" {
     max_read_request_units  = var.tag_ref_table_max_read_request_units
     max_write_request_units = var.tag_ref_table_max_write_request_units
   }
+
+  point_in_time_recovery {
+    enabled                 = var.global_variables.is_production
+    recovery_period_in_days = var.point_in_time_recovery_days
+  }
 }
