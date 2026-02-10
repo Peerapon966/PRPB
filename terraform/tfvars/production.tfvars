@@ -21,6 +21,7 @@ blog_table_max_read_request_units     = 5
 blog_table_max_write_request_units    = 5
 tag_ref_table_max_read_request_units  = 5
 tag_ref_table_max_write_request_units = 5
+point_in_time_recovery_days           = 14
 
 # ==========================================================================================
 # module: cdn

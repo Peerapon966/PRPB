@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source                = "hashicorp/aws"
-      version               = "~> 5.84.0"
+      version               = "~> 6.31.0"
       configuration_aliases = [aws.virginia]
     }
   }
@@ -56,8 +56,8 @@ resource "aws_route53_record" "cloudfront_cert_validation" {
 
 locals {
   cloudfront_origins = {
-    s3_origin_bucket      = var.s3_origin_cache_behavior,
-    api_gateway           = var.api_gateway_cache_behavior
+    s3_origin_bucket = var.s3_origin_cache_behavior,
+    api_gateway      = var.api_gateway_cache_behavior
   }
 }
 
@@ -211,8 +211,8 @@ data "aws_iam_policy_document" "allow_public_access" {
 }
 
 resource "aws_s3_bucket_policy" "origin_bucket_policy" {
-  bucket   = var.s3_origin_bucket.id
-  policy   = data.aws_iam_policy_document.allow_public_access.json
+  bucket = var.s3_origin_bucket.id
+  policy = data.aws_iam_policy_document.allow_public_access.json
 }
 
 # ==========================================================================================
