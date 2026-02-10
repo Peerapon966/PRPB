@@ -63,14 +63,14 @@ const { frontmatter, headings } = Astro.props;
             frontmatter?.thumbnail && (
               <div class="w-full lg:w-2/3 mx-auto border rounded-xl">
                 {/* <Image
-                  src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/${frontmatter?.slug}/thumbnail.png`}
+                  src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/${frontmatter?.slug}/thumbnail.png`}
                   alt={frontmatter?.title + " thumbnail"}
                   class="rounded-xl select-none"
                   inferSize
                   loading={"eager"}
                 /> */}
                 <img
-                  src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/${frontmatter?.slug}/thumbnail.png`}
+                  src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/${frontmatter?.slug}/thumbnail.png`}
                   data-image-component="true"
                   alt={frontmatter?.title + " thumbnail"}
                   loading="eager"
