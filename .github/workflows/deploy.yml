@@ -1,5 +1,5 @@
-name: Deploy Staging
-run-name: Deploy new commit '${{ github.head_ref }}' (${{ github.sha }}) to staging environment
+name: Deploy
+run-name: Deploy new commit '${{ github.head_ref }}' (${{ github.sha }}) to target environment
 
 on:
   pull_request:

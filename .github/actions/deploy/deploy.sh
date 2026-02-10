@@ -8,7 +8,7 @@ terraform apply \
   -var="account=$ACCOUNT_ID" \
   -auto-approve
 
-aws s3 sync ../dist/ "s3://$(terraform output -raw s3_origin_bucket_name)/" --delete ---exclude "assets/*"
+aws s3 sync ../dist/ "s3://$(terraform output -raw s3_origin_bucket_name)/" --delete --exclude "assets/*"
 aws s3 sync ../src/assets/ "s3://$(terraform output -raw s3_origin_bucket_name)/assets/" --delete
 
 pushd ../.github/actions/deploy > /dev/null 2>&1
