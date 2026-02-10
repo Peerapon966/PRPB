@@ -25,6 +25,10 @@ permissions:
 
 jobs:
   build:
+    if: |
+      (startsWith(github.head_ref, 'dependabot/') == false &&
+      github.event.pull_request.merged == true) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     steps:
@@ -57,10 +61,8 @@ jobs:
           if-no-files-found: error
           overwrite: true
   deploy:
-    if: |
-      startsWith(github.head_ref, 'dependabot/') == false &&
-      github.event.pull_request.merged == true
     needs: build
+    if: ${{ needs.build.result == 'success' }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
