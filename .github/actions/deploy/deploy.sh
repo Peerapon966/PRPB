@@ -44,6 +44,7 @@ while read -r BLOG; do
     -d @item.json \
     "$(terraform output -raw api_invoke_url)/blogs"
 done < <(git diff --name-only --diff-filter=A origin/main...HEAD | grep 'src/pages/blog/.*\.mdx$' || true)
+popd > /dev/null 2>&1
 
 aws cloudfront create-invalidation --distribution-id "$(terraform output -raw distribution_id)" --paths "*"
 
