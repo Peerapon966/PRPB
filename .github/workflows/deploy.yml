@@ -57,6 +57,9 @@ jobs:
           if-no-files-found: error
           overwrite: true
   deploy:
+    if: |
+      startsWith(github.head_ref, 'dependabot/') == false &&
+      github.event.pull_request.merged == true
     needs: build
     timeout-minutes: 60
     runs-on: ubuntu-latest
@@ -68,7 +71,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
       - name: Assume AWS role
