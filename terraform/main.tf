@@ -20,6 +20,7 @@ module "db" {
   blog_table_max_write_request_units    = var.blog_table_max_write_request_units
   tag_ref_table_max_read_request_units  = var.tag_ref_table_max_read_request_units
   tag_ref_table_max_write_request_units = var.tag_ref_table_max_write_request_units
+  point_in_time_recovery_days           = var.point_in_time_recovery_days
 }
 
 module "api" {

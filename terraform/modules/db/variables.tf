@@ -28,3 +28,9 @@ variable "tag_ref_table_max_write_request_units" {
   type        = number
   description = "(Required) Maximum number of writes consumed per second for the tag reference table before DynamoDB returns a ThrottlingException."
 }
+
+variable "point_in_time_recovery_days" {
+  type        = number
+  description = "(Optional) The number of days to retain point-in-time recovery data for the DynamoDB table."
+  default     = 14
+}
