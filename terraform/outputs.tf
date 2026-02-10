@@ -3,11 +3,6 @@ output "s3_origin_bucket_name" {
   value       = module.s3.s3_origin_bucket.bucket
 }
 
-output "s3_blog_assets_bucket_name" {
-  description = "S3 blog assets bucket name"
-  value       = module.s3.s3_blog_assets_bucket.bucket
-}
-
 output "api_key_id" {
   description = "API Gateway API Key ID"
   sensitive   = true

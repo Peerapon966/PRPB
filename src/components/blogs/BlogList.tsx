@@ -60,7 +60,7 @@ export function BlogList() {
   }
 
   async function fetchBlogs(
-    props: FetchBlogsProps = { category: "", subcategory: "" }
+    props: FetchBlogsProps = { category: "", subcategory: "" },
   ) {
     const categoryChanged = props.category !== prevCategory.current;
     const subcategoryChanged = props.subcategory !== prevSubcategory.current;
@@ -70,15 +70,15 @@ export function BlogList() {
     if (!props.lastBlog && !filterChanged) return;
 
     const queryString = getQueryString(props);
-    const apiEndpoint = (
-      await (await fetch(import.meta.env.PUBLIC_CONFIGS)).json()
-    ).API_Endpoint;
-    const response = await fetch(`${apiEndpoint}/blogs${queryString}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${import.meta.env.SITE_URL}/api/blogs${queryString}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
     const { blogs } = (await response.json()) as { blogs: BlogItemProps[] };
 
     filterChanged

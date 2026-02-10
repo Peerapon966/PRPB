@@ -3,7 +3,7 @@ locals {
     region        = "${var.region}"
     account       = "${var.account}"
     is_production = var.is_production
-    prefix        = var.include_branch_name_in_prefix ? "${var.project}-${var.environment}-${var.branch}" : "${var.project}-${var.environment}"
+    prefix        = "${var.project}-${var.environment}"
     environment   = "${var.environment}"
   }
 }
@@ -25,10 +25,11 @@ module "db" {
 module "api" {
   source                 = "./modules/api"
   global_variables       = local.global_variables
-  api_definition         = var.api_definition
+  api_definition_path    = var.api_definition_path
   dynamodb_blog_table    = module.db.dynamodb_blog_table
   dynamodb_tag_ref_table = module.db.dynamodb_tag_ref_table
-  enable_account_logging = var.enable_account_logging
+  throttling_burst_limit = var.throttling_burst_limit
+  throttling_rate_limit  = var.throttling_rate_limit
 }
 
 module "cdn" {
@@ -38,10 +39,8 @@ module "cdn" {
   }
   global_variables                    = local.global_variables
   s3_origin_bucket                    = module.s3.s3_origin_bucket
-  s3_blog_assets_bucket               = module.s3.s3_blog_assets_bucket
   api                                 = module.api.api
   s3_origin_cache_behavior            = var.s3_origin_cache_behavior
-  s3_blog_assets_cache_behavior       = var.s3_blog_assets_cache_behavior
   api_gateway_cache_behavior          = var.api_gateway_cache_behavior
   add_index_cf_function_source_code   = var.add_index_cf_function_source_code
   remove_path_cf_function_source_code = var.remove_path_cf_function_source_code

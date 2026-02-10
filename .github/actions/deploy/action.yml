@@ -1,0 +1,37 @@
+name: "Deploy"
+description: "Deploy Terraform and build artifacts to AWS account"
+inputs:
+  workspace:
+    description: "Terraform workspace name"
+    required: true
+  tfvars-file:
+    description: "Path to the tfvars file (relative to the terraform directory)"
+    required: true
+  account-id:
+    description: "AWS account ID to deploy to"
+    required: true
+  api-key:
+    description: "API key for API Gateway REST API"
+    required: true
+outputs:
+  app-url:
+    description: "URL of the deployed application"
+    value: ${{ steps.deploy.outputs.app-url }}
+runs:
+  using: "composite"
+  steps:
+    - name: Set GitHub Path
+      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+    - name: Run terraform deploy script
+      id: deploy
+      run: deploy.sh
+      shell: bash
+      working-directory: ${{ github.workspace }}/terraform
+      env:
+        WORKSPACE: ${{ inputs.workspace }}
+        TFVARS_FILE: ${{ inputs.tfvars-file }}
+        ACCOUNT_ID: ${{ inputs.account-id }}
+        API_KEY: ${{ inputs.api-key }}

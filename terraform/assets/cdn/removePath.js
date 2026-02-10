@@ -7,10 +7,5 @@ async function handler(event) {
     request.uri = request.uri.replace(/^\/api\//, "/");
   }
 
-  // Check whether the "/assets/" is in the URI.
-  if (uri.includes("/assets/")) {
-    request.uri = request.uri.replace(/^\/assets\//, "/");
-  }
-
   return request;
 }

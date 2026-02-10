@@ -2,17 +2,18 @@
 # Global Variables
 # ==========================================================================================
 
-project                       = "prpb"
-region                        = "ap-southeast-1"
-is_production                 = false
-environment                   = "staging"
-include_branch_name_in_prefix = true
+project       = "prpb"
+region        = "ap-southeast-1"
+is_production = false
+environment   = "staging"
 
 # ==========================================================================================
 # module: api
 # ==========================================================================================
 
-api_definition = "assets/api/api.json"
+api_definition_path    = "assets/api/api.json.tftpl"
+throttling_burst_limit = 250
+throttling_rate_limit  = 500
 
 # ==========================================================================================
 # module: db
@@ -30,10 +31,9 @@ tag_ref_table_max_write_request_units = 5
 s3_origin_cache_behavior = {
   cloudfront_cache_policy_name = "Managed-CachingOptimized"
 }
-s3_blog_assets_cache_behavior = {
-  cloudfront_cache_policy_name = "Managed-CachingOptimized"
-}
 api_gateway_cache_behavior = {
   cloudfront_cache_policy_name          = "Managed-CachingDisabled",
   cloudfront_origin_request_policy_name = "Managed-AllViewerExceptHostHeader"
 }
+hosted_zone_name    = "p-dev.click"
+app_sub_domain_name = "staging"

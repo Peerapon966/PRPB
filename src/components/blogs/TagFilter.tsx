@@ -63,10 +63,7 @@ export function TagFilter({
 
   useEffect(() => {
     async function fetchTags() {
-      const apiEndpoint = (
-        await (await fetch(import.meta.env.PUBLIC_CONFIGS)).json()
-      ).API_Endpoint;
-      const response = await fetch(`${apiEndpoint}/tags`, {
+      const response = await fetch(`${import.meta.env.SITE_URL}/api/tags`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +85,7 @@ export function TagFilter({
         : false;
     })(category);
     const isValidSubcategory = ((
-      subcategory: string
+      subcategory: string,
     ): subcategory is string => {
       return (tags?.subcategories[category] ?? []).includes(subcategory) ||
         (category && !subcategory)

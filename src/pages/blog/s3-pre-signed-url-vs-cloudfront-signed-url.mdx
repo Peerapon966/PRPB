@@ -6,7 +6,8 @@ date: "2025-04-15"
 category: "AWS"
 subcategories: ["S3", "CloudFront"]
 description: "resource ใน private subnet ที่เชื่อมต่อ internet ไม่ได้ สามารถเข้าถึง DNS resolve ได้ยังไง บทความนี้มีคำตอบครับ"
-thumbnail: "https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/thumbnail.png"
+slug: "s3-pre-signed-url-vs-cloudfront-signed-url"
+thumbnail: true
 ---
 
 S3 Presigned URL กับ CloudFront Signed URL ต่างกันยังไง? มีใครเคยสงสัยแบบผมมั้ยครับ คือตอนนี้ผมก็รู้แล้วแหละว่ามันต่างกันยังไงเพราะมันแทบจะคนละเรื่องคนละ service กันเลย แต่สมัยที่ผมพึ่งใช้ AWS ใหม่ ๆ ด้วยความที่ประสบการณ์แทบจะเป็น 0 แถมชื่อ presigned URL กับ signed URL ยังคล้ายกันมากจนผมเผลอคิดไปว่ามันคือสิ่งเดียวกันแต่แค่ AWS อินดี้ตั้งชื่อให้ไม่เหมือนกันเฉย ๆ ครับ 555
@@ -45,25 +46,55 @@ S3 presigned URL คือ URL ที่เอาไว้ใช้สำหร�
 
 สมมติว่าผมมี S3 bucket ชื่อ `my-bucket-09e54cfa` (ตั้งชื่อ bucket ให้ unique นี่มันลำบากดีแท้) ที่ข้างในมีไฟล์ `song-of-the-day.txt` อยู่
 
-![01.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/01.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/01.png`}
+    alt="01.png"
+  />
+</p>
 
 สมมติว่าอยากแชร์ไฟล์นี้ให้คนอื่น เลย copy URL แล้วเปิดไฟล์จาก URL นั้นดู ก็จะพบว่าเปิดไม่ได้ เพราะไม่ได้เปิด public access ให้กับไฟล์นี้ไว้
 
-![02.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/02.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/02.png`}
+    alt="02.png"
+  />
+</p>
 
 ทีนี้ลองแชร์โดยใช้ presigned URL แทน โดยไปที่เมนู Actions → Share with a presigned URL จากนั้นใส่ระยะเวลาเข้าไปว่าอยากให้ URL นี้ใช้ได้นานเท่าไหร่ (สร้างผ่าน console จะเลือกได้สูงสุด 12 ชม. แต่ถ้าสร้างผ่าน CLI หรือ SDK จะได้สูงสุด 7 วัน)
 
-![03.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/03.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/03.png`}
+    alt="03.png"
+  />
+</p>
 
-![04.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/04.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/04.png`}
+    alt="04.png"
+  />
+</p>
 
 แล้วลองเปิดไฟล์ด้วย presigned URL ที่ได้มาก็จะพบว่าสามารถเข้าถึงไฟล์ได้แล้ว
 
-![05.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/05.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/05.png`}
+    alt="05.png"
+  />
+</p>
 
 พอ URL หมดอายุก็จะใช้งานไม่ได้อีก
 
-![06.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/06.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/06.png`}
+    alt="06.png"
+  />
+</p>
 
 ### แถม
 
@@ -96,7 +127,12 @@ def generate_presigned_url():
 curl -X PUT -T "game-of-the-day.txt" "<presigned-URL>"
 ```
 
-![07.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/07.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/07.png`}
+    alt="07.png"
+  />
+</p>
 
 หรืออย่างอันนี้จะสร้าง presigned URL สำหรับ list ไฟล์ที่อยู่ใน bucket `my-bucket-09e54cfa`
 
@@ -121,7 +157,12 @@ def generate_presigned_url():
 
 เอา presigned URL ที่ได้ไปเปิดบน browser ก็ได้จะข้อมูลกลับมาในรูปของ XML
 
-![08.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/08.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/08.png`}
+    alt="08.png"
+  />
+</p>
 
 สำหรับรายละเอียดเพิ่มเติม ถ้าใครสนใจวิธีการสร้าง presigned URL สำหรับใช้ทำอย่างอื่นนอกเหนือจากนี้สามารถดูได้ที่ documentation ของ AWS ได้เลยครับ
 
@@ -148,7 +189,12 @@ CloudFront signed URL คือฟีเจอร์ของ CloudFront ที�
 
 อธิบายคร่าว ๆ ก่อนครับ คือตอนนี้ผมมีรูปภาพ `thumbnail.png` อยู่ใน S3 bucket แล้วก็มี CloudFront distribution อันนึงที่มี bucket อันนี้เป็น origin ครับ หมายความว่าตอนนี้ผมสามารถดูรูปภาพนี้ได้ผ่าน `<distribution_domain_name>/thumbnail.png`
 
-![09.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/09.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/09.png`}
+    alt="09.png"
+  />
+</p>
 
 แล้วถ้าเกิดผมมีรูปอื่นอีก เช่น `thumbnail2.png` ผมก็แค่ไล่เปลี่ยนชื่อไฟล์ใน URL ไปเรื่อย ๆ ก็พอ เช่น `<distribution_domain_name>/thumbnail2.png`
 
@@ -175,13 +221,28 @@ aws cloudfront create-key-group --key-group-config "Name=my-key-group,Items=<pub
 
 เลือก distribution → behavior → edit → เปิด restrict viewer access → เลือก key group ที่สร้างไว้
 
-![10.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/10.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/10.png`}
+    alt="10.png"
+  />
+</p>
 
-![11.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/11.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/11.png`}
+    alt="11.png"
+  />
+</p>
 
 พอตั้งค่าเสร็จแล้วลองเปิดรูปภาพด้วย URL เดิม จะพบว่าเปิดไม่ได้แล้ว เพราะไม่มี signature
 
-![12.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/12.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/12.png`}
+    alt="12.png"
+  />
+</p>
 
 ขั้นตอนต่อไปเราก็จะสร้าง signed URL โดยใช้ SDK ซึ่ง URL ที่ได้จาก code ด้านล่างจะสามารถใช้เพื่อเข้าถึงไฟล์ `thumbnail.png` จนถึงวันที่ 15/04/2025 หลังจากนั้น URL ก็จะหมดอายุครับ
 
@@ -210,7 +271,12 @@ function signURL() {
 
 ลองเปิด URL ดูก็จะพบว่าสามารถดูรูปภาพได้
 
-![13.png](https://prpblog.com/assets/s3-pre-signed-url-vs-cloudfront-signed-url/13.png)
+<p>
+  <img
+    src={`${import.meta.env.SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/13.png`}
+    alt="13.png"
+  />
+</p>
 
 เราสามารถใช้ wildcard กับ URL ได้ด้วย แต่ไม่ใช่ว่าแค่เปลี่ยน URL เป็น `https://d2wv1gnkwl6nia.cloudfront.net/*.png` แล้วจะจบนะครับ เพราะแบบนี้ URL ที่ได้มาจะหมายถึงอนุญาตให้เข้าถึงไฟล์ชื่อ `*.png` (\* ที่ไม่ใช่ wildcard แต่หมายถึงไฟล์ที่ชื่อ \* จริง ๆ แบบ literally) เฉย ๆ
 
