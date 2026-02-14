@@ -1,7 +1,9 @@
 export function Footer() {
   return (
-    <div className="w-full h-[3.3rem] select-none md:border-t-2 sticky bottom-0 flex justify-between items-center px-6 md:px-16">
-      <div className="opacity-70 text-foreground text-sm">© 2025 PRPB</div>
+    <div className="w-full h-[3.3rem] select-none md:border-t-2 sticky bottom-0 flex justify-between items-center px-6 md:px-16 z-10 bg-background">
+      <div className="opacity-70 text-foreground text-sm">
+        © {new Date().getFullYear()} PRPB
+      </div>
       <div className="hidden md:flex items-center">
         <a
           href="https://github.com/Peerapon-Org/PRPB"

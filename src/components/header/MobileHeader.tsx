@@ -80,12 +80,15 @@ export function MobileHeader() {
         className="menu-overlay bg-overlay/90 dark:bg-overlay/90"
       ></div>
       <div ref={menuGroup} className="menu-group">
-        <div ref={themeToggleBtn} className="theme-toggle-btn-wrapper">
+        <div
+          ref={themeToggleBtn}
+          className="min-w-[48px] theme-toggle-btn-wrapper"
+        >
           <ThemeToggleBtn />
         </div>
         <div
           ref={menuContainer}
-          className="menu-container circle backdrop-filter backdrop-blur-[6px] relative"
+          className="menu-container circle backdrop-filter backdrop-blur-[6px] min-w-[48px] relative"
         >
           <div className="absolute w-full h-full opacity-0 z-full"></div>
           {menus.map(({ menu, link }) => (
@@ -106,7 +109,7 @@ export function MobileHeader() {
             <div className="flex items-center">
               <a
                 href="/"
-                className="prpb-icon font-serif font-semibold text-md"
+                className="prpb-icon font-semibold text-md"
                 rel="noopener noreferrer nofollow"
               >
                 PRPB

@@ -17,7 +17,7 @@ export function PCHeader() {
           <a
             href="/"
             rel="noopener noreferrer nofollow"
-            className="flex items-center justify-center h-full shrink-0 font-serif font-semibold select-none"
+            className="flex items-center justify-center h-full shrink-0 font-semibold select-none"
           >
             PRPB
           </a>

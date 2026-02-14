@@ -85,6 +85,9 @@ export default {
           "100%": { transform: "scaleY(4)" },
         },
       },
+      fontFamily: {
+        prompt: ["Prompt", "sans-serif"],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

@@ -12,17 +12,19 @@ export function TOC({ headings }: { headings: Headings }) {
   const floorDepth = headings[0].depth;
   const onClickHandler = () => {
     navBar.current?.classList.toggle("!w-0");
-    navBtn.current?.classList.toggle("hidden");
+    navBtn.current?.classList.toggle("!hidden");
     navBtn.current?.firstElementChild?.classList.toggle("rotate-180");
   };
   const generateTOC = (
     headings: Headings,
-    currentDepth: number
+    currentDepth: number,
   ): JSX.Element => {
     let exhausted = false;
     return (
       <>
-        <ul className="list-none">
+        <ul
+          className={`list-none ${currentDepth <= 2 ? "-translate-x-4" : ""}`}
+        >
           {headings.map(({ depth, slug, text }, idx) => {
             if (exhausted) return;
             if (depth < currentDepth) {
@@ -43,7 +45,7 @@ export function TOC({ headings }: { headings: Headings }) {
                   {headings[idx + 1]?.depth > currentDepth &&
                     generateTOC(
                       headings.slice(idx + 1),
-                      headings[idx + 1].depth
+                      headings[idx + 1].depth,
                     )}
                 </li>
               );
@@ -54,7 +56,7 @@ export function TOC({ headings }: { headings: Headings }) {
   };
 
   return (
-    <nav className="fixed 2xl:sticky top-0 right-0 z-[999] h-full 2xl:h-screen flex items-center text-sm">
+    <nav className="h-full flex items-center text-sm">
       <div
         ref={navBtn}
         onClick={onClickHandler}
@@ -84,12 +86,12 @@ export function TOC({ headings }: { headings: Headings }) {
                 return { ...heading, depth: floorDepth };
               return heading;
             }),
-            floorDepth
+            floorDepth,
           )}
         </div>
         <div
           onClick={onClickHandler}
-          className="xs:hidden absolute w-7 right-3 top-1/2"
+          className="2xl:hidden absolute w-7 right-0 top-1/2 -translate-y-1/2 py-4 hover:cursor-pointer select-none border-y border-l border-r border-r-background rounded-l-xl bg-background"
         >
           <svg
             className="w-full h-full rotate-180"
