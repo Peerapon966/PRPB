@@ -82,6 +82,10 @@
     line-height: 1.8;
   }
 
+  body.lock {
+    @apply h-full overflow-clip;
+  }
+
   ul {
     @apply list-disc pl-8 leading-tight whitespace-normal;
   }

@@ -49,13 +49,13 @@ const { frontmatter, headings } = Astro.props;
       }
     </script>
   </head>
-  <body class="bai-jamjuree-regular">
+  <body class="bai-jamjuree-regular overscroll-none">
     <header>
       <Header client:load />
     </header>
     <main class="relative">
       <div
-        class="min-w-96 max-w-screen-sm mx-auto px-4 break-word whitespace-pre-line text-wrap pt-0 md:pt-[3.4rem] relative"
+        class="max-w-screen-sm mx-auto px-4 break-word whitespace-pre-line text-wrap pt-0 md:pt-[3.4rem] relative"
       >
         <div id="content" class="py-4 md:py-6">
           {
@@ -108,9 +108,7 @@ const { frontmatter, headings } = Astro.props;
           <slot />
         </div>
       </div>
-      <div class="fixed h-full right-0 top-0">
-        <TOC client:load headings={headings} />
-      </div>
+      <TOC client:load headings={headings} />
     </main>
     <footer>
       <Footer />

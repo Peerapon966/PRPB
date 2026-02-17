@@ -1,0 +1,39 @@
+name: prpb
+
+services:
+  api:
+    build: ./docker/api
+    container_name: prpb-api
+    restart: unless-stopped
+    env_file:
+      - ./docker/.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker/api/:/code/:ro
+    depends_on:
+      - mongodb
+    networks:
+      - prpb
+
+  mongodb:
+    image: mongo:latest
+    container_name: prpb-mongodb
+    restart: unless-stopped
+    env_file:
+      - ./docker/.env
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker/mongodb/initdb/:/docker-entrypoint-initdb.d/:ro
+    networks:
+      - prpb
+
+volumes:
+  mongodb_data:
+
+networks:
+  prpb:
+    name: prpb
+    driver: bridge
