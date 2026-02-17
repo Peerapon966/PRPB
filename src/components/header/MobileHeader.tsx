@@ -13,40 +13,27 @@ export function MobileHeader() {
     { menu: "About", link: "/about" },
   ];
   const menuOverlay = useRef<HTMLDivElement | null>(null);
-  const menuGroup = useRef<HTMLDivElement | null>(null);
   const menuContainer = useRef<HTMLDivElement | null>(null);
   const themeToggleBtn = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleMenuClick = (e: MouseEvent) => {
-      if (
-        !menuContainer.current?.classList.contains("active") &&
-        !menuGroup.current?.classList.contains("active")
-      ) {
+      if (!menuContainer.current?.classList.contains("active")) {
         e.preventDefault();
         menuContainer.current?.classList.add("active");
         menuContainer.current?.firstElementChild?.classList.add("hidden");
         themeToggleBtn.current?.classList.add("active");
         menuOverlay.current?.classList.add("active");
-        setTimeout(() => {
-          menuGroup.current?.classList.add("active");
-        }, 600);
         disableScroll();
       }
     };
 
     const handleOverlayClick = () => {
-      if (
-        menuContainer.current?.classList.contains("active") &&
-        menuGroup.current?.classList.contains("active")
-      ) {
+      if (menuContainer.current?.classList.contains("active")) {
         menuContainer.current.classList.remove("active");
         menuContainer.current?.firstElementChild?.classList.remove("hidden");
         themeToggleBtn.current?.classList.remove("active");
         menuOverlay.current?.classList.remove("active");
-        setTimeout(() => {
-          menuGroup.current?.classList.remove("active");
-        }, 600);
         enableScroll();
       }
     };
@@ -79,13 +66,16 @@ export function MobileHeader() {
         ref={menuOverlay}
         className="menu-overlay bg-overlay/90 dark:bg-overlay/90"
       ></div>
-      <div ref={menuGroup} className="menu-group">
-        <div ref={themeToggleBtn} className="theme-toggle-btn-wrapper">
+      <div className="menu-group">
+        <div
+          ref={themeToggleBtn}
+          className="min-w-[48px] theme-toggle-btn-wrapper"
+        >
           <ThemeToggleBtn />
         </div>
         <div
           ref={menuContainer}
-          className="menu-container circle backdrop-filter backdrop-blur-[6px] relative"
+          className="menu-container circle backdrop-filter backdrop-blur-[6px] min-w-[48px] relative"
         >
           <div className="absolute w-full h-full opacity-0 z-full"></div>
           {menus.map(({ menu, link }) => (
@@ -106,7 +96,7 @@ export function MobileHeader() {
             <div className="flex items-center">
               <a
                 href="/"
-                className="prpb-icon font-serif font-semibold text-md"
+                className="prpb-icon font-semibold text-md"
                 rel="noopener noreferrer nofollow"
               >
                 PRPB

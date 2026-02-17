@@ -1,0 +1,5 @@
+bucket         = "terraform-remote-state-bucket-019498b7"
+key            = "terraform.tfstate"
+dynamodb_table = "terraform-state-lock-table"
+region         = "ap-southeast-1"
+profile        = "dev"

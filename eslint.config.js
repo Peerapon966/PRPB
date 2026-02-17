@@ -17,6 +17,7 @@ export default [
       "**/*.config*",
       "tests-examples",
       "src/middleware.ts",
+      "docker/*",
     ],
   },
   { languageOptions: { globals: globals.browser } },
