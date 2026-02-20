@@ -58,7 +58,7 @@ export function TOC({ headings }: { headings: Headings }) {
   };
 
   return (
-    <nav className="fixed max-w-[300px] h-screen right-0 top-0 flex items-center text-sm z-10">
+    <nav className="fixed max-w-[300px] h-full right-0 top-0 flex items-center text-sm z-10">
       <div
         ref={navBtn1}
         onClick={onClickHandler}
@@ -78,7 +78,7 @@ export function TOC({ headings }: { headings: Headings }) {
       </div>
       <div
         ref={navBar}
-        className="relative break-word overflow-y-scroll h-screen pt-4 lg:pt-[3.3rem] bg-background flex flex-col items-center !w-0 w-full 2xl:!w-full border-l scrollbar-hide"
+        className="relative break-word overflow-y-scroll h-full pt-4 lg:pt-[3.3rem] bg-background flex flex-col items-center !w-0 w-full 2xl:!w-full border-l scrollbar-hide"
       >
         <div className="py-6 text-lg font-semibold">Table of content</div>
         <div className="pr-8 ml-2 h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">

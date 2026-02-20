@@ -4,6 +4,7 @@
   "exclude": ["dist"],
   "compilerOptions": {
     // "verbatimModuleSyntax": true,
+    "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "baseUrl": ".",
