@@ -12,16 +12,19 @@ export function TOC({ headings }: { headings: Headings }) {
   const navBtn = useRef<HTMLDivElement | null>(null);
   const floorDepth = headings[0].depth;
 
+  // 500 ms timeout is a temporary fix to deal with iOS26 liquid glass Safari bottom address bar bg-color paint delay when opening the TOC
+  // TODO: properly fix this later when have time
   const onClickHandler = () => {
     overlay.current?.classList.toggle("active");
-    // overlay.current?.classList.toggle("!z-10");
     navBtn.current?.firstElementChild?.classList.toggle("rotate-180");
+    setTimeout(() => {
+      overlay.current?.classList.toggle("!z-10");
+    }, 500);
 
     if (overlay.current?.classList.contains("active")) {
-      // setTimeout(() => {
-      //   navBar.current?.classList.remove("invisible");
-      // }, 200);
-      navBar.current?.classList.remove("invisible");
+      setTimeout(() => {
+        navBar.current?.classList.remove("invisible");
+      }, 500);
       document.body.classList.add("lock");
     } else {
       document.body.classList.remove("lock");
