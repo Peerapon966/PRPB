@@ -19,9 +19,9 @@ done
 pushd $(dirname -- ${BASH_SOURCE[0]})
 pushd ../terraform
 
-aws sts get-caller-identity --profile dev || echo "Couldn't authenticate AWS profile 'dev'"; exit 1
+aws sts get-caller-identity --profile dev || { echo "Couldn't authenticate AWS profile 'dev'"; exit 1; }
 
-terraform init -backend-config=backend-dev.hcl
+terraform init -backend-config=init/backend-dev.hcl
 
 ORIGIN_BUCKET_NAME=$(terraform output -raw s3_origin_bucket_name)
 DISTRIBUTION_ID=$(terraform output -raw distribution_id)
@@ -33,6 +33,6 @@ pushd ..
 
 npm run build -- --mode development
 
-aws s3 sync dist/ "$ORIGIN_BUCKET_NAME" --delete --exclude "assets/*"
-aws s3 sync src/assets/ "$ORIGIN_BUCKET_NAME" --delete
-aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*"
+aws s3 sync dist/ "s3://${ORIGIN_BUCKET_NAME}" --delete --exclude "assets/*" --profile dev
+aws s3 sync src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --profile dev
+aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*" --profile dev | tee /dev/null

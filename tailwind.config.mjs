@@ -64,9 +64,8 @@ export default {
         menu: "cubic-bezier(0.32, 0.72, 0, 1)",
       },
       screens: {
-        xs: "640px",
-        sm: "767px",
-        md: "990px",
+        xs: "420px",
+        xl: "1210px",
       },
       zIndex: {
         full: "9999",

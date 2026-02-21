@@ -7,16 +7,28 @@ type Headings = {
 }[];
 
 export function TOC({ headings }: { headings: Headings }) {
+  const overlay = useRef<HTMLDivElement | null>(null);
   const navBar = useRef<HTMLDivElement | null>(null);
-  const navBtn1 = useRef<HTMLDivElement | null>(null);
-  const navBtn2 = useRef<HTMLDivElement | null>(null);
+  const navBtn = useRef<HTMLDivElement | null>(null);
   const floorDepth = headings[0].depth;
+
   const onClickHandler = () => {
-    navBar.current?.classList.toggle("!w-0");
-    navBtn1.current?.classList.toggle("!hidden");
-    navBtn2.current?.classList.toggle("!hidden");
+    overlay.current?.classList.toggle("active");
+    // overlay.current?.classList.toggle("!z-10");
+    navBtn.current?.firstElementChild?.classList.toggle("rotate-180");
+
+    if (overlay.current?.classList.contains("active")) {
+      // setTimeout(() => {
+      //   navBar.current?.classList.remove("invisible");
+      // }, 200);
+      navBar.current?.classList.remove("invisible");
+      document.body.classList.add("lock");
+    } else {
+      document.body.classList.remove("lock");
+      navBar.current?.classList.add("invisible");
+    }
   };
-  navBar.current?.addEventListener("wheel", (e) => e.stopPropagation());
+
   const generateTOC = (
     headings: Headings,
     currentDepth: number,
@@ -58,46 +70,20 @@ export function TOC({ headings }: { headings: Headings }) {
   };
 
   return (
-    <nav className="fixed max-w-[300px] h-full right-0 top-0 flex items-center text-sm z-10">
+    <>
       <div
-        ref={navBtn1}
+        ref={overlay}
         onClick={onClickHandler}
-        className="w-7 py-4 rounded-l-xl hover:cursor-pointer select-none border-y border-l border-r border-r-background bg-background relative left-[2px] xs:block 2xl:hidden"
-      >
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 1024 1024"
-          version="1.1"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M768 903.232l-50.432 56.768L256 512l461.568-448 50.432 56.768L364.928 512z"
-            fill="currentColor"
-          />
-        </svg>
-      </div>
-      <div
-        ref={navBar}
-        className="relative break-word overflow-y-scroll h-full pt-4 lg:pt-[3.3rem] bg-background flex flex-col items-center !w-0 w-full 2xl:!w-full border-l scrollbar-hide"
-      >
-        <div className="py-6 text-lg font-semibold">Table of content</div>
-        <div className="pr-8 ml-2 h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {generateTOC(
-            headings.map((heading) => {
-              if (heading.depth < floorDepth)
-                return { ...heading, depth: floorDepth };
-              return heading;
-            }),
-            floorDepth,
-          )}
-        </div>
+        className="menu-overlay bg-overlay/90 xl:hidden"
+      ></div>
+      <nav className="fixed max-w-[300px] right-0 bottom-0 flex flex-row-reverse items-center text-sm z-20">
         <div
-          ref={navBtn2}
+          ref={navBtn}
           onClick={onClickHandler}
-          className="!hidden 2xl:!hidden fixed w-7 right-0 top-1/2 -translate-y-1/2 py-4 hover:cursor-pointer select-none border-y border-l border-r border-r-background rounded-l-xl bg-background"
+          className="w-7 py-4 rounded-l-xl hover:cursor-pointer select-none border-y border-l border-r border-r-background bg-background relative left-[2px] xs:block xl:hidden z-[1020]"
         >
           <svg
-            className="w-full h-full rotate-180"
+            className="w-full h-full"
             viewBox="0 0 1024 1024"
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
@@ -108,7 +94,23 @@ export function TOC({ headings }: { headings: Headings }) {
             />
           </svg>
         </div>
-      </div>
-    </nav>
+        <div
+          ref={navBar}
+          className="relative break-word overflow-y-scroll h-dvh pt-4 lg:pt-[3.3rem] translate-x-7 bg-background flex flex-col items-center invisible xl:visible border-l scrollbar-hide z-[1010]"
+        >
+          <div className="py-6 text-lg font-semibold">Table of content</div>
+          <div className="pr-8 ml-2 h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {generateTOC(
+              headings.map((heading) => {
+                if (heading.depth < floorDepth)
+                  return { ...heading, depth: floorDepth };
+                return heading;
+              }),
+              floorDepth,
+            )}
+          </div>
+        </div>
+      </nav>
+    </>
   );
 }

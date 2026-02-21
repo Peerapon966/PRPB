@@ -61,11 +61,8 @@ export function MobileHeader() {
   }
 
   return (
-    <div className="absolute h-full w-full">
-      <div
-        ref={menuOverlay}
-        className="menu-overlay bg-overlay/90 dark:bg-overlay/90"
-      ></div>
+    <div className="h-full w-full">
+      <div ref={menuOverlay} className="menu-overlay bg-overlay/90"></div>
       <div className="menu-group">
         <div
           ref={themeToggleBtn}
