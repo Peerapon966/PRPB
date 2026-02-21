@@ -14,22 +14,31 @@ export function TOC({ headings }: { headings: Headings }) {
 
   // 500 ms timeout is a temporary fix to deal with iOS26 liquid glass Safari bottom address bar bg-color paint delay when opening the TOC
   // TODO: properly fix this later when have time
+  let addressBarPainted = false;
   const onClickHandler = () => {
     overlay.current?.classList.toggle("active");
     navBtn.current?.firstElementChild?.classList.toggle("rotate-180");
-    setTimeout(() => {
-      overlay.current?.classList.toggle("!z-10");
-    }, 500);
+    setTimeout(
+      () => {
+        overlay.current?.classList.toggle("!z-10");
+      },
+      addressBarPainted ? 0 : 500,
+    );
 
     if (overlay.current?.classList.contains("active")) {
-      setTimeout(() => {
-        navBar.current?.classList.remove("invisible");
-      }, 500);
+      setTimeout(
+        () => {
+          navBar.current?.classList.remove("invisible");
+        },
+        addressBarPainted ? 0 : 500,
+      );
       document.body.classList.add("lock");
     } else {
       document.body.classList.remove("lock");
       navBar.current?.classList.add("invisible");
     }
+
+    addressBarPainted = true;
   };
 
   const generateTOC = (
