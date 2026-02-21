@@ -8,6 +8,7 @@
     "test": "playwright test --fully-parallel",
     "lint": "eslint",
     "preview": "astro preview",
+    "deploy": "bash scripts/deploy-dev.sh",
     "astro": "astro"
   },
   "dependencies": {
