@@ -3,7 +3,7 @@ import "@/styles/globals.css";
 import { Header } from "@/components/header/Header";
 import { Footer } from "@/components/footer/Footer";
 import { Tag } from "@/components/blogs/Tag";
-import { TOC } from "@/components/TOC";
+import { TOC } from "@/components/blogs/TOC";
 
 const { frontmatter, headings } = Astro.props;
 ---
@@ -94,8 +94,8 @@ const { frontmatter, headings } = Astro.props;
               }
               {
                 frontmatter?.category &&
-                  frontmatter?.subcategory &&
-                  frontmatter.subcategory.map((subcategory: string) => (
+                  frontmatter?.subcategories &&
+                  frontmatter.subcategories.map((subcategory: string) => (
                     <div class="mr-2">
                       <Tag
                         name={subcategory}

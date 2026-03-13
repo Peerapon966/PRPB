@@ -1,6 +1,20 @@
-name: prpb
-
 services:
+  astro:
+    image: node:iron
+    container_name: prpb-astro
+    restart: unless-stopped
+    ports:
+      - "43210:43210"
+    working_dir: /home/node/app
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+    volumes:
+      - ./:/home/node/app:rw
+      - ./.env.local:/home/node/app/.env.development
+    depends_on:
+      - api
+    networks:
+      - prpb
+
   api:
     build: ./docker/api
     container_name: prpb-api
