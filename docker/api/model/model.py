@@ -31,3 +31,23 @@ class BlogUpdateModel(BaseModel):
                 "Both 'category' and 'subcategories' must be provided together, or both must be omitted."
             )
         return self
+
+
+class CategoryCreateModel(BaseModel):
+    name: str
+
+
+class SubcategoryCreateModel(BaseModel):
+    category: str
+    name: str
+
+
+class CategoryUpdateModel(BaseModel):
+    newName: str
+
+
+class SubcategoryUpdateModel(BaseModel):
+    category: str
+    name: str
+    newCategory: Optional[str] = None
+    newName: Optional[str] = None
