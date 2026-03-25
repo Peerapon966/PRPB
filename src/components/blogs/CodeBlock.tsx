@@ -1,0 +1,203 @@
+"use client";
+
+import * as React from "react";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+
+export const CODE_LANGUAGES = [
+  "bash",
+  "c",
+  "cpp",
+  "css",
+  "diff",
+  "dockerfile",
+  "go",
+  "graphql",
+  "html",
+  "java",
+  "javascript",
+  "json",
+  "jsx",
+  "kotlin",
+  "markdown",
+  "php",
+  "plaintext",
+  "python",
+  "ruby",
+  "rust",
+  "shell",
+  "sql",
+  "toml",
+  "typescript",
+  "tsx",
+  "yaml",
+] as const;
+
+export type CodeLanguage = (typeof CODE_LANGUAGES)[number];
+
+export type CodeBlockProps = {
+  language?: CodeLanguage;
+  code?: string;
+  children?: React.ReactNode;
+  className?: string;
+};
+
+function stripSingleEdgeBlankLines(value: string) {
+  let lines = value.replaceAll("\r\n", "\n").split("\n");
+  if (lines.length > 0 && lines[0].trim() === "") lines = lines.slice(1);
+  if (lines.length > 0 && lines[lines.length - 1].trim() === "")
+    lines = lines.slice(0, -1);
+  return lines;
+}
+
+function countLeadingWhitespace(line: string) {
+  let i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (ch !== " " && ch !== "\t") break;
+    i += 1;
+  }
+  return i;
+}
+
+function dedentLines(lines: string[]) {
+  let minIndent = Number.POSITIVE_INFINITY;
+  for (const line of lines) {
+    if (line.trim() === "") continue;
+    minIndent = Math.min(minIndent, countLeadingWhitespace(line));
+  }
+
+  if (!Number.isFinite(minIndent) || minIndent <= 0) return lines;
+  return lines.map((line) => (line.trim() === "" ? "" : line.slice(minIndent)));
+}
+
+function normalizeCode(value: string) {
+  const lines = stripSingleEdgeBlankLines(value);
+  return dedentLines(lines).join("\n");
+}
+
+async function copyToClipboard(text: string) {
+  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  if (typeof document === "undefined") return;
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "-9999px";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+}
+
+function nodeToString(node: React.ReactNode): string {
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(nodeToString).join("");
+  return "";
+}
+
+function extractCodeFromPre(pre: HTMLPreElement): string {
+  const lineNodes = pre.querySelectorAll("span.line");
+  if (lineNodes.length > 0) {
+    return Array.from(lineNodes, (line) => line.textContent ?? "").join("\n");
+  }
+
+  const codeEl = pre.querySelector("code");
+  return codeEl?.textContent ?? pre.textContent ?? "";
+}
+
+export function CodeBlock({
+  language,
+  code: codeProp,
+  children,
+  className,
+}: CodeBlockProps) {
+  const wrapperRef = React.useRef<HTMLDivElement | null>(null);
+  const [wrappedLanguage, setWrappedLanguage] = React.useState<string>("");
+  const rawFromPropsOrChildren = codeProp ?? nodeToString(children);
+  const isWrapMode = !codeProp && rawFromPropsOrChildren.trim() === "";
+  const code = React.useMemo(() => {
+    if (isWrapMode) return "";
+    return normalizeCode(rawFromPropsOrChildren);
+  }, [isWrapMode, rawFromPropsOrChildren]);
+
+  const [copied, setCopied] = React.useState(false);
+  const timeoutRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (!isWrapMode) return;
+    if (language) return;
+    const pre = wrapperRef.current?.querySelector("pre");
+    const detected = pre?.getAttribute("data-language") ?? "";
+    setWrappedLanguage(detected);
+  }, [isWrapMode, language]);
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  async function onCopy() {
+    const textToCopy = (() => {
+      if (codeProp) return normalizeCode(codeProp);
+      if (!isWrapMode) return code;
+      const pre = wrapperRef.current?.querySelector("pre");
+      if (!pre) return "";
+      return extractCodeFromPre(pre);
+    })();
+
+    if (!textToCopy) return;
+    await copyToClipboard(textToCopy);
+    setCopied(true);
+    if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    timeoutRef.current = window.setTimeout(() => setCopied(false), 1500);
+  }
+
+  const displayLanguage = language ?? (wrappedLanguage as CodeLanguage | "") ?? "";
+
+  return (
+    <div
+      ref={wrapperRef}
+      className={cn(
+        "my-4 overflow-hidden rounded-lg border border-border",
+        // Make wrapped <pre> look like it's part of this component.
+        "[&_pre]:m-0 [&_pre]:rounded-none",
+        className,
+      )}
+    >
+      <div className="flex select-none items-center justify-between gap-2 border-b border-border px-4 py-2">
+        <div className="text-xs font-medium text-muted-foreground">
+          {displayLanguage}
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-7 px-2 text-xs select-none"
+          onClick={onCopy}
+          disabled={isWrapMode ? false : !code}
+        >
+          {copied ? "Copied" : "Copy"}
+        </Button>
+      </div>
+      {isWrapMode ? (
+        <div>{children}</div>
+      ) : (
+        <pre className="overflow-x-auto bg-muted px-4 py-3">
+          <code className={language ? `language-${language}` : undefined}>
+            {code}
+          </code>
+        </pre>
+      )}
+    </div>
+  );
+}

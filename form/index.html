@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple File Upload Form</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+        Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      margin: 24px;
+      max-width: 760px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid rgba(127, 127, 127, 0.35);
+      border-radius: 10px;
+    }
+
+    .row {
+      display: grid;
+      gap: 8px;
+    }
+
+    button {
+      width: fit-content;
+      padding: 8px 12px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding: 12px;
+      border: 1px solid rgba(127, 127, 127, 0.35);
+      border-radius: 10px;
+      margin: 16px 0 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>File Upload Form</h1>
+
+  <form id="uploadForm" action="https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/" method="post"
+    enctype="multipart/form-data">
+    <div class="row">
+      <!-- Fields from your presigned POST -->
+      <input type="hidden" name="acl" value="bucket-owner-full-control" />
+      <input type="hidden" name="x-amz-storage-class" value="INTELLIGENT_TIERING" />
+      <input type="hidden" name="bucket" value="my-meme-collection" />
+      <input type="hidden" name="X-Amz-Algorithm" value="AWS4-HMAC-SHA256" />
+      <input type="hidden" name="X-Amz-Credential"
+        value="ASIA2ZIONJJT3WIUJOZ4/20260323/ap-southeast-1/s3/aws4_request" />
+      <input type="hidden" name="X-Amz-Date" value="20260323T182047Z" />
+      <input type="hidden" name="X-Amz-Security-Token"
+        value="IQoJb3JpZ2luX2VjELn//////////wEaDmFwLXNvdXRoZWFzdC0xIkcwRQIgVe9lph1+PiHZtdP9hkJV3PID5oCb2/jDtMTSa95BHvACIQDFxXIaAf5jOrJgj949g0NGRlIF94xhfTQ0n41KwvfecyqDAwiC//////////8BEAAaDDc0MTQ0ODk2MDYxNSIMeYHhzHMnwd69N6m0KtcCCnVJN+hcmnr2LY7zpA5X33qjYsNn5BL/m/XEWtA+pTaUX5HWtaXmxC8swrbzgvHm6e44MVVPhOOtbvqDvMeaUV/uSnuMvlnRJLkLTydroJvAjhCDUYDa+JN2S+sMLCkM+03nMiBgOcY+rQpzCZNBQIQsdXzf9KnMD9g/1W72dWY6Esx2+lfknl9baeHM7/ZH68gHETk+1tDm90+Xei4q9NuCjVoYEgVtF4oIiPgA/5GKpxgVlyk6++6JW8ZFoDrVg5By6bGYXeoSHHtCuMfEijpo4uE/Omm9xE6MvSG5/k9H39muQFfuzqgGFLKllSyymj4vZDDdwVOIT/QILJXkjCNnjd+mayQLKhcko+WbHrNKrGpwgB9jRaNJ3k2OWP3sgtaTOvd1CnAt73NeC1uTPtdUnfaTSUfo1adXfboBN5CXRhzL0vthMytYsCY6Ux7L4jW7a3tE3TC35oXOBjqlAeRfc3IxwALd1OgTxVq0kyDzj/iAFcpSLQ309aJTiUNyXoeUF8bTKRmAwkABC9cdnyk8xOhtWi+JLB8lAPEywlc9C10EGmCWqUhRRdiFziZOuJ+O/vTUXmUE4bnEXLGTJO/1Sfi/UEmk7SDxC76LHdctEuS7j+0g4D+l/s0fVwAc1E31Q3eobQAEycXT8Ki3Awx4L5bi/UYXMgdcM06El+NiQ9JqsA==" />
+      <input type="hidden" name="Policy"
+        value="eyJleHBpcmF0aW9uIjoiMjAyNi0wMy0yM1QxOToyMDo0N1oiLCJjb25kaXRpb25zIjpbeyJhY2wiOiJidWNrZXQtb3duZXItZnVsbC1jb250cm9sIn0seyJ4LWFtei1zdG9yYWdlLWNsYXNzIjoiSU5URUxMSUdFTlRfVElFUklORyJ9LHsiYnVja2V0IjoibXktbWVtZS1jb2xsZWN0aW9uIn0sWyJzdGFydHMtd2l0aCIsIiRrZXkiLCJhdmF0YXIvIl0sWyJzdGFydHMtd2l0aCIsIiRDb250ZW50LVR5cGUiLCJpbWFnZS8iXSx7IlgtQW16LUFsZ29yaXRobSI6IkFXUzQtSE1BQy1TSEEyNTYifSx7IlgtQW16LUNyZWRlbnRpYWwiOiJBU0lBMlpJT05KSlQzV0lVSk9aNC8yMDI2MDMyMy9hcC1zb3V0aGVhc3QtMS9zMy9hd3M0X3JlcXVlc3QifSx7IlgtQW16LURhdGUiOiIyMDI2MDMyM1QxODIwNDdaIn0seyJYLUFtei1TZWN1cml0eS1Ub2tlbiI6IklRb0piM0pwWjJsdVgyVmpFTG4vLy8vLy8vLy8vd0VhRG1Gd0xYTnZkWFJvWldGemRDMHhJa2N3UlFJZ1ZlOWxwaDErUGlIWnRkUDloa0pWM1BJRDVvQ2IyL2pEdE1UU2E5NUJIdkFDSVFERnhYSWFBZjVqT3JKZ2o5NDlnME5HUmxJRjk0eGhmVFEwbjQxS3d2ZmVjeXFEQXdpQy8vLy8vLy8vLy84QkVBQWFERGMwTVRRME9EazJNRFl4TlNJTWVZSGh6SE1ud2Q2OU42bTBLdGNDQ25WSk4raGNtbnIyTFk3enBBNVgzM3FqWXNObjVCTC9tL1hFV3RBK3BUYVVYNUhXdGFYbXhDOHN3cmJ6Z3ZIbTZlNDRNVlZQaE9PdGJ2cUR2TWVhVVYvdVNudU12bG5SSkxrTFR5ZHJvSnZBamhDRFVZRGErSk4yUytzTUxDa00rMDNuTWlCZ09jWStyUXB6Q1pOQlFJUXNkWHpmOUtuTUQ5Zy8xVzcyZFdZNkVzeDIrbGZrbmw5YmFlSE03L1pINjhnSEVUaysxdERtOTArWGVpNHE5TnVDalZvWUVnVnRGNG9JaVBnQS81R0tweGdWbHlrNisrNkpXOFpGb0RyVmc1Qnk2YkdZWGVvU0hIdEN1TWZFaWpwbzR1RS9PbW05eEU2TXZTRzUvazlIMzltdVFGZnV6cWdHRkxLbGxTeXltajR2WkREZHdWT0lUL1FJTEpYa2pDTm5qZCttYXlRTEtoY2tvK1diSHJOS3JHcHdnQjlqUmFOSjNrMk9XUDNzZ3RhVE92ZDFDbkF0NzNOZUMxdVRQdGRVbmZhVFNVZm8xYWRYZmJvQk41Q1hSaHpMMHZ0aE15dFlzQ1k2VXg3TDRqVzdhM3RFM1RDMzVvWE9CanFsQWVSZmMzSXh3QUxkMU9nVHhWcTBreUR6ai9pQUZjcFNMUTMwOWFKVGlVTnlYb2VVRjhiVEtSbUF3a0FCQzljZG55azh4T2h0V2krSkxCOGxBUEV5d2xjOUMxMEVHbUNXcVVoUlJkaUZ6aVpPdUorTy92VFVYbVVFNGJuRVhMR1RKTy8xU2ZpL1VFbWs3U0R4Qzc2TEhkY3RFdVM3aiswZzREK2wvczBmVndBYzFFMzFRM2VvYlFBRXljWFQ4S2kzQXd4NEw1YmkvVVlYTWdkY00wNkVsK05pUTlKcXNBPT0ifV19" />
+      <input type="hidden" name="X-Amz-Signature"
+        value="0036cc6652a340b6f0e494446c30396943f7d892333ca6644ad680cc7357893b" />
+      <input type="hidden" name="key" value="avatar/${filename}" />
+      <!-- <input type="hidden" name="Content-Type" value="image/jpeg" /> -->
+
+      <label for="fileInput"><strong>Choose a file</strong></label>
+      <input id="fileInput" name="file" type="file" />
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+  <pre id="meta">No file selected.</pre>
+
+  <script>
+    // const UPLOAD_ENDPOINT = "https://httpbin.org/post";
+    const form = document.getElementById("uploadForm");
+    const input = document.getElementById("fileInput");
+    const meta = document.getElementById("meta");
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes)) return String(bytes);
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      let n = bytes;
+      let u = 0;
+      while (n >= 1024 && u < units.length - 1) {
+        n /= 1024;
+        u++;
+      }
+      return `${n.toFixed(u === 0 ? 0 : 2)} ${units[u]}`;
+    }
+
+    input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (!file) {
+        meta.textContent = "No file selected.";
+        return;
+      }
+      meta.textContent = [
+        `name: ${file.name}`,
+        `type: ${file.type || "(unknown)"}`,
+        `size: ${formatBytes(file.size)}`,
+        `lastModified: ${new Date(file.lastModified).toISOString()}`,
+      ].join("\n");
+    });
+
+    // form.addEventListener("submit", async (e) => {
+    //   e.preventDefault();
+    //   const file = input.files && input.files[0];
+    //   if (!file) {
+    //     alert("Pick a file first.");
+    //     return;
+    //   }
+
+    //   try {
+    //     const formData = new FormData();
+    //     formData.append("file", file, file.name);
+
+    //     const response = await fetch(UPLOAD_ENDPOINT, {
+    //       method: "POST",
+    //       body: formData,
+    //     });
+
+    //     alert(response.ok ? "Upload successful." : `Upload failed: ${response.status} ${response.statusText}`);
+    //   } catch (error) {
+    //     alert(`Upload failed: ${error instanceof Error ? error.message : String(error)}`);
+    //   }
+    // });
+  </script>
+</body>
+
+</html>
