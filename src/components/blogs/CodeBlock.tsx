@@ -1,11 +1,11 @@
 "use client";
 
-import * as React from "react";
+import { useRef, useState, useEffect, useMemo, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-export const CODE_LANGUAGES = [
+const CODE_LANGUAGES = [
   "bash",
   "c",
   "cpp",
@@ -34,13 +34,19 @@ export const CODE_LANGUAGES = [
   "yaml",
 ] as const;
 
-export type CodeLanguage = (typeof CODE_LANGUAGES)[number];
+type CodeLanguage = (typeof CODE_LANGUAGES)[number];
 
-export type CodeBlockProps = {
+type CodeBlockProps = {
   language?: CodeLanguage;
   code?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
+  /**
+   * When true + `summary` is provided, wraps the whole component in a
+   * <details>/<summary> block (foldable/collapsible).
+   */
+  foldable?: boolean;
+  summary?: string;
 };
 
 function stripSingleEdgeBlankLines(value: string) {
@@ -78,11 +84,17 @@ function normalizeCode(value: string) {
 }
 
 async function copyToClipboard(text: string) {
+  // Modern API
   if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch (err) {
+      // fallback if permission fails
+    }
   }
 
+  // Fallback for older browsers
   if (typeof document === "undefined") return;
 
   const textarea = document.createElement("textarea");
@@ -91,13 +103,20 @@ async function copyToClipboard(text: string) {
   textarea.style.position = "fixed";
   textarea.style.top = "-9999px";
   textarea.style.left = "-9999px";
+
   document.body.appendChild(textarea);
   textarea.select();
-  document.execCommand("copy");
+
+  try {
+    document.execCommand("copy");
+  } catch (err) {
+    console.error("Fallback copy failed", err);
+  }
+
   document.body.removeChild(textarea);
 }
 
-function nodeToString(node: React.ReactNode): string {
+function nodeToString(node: ReactNode): string {
   if (typeof node === "string") return node;
   if (typeof node === "number") return String(node);
   if (Array.isArray(node)) return node.map(nodeToString).join("");
@@ -119,20 +138,27 @@ export function CodeBlock({
   code: codeProp,
   children,
   className,
+  foldable,
+  summary,
 }: CodeBlockProps) {
-  const wrapperRef = React.useRef<HTMLDivElement | null>(null);
-  const [wrappedLanguage, setWrappedLanguage] = React.useState<string>("");
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const summaryRef = useRef<HTMLDivElement | null>(null);
+  const [wrappedLanguage, setWrappedLanguage] = useState<string>("");
   const rawFromPropsOrChildren = codeProp ?? nodeToString(children);
   const isWrapMode = !codeProp && rawFromPropsOrChildren.trim() === "";
-  const code = React.useMemo(() => {
+  const shouldFold =
+    Boolean(foldable) &&
+    typeof summary === "string" &&
+    summary.trim().length > 0;
+  const code = useMemo(() => {
     if (isWrapMode) return "";
     return normalizeCode(rawFromPropsOrChildren);
   }, [isWrapMode, rawFromPropsOrChildren]);
 
-  const [copied, setCopied] = React.useState(false);
-  const timeoutRef = React.useRef<number | null>(null);
+  const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isWrapMode) return;
     if (language) return;
     const pre = wrapperRef.current?.querySelector("pre");
@@ -140,7 +166,7 @@ export function CodeBlock({
     setWrappedLanguage(detected);
   }, [isWrapMode, language]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     };
@@ -162,13 +188,20 @@ export function CodeBlock({
     timeoutRef.current = window.setTimeout(() => setCopied(false), 1500);
   }
 
-  const displayLanguage = language ?? (wrappedLanguage as CodeLanguage | "") ?? "";
+  function onClickHandler() {
+    summaryRef.current?.classList.toggle("rounded-b-none");
+  }
 
-  return (
+  const displayLanguage =
+    language ?? (wrappedLanguage as CodeLanguage | "") ?? "";
+
+  const component = (
     <div
       ref={wrapperRef}
       className={cn(
-        "my-4 overflow-hidden rounded-lg border border-border",
+        shouldFold
+          ? "overflow-hidden border border-border border-t-0"
+          : "my-4 overflow-hidden rounded-lg border border-border",
         // Make wrapped <pre> look like it's part of this component.
         "[&_pre]:m-0 [&_pre]:rounded-none",
         className,
@@ -199,5 +232,20 @@ export function CodeBlock({
         </pre>
       )}
     </div>
+  );
+
+  if (!shouldFold) return component;
+
+  return (
+    <details className="my-4 border-none rounded-none">
+      <summary
+        ref={summaryRef}
+        onClick={onClickHandler}
+        className="cursor-pointer select-none rounded-md border border-border bg-muted/60 px-3 py-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      >
+        {summary}
+      </summary>
+      {component}
+    </details>
   );
 }

@@ -8,6 +8,11 @@ import mdx from "@astrojs/mdx";
 
 export default defineConfig({
   integrations: [tailwind({ applyBaseStyles: false }), react(), mdx()],
+  vite: {
+    resolve: {
+      dedupe: ["react", "react-dom"],
+    },
+  },
   markdown: {
     remarkPlugins: [remarkMermaid],
   },
