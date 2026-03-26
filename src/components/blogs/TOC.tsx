@@ -28,14 +28,14 @@ export function TOC({ headings }: { headings: Headings }) {
     if (overlay.current?.classList.contains("active")) {
       setTimeout(
         () => {
-          navBar.current?.classList.remove("invisible");
+          navBar.current?.classList.remove("hidden");
         },
         addressBarPainted ? 0 : 500,
       );
       document.body.classList.add("lock");
     } else {
       document.body.classList.remove("lock");
-      navBar.current?.classList.add("invisible");
+      navBar.current?.classList.add("hidden");
     }
 
     addressBarPainted = true;
@@ -88,11 +88,11 @@ export function TOC({ headings }: { headings: Headings }) {
         onClick={onClickHandler}
         className="menu-overlay bg-overlay/90 xl:hidden"
       ></div>
-      <nav className="fixed max-w-[300px] right-0 bottom-0 flex flex-row-reverse items-center text-sm z-20">
+      <nav className="fixed h-screen max-w-[300px] right-0 bottom-0 flex flex-row-reverse items-center text-sm z-20">
         <div
           ref={navBtn}
           onClick={onClickHandler}
-          className="w-7 py-4 rounded-l-xl hover:cursor-pointer select-none border-y border-l border-r border-r-background bg-background relative left-[2px] xs:block xl:hidden z-[1020]"
+          className="w-7 my-auto py-4 rounded-l-xl hover:cursor-pointer select-none border-y border-l border-r border-r-background bg-background relative left-[2px] xs:block xl:hidden z-[1020]"
         >
           <svg
             className="w-full h-full"
@@ -108,9 +108,11 @@ export function TOC({ headings }: { headings: Headings }) {
         </div>
         <div
           ref={navBar}
-          className="relative break-word overflow-y-scroll h-dvh pt-4 lg:pt-[3.3rem] translate-x-7 bg-background flex flex-col items-center invisible xl:visible border-l scrollbar-hide z-[1010]"
+          className="relative break-word overflow-y-scroll h-dvh pt-4 lg:pt-[3.3rem] translate-x-7 bg-background flex flex-col items-center hidden xl:flex border-l scrollbar-hide z-[1010]"
         >
-          <div className="py-6 text-lg font-semibold">Table of content</div>
+          <div className="py-6 text-lg font-semibold xl:mr-7">
+            Table of content
+          </div>
           <div className="pr-8 ml-2 h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {generateTOC(
               headings.map((heading) => {

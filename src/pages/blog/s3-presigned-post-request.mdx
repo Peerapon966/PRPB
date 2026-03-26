@@ -47,6 +47,39 @@ def generate_presigned_url():
 
 วิธีการสร้าง S3 presigned post request ก็สามารถทำได้โดยใช้ SDK เหมือนเดิมครับ โดยเราจะใช้ library **@aws-sdk/s3-presigned-post**
 
+<CodeBlock client:visible>
+```javascript
+import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { S3Client } from "@aws-sdk/client-s3";
+
+const client = new S3Client({ region: "ap-southeast-1" });
+
+async function presignPostRequest() {
+	const Bucket = "<bucket_name>";
+	const Key = "<key_or_prefix>/${filename}";
+	const Fields = {
+	  acl: "bucket-owner-full-control",
+	};
+	const Conditions = [
+		{ acl: "bucket-owner-full-control" },
+		{ bucket: "<bucket_name>" },
+		["starts-with", "$key", "<key_or_prefix>/"]
+	];
+	const Expires = 600;
+	
+	return await createPresignedPost(client, {
+	  Bucket,
+	  Key,
+	  Fields,
+	  Conditions,
+	  Expires
+	});
+}
+```
+</CodeBlock>
+
+โดยตอนที่เราสร้าง S3 presigned post request จะมี 5 อย่างที่เราสามารถกำหนดได้ ซึ่งจะเป็นตัวกำหนดว่า presigned post request ที่สร้างมาจะสามารถใช้อัปโหลดไฟล์อะไรได้บ้างแหละมีอายุเท่าไหร่
+
 ### มันคืออะไร
 
 S3 presigned URL คือ URL ที่เอาไว้ใช้สำหรับโหลดไฟล์ใน S3 ครับ แต่มันจะแตกต่างจาก URL ทั่วไปตรงที่จะมี permission สำหรับโหลดไฟล์แนบมากับ URL ด้วยแบบพร้อมใช้งานเลย ทีนี้พอเวลามีคนมาโหลดไฟล์โดยใช้ presigned URL S3 ก็จะเช็ค permission ที่อยู่ใน URL แทน นั่นหมายความว่าเราสามารถแชร์ไฟล์ใน S3 ได้ด้วย URL อันเดียวโดยไม่ต้องคิดอะไรให้ซับซ้อนแล้วครับ
