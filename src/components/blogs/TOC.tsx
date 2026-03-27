@@ -49,7 +49,7 @@ export function TOC({ headings }: { headings: Headings }) {
     return (
       <>
         <ul
-          className={`list-none ${currentDepth <= 2 ? "-translate-x-4" : ""}`}
+          className={`select-none list-none ${currentDepth <= 2 ? "-translate-x-4" : ""}`}
         >
           {headings.map(({ depth, slug, text }, idx) => {
             if (exhausted) return;
@@ -110,7 +110,7 @@ export function TOC({ headings }: { headings: Headings }) {
           ref={navBar}
           className="relative break-word overflow-y-scroll h-dvh pt-4 lg:pt-[3.3rem] translate-x-7 bg-background flex flex-col items-center hidden xl:flex border-l scrollbar-hide z-[1010]"
         >
-          <div className="py-6 text-lg font-semibold xl:mr-7">
+          <div className="py-6 text-lg font-semibold xl:mr-7 select-none">
             Table of content
           </div>
           <div className="pr-8 ml-2 h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
