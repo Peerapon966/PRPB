@@ -150,7 +150,7 @@
 
   p:has(img) > img,
   p > a:has(img) {
-    @apply rounded-md;
+    @apply rounded-md border border-border;
   }
 
   table,

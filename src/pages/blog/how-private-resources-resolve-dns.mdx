@@ -10,17 +10,13 @@ slug: "how-private-resources-resolve-dns"
 thumbnail: true
 ---
 import { CodeBlock } from "@/components/blogs/CodeBlock";
+import { Image } from "@/components/blogs/Image";
 
 ปกติแล้วเวลาเราจะเชื่อมต่อกับเว็บไซต์อะไรซักอย่างเราก็จะระบุ URL ของเว็บไซต์นั้นใช่ไหมครับ แล้วทีนี้ตัว URL ก็จะถูกแปลงเป็นเลข IP โดย DNS resolver ซึ่งโดยพื้นฐานแล้ว DNS resolver ที่เราใช้ ๆ กันก็มักจะเป็นของ ISP หรือของยอดนิยมอย่าง 8.8.8.8 (Google) หรือ 1.1.1.1 (Cloudflare) เป็นต้น
 
 ทีนี้ลองดูภาพด้านล่างครับ
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/01.png`}
-    alt="01.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="01.png" altText="01.png" client:visible />
 
 สมมติว่าเรามี EC2 กับ RDS อยู่ใน VPC เดียวกันแต่อยู่คนละ subnet แถม subnet ทั้ง 2 อันดันเป็น private subnet ทีนี้เวลา EC2 อยากเชื่อมต่อเข้าไปที่ RDS (ขอสมมติว่าเป็น MySQL) ตัวดังกล่าวก็สามารถทำได้โดยใช้คำสั่งประมาณนี้ใช่มั้ยครับ
 
@@ -43,12 +39,7 @@ Route 53 Resolver ถ้าให้พูดง่าย ๆ ก็คือ DN
 
 ตอนนี้ภาพของเราก็จะกลายเป็นประมาณนี้
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/03.png`}
-    alt="03.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="03.png" altText="03.png" client:visible />
 
 Flow แบบคร่าว ๆ ก็คือ
 
@@ -72,37 +63,17 @@ Flow แบบคร่าว ๆ ก็คือ
 
 ทีนี้เราจะลองมาดูของจริงเทียบกัน ผมมี VPC ที่มี CIDR เป็น 172.31.0.0/16 พร้อมกับ EC2 และ RDS อยู่ใน private subnet ตามภาพด้านบนเอาไว้ครับ
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/04.png`}
-    alt="04.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="04.png" altText="04.png" client:visible />
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/05.png`}
-    alt="05.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="05.png" altText="05.png" client:visible />
 
 ลอง ping หา google ดูเพื่อยืนยันว่า EC2 ตัวนี้เชื่อมต่อ internet ไม่ได้
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/06.png`}
-    alt="06.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="06.png" altText="06.png" client:visible />
 
 และเนื่องจาก ec2 เราเชื่อมต่อ internet ไม่ได้ ผมก็เลยลง MySQL client ไม่ได้ไปด้วยครับ 555 เพราะฉะนั้นเราจะทดสอบโดยการใช้คำสั่ง dig เพื่อ resolve หา IP ของ RDS จาก RDS endpoint แทนครับ
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/07.png`}
-    alt="07.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="07.png" altText="07.png" client:visible />
 
 ก็จะเห็นว่าเราสามารถ resolve IP ของ RDS ได้ออกมาเป็น 172.31.48.77 โดย IP ของ DNS resolver ในครั้งนี้คือ 172.31.0.2 หรือก็คือ Route 53 Resolver ที่มี IP เป็น VPC+2 นั่นเองครับ
 
@@ -110,12 +81,7 @@ Flow แบบคร่าว ๆ ก็คือ
 
 ทดสอบง่าย ๆ ด้วยการลองรันคำสั่งเดียวกันผ่าน WSL ในคอมพิวเตอร์ของผมก็ได้ผลลัพธ์เดียวกันออกมา แต่ IP ของ DNS resolver จะเป็นของ network ของผม 172.23.32.1 แทน
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/08.png`}
-    alt="08.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="08.png" altText="08.png" client:visible />
 
 ### Public EC2 → Private EC2
 
@@ -123,21 +89,11 @@ Flow แบบคร่าว ๆ ก็คือ
 
 ลอง ping หา google แล้วก็ resolve หา private IP ของ private EC2 ตัวเมื่อกี้ ได้ IP เป็น 172.31.130.80 และ IP ของ DNS resolver ในครั้งนี้คือ 172.31.0.2 เหมือนเดิม
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/09.png`}
-    alt="09.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="09.png" altText="09.png" client:visible />
 
 ทีนี้ลองใช้คำสั่งเดิม แต่ระบุ DNS resolver เป็นของ google 8.8.8.8 จะพบว่าหา IP ไม่เจอ
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/10.png`}
-    alt="10.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="10.png" altText="10.png" client:visible />
 
 ## Cross-Network DNS resolve
 
@@ -151,12 +107,7 @@ Flow แบบคร่าว ๆ ก็คือ
 
 โดยตัว Inbound Endpoint นี้จะมี private IP ให้เราเชื่อมต่อได้ และจะทำหน้าที่คอย forward DNS query request ที่เข้ามาไปยัง VPC+2 endpoint ให้เรา ตอนใช้งานเราก็แค่ระบุ DNS resolver เป็น IP ของ Inbound Endpoint เท่านี้ก็พอครับ
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/how-private-resources-resolve-dns/02.png`}
-    alt="02.png"
-  />
-</p>
+<Image slug={frontmatter.slug} filename="02.png" altText="02.png" client:visible />
 
 จริง ๆ ยังมี Outbound Endpoint อีกนะครับ ตรงส่วนนี้ถ้าอธิบายละเอียดจริง ๆ เนื้อหาจะค่อนข้างเยอะถึงขนาดเขียนเป็นบทความแยกได้เลย เพราะฉะนั้นผมขอจบไว้แค่ตรงนี้ก่อน ไว้มีโอกาสจะลองเขียนบทความเกี่ยวกับ Route 53 Resolver Inbound Endpoint และ Outbound Endpoint เพิ่มเติมครับ
 
