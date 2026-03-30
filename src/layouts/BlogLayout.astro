@@ -1,5 +1,10 @@
 ---
 import "@/styles/globals.css";
+import "@fontsource/prompt/300.css";
+import "@fontsource/prompt/400.css";
+import "@fontsource/prompt/500.css";
+import "@fontsource/prompt/600.css";
+import "@fontsource/prompt/700.css";
 import { Header } from "@/components/header/Header";
 import { Footer } from "@/components/footer/Footer";
 import { Tag } from "@/components/blogs/Tag";
@@ -18,12 +23,6 @@ const { frontmatter, headings } = Astro.props;
     />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-      rel="stylesheet"
-    />
     <title>{frontmatter?.title + " | PRPB"}</title>
     <script>
       const preferredTheme =
@@ -52,9 +51,9 @@ const { frontmatter, headings } = Astro.props;
       }
     </script>
   </head>
-  <body class="bai-jamjuree-regular">
+  <body>
     <header>
-      <Header client:load />
+      <Header client:idle />
     </header>
     <main class="relative">
       <div
@@ -69,6 +68,7 @@ const { frontmatter, headings } = Astro.props;
                   data-image-component="true"
                   alt={frontmatter?.title + " thumbnail"}
                   loading="eager"
+                  fetchpriority="high"
                   decoding="async"
                   class="rounded-xl select-none"
                   draggable="false"
@@ -85,7 +85,7 @@ const { frontmatter, headings } = Astro.props;
             <div class="flex">
               {
                 frontmatter?.category && (
-                  <div class="mr-2">
+                  <div class="mr-3">
                     <Tag
                       name={frontmatter.category}
                       category={frontmatter.category}
@@ -112,7 +112,7 @@ const { frontmatter, headings } = Astro.props;
           <slot />
         </div>
       </div>
-      <TOC client:load headings={headings} />
+      <TOC client:idle headings={headings} />
     </main>
     <footer>
       <Footer />

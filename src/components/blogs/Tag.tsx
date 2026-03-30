@@ -18,9 +18,9 @@ export function Tag({ name, category, subcategory, themeLock }: TagProps) {
       rel="noopener noreferrer nofollow"
     >
       <Button
-        size="sm"
+        size="default"
         variant={themeLock ? "tag" : "default"}
-        className="h-auto px-2 text-sm sm:text-xs rounded-2xl select-none"
+        className="h-auto text-sm sm:text-xs rounded-2xl select-none"
       >
         {name}
       </Button>

@@ -16,4 +16,7 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [remarkMermaid],
   },
+  build: {
+    inlineStylesheets: "always",
+  },
 });
