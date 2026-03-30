@@ -7,7 +7,7 @@ import {
   type ComponentPropsWithoutRef,
   type HTMLAttributes,
 } from "react";
-import * as LabelPrimitive from "@radix-ui/react-label";
+import { Root } from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import {
   Controller,
@@ -92,8 +92,8 @@ const FormItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 FormItem.displayName = "FormItem";
 
 const FormLabel = forwardRef<
-  ElementRef<typeof LabelPrimitive.Root>,
-  ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+  ElementRef<typeof Root>,
+  ComponentPropsWithoutRef<typeof Root>
 >(({ className, ...props }, ref) => {
   const { error, formItemId } = useFormField();
 

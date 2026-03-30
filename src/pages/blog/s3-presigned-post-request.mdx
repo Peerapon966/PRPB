@@ -12,10 +12,13 @@ thumbnail: true
 ---
 import { CodeBlock } from "@/components/blogs/CodeBlock";
 import { Image } from "@/components/blogs/Image";
+import { Link } from "@/components/blogs/Link";
 
-ก่อนหน้านี้ผมเคยเขียนบทความเกี่ยวกับ S3 presigned URL ไป (ใครยังไม่ได้อ่านหรือยังไม่รู้จัก presigned URL สามารถไปดูได้ที่[บทความนี้](s3-pre-signed-url-vs-cloudfront-signed-url)เลยครับ) ซึ่งในบทความนั้นก็ได้พูดถึง S3 presigned URL ไว้ว่าเป็นเหมือนการฝัง permission สำหรับทำ action หนึ่ง ๆ กับ S3 ไว้ใน URL ทำให้สามารถมอบ permission ให้กับคนนอกมายุ่งกับ S3 bucket ของเราได้ชั่วคราว
+ก่อนหน้านี้ผมเคยเขียนบทความเกี่ยวกับ **S3 presigned URL** ไป (ใครยังไม่ได้อ่านหรือยังไม่รู้จัก presigned URL สามารถไปดูได้ที่[**บทความนี้**](s3-pre-signed-url-vs-cloudfront-signed-url)เลยครับ) ซึ่งในบทความนั้นก็ได้พูดถึง S3 presigned URL ไว้ว่าเป็นเหมือนการฝัง permission สำหรับทำ action หนึ่ง ๆ กับ S3 ไว้ใน URL ทำให้สามารถมอบ permission ให้กับคนนอกมายุ่งกับ S3 bucket ของเราได้ชั่วคราว
 
-หนึ่งในสิ่งที่เราสามารถทำได้ด้วย presigned URL ก็คือการอัปโหลดไฟล์ครับ โดยเราสามารถสร้าง presigned URL สำหรับอัปโหลดไฟล์ได้โดยใช้ SDK (code ตัวอย่างก็อยู่ในบทความนั้นเหมือนกันครับ) โดยใน presigned URL จะกำหนดชัดเจนเลยว่าไฟล์ที่เราอัปโหลดขึ้นไปจะมี key เป็นอะไร เช่น ถ้าผมสร้าง presigned URL โดยระบุ key เป็น `aaa/bbb/ccc.png`
+<Link url="https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-s3-presigned-post/" />
+
+หนึ่งในสิ่งที่เราสามารถทำได้ด้วย presigned URL ก็คือการอัปโหลดไฟล์ครับ โดยเราสามารถสร้าง presigned URL สำหรับอัปโหลดไฟล์ได้โดยใช้ SDK (code ตัวอย่างก็อยู่ในบทความด้านบนเมื่อกี้เหมือนกันครับ) โดยใน presigned URL จะกำหนดชัดเจนเลยว่าไฟล์ที่เราอัปโหลดขึ้นไปจะมี key เป็นอะไร เช่น ถ้าผมสร้าง presigned URL โดยระบุ key เป็น `aaa/bbb/ccc.png`
 
 <CodeBlock client:visible>
 ```python
@@ -38,11 +41,11 @@ def generate_presigned_url():
 ```
 </CodeBlock>
 
-ตอนที่เราใช้ presigned URL นี้อัปโหลดไฟล์ ไม่ว่าเราจะอัปโหลดไฟล์อะไรขึ้นไปก็ตาม เช่น สมมติว่าผมอัปโหลดไฟล์รูปชื่อ cat.png ไฟล์นั้นจะถูกอัปโหลดขึ้นไปบน S3 โดยอยู่ในโฟลเดอร์และมีชื่อไฟล์ตามที่ระบุไว้ใน presigned URL เสมอ
+ตอนที่เราใช้ presigned URL นี้อัปโหลดไฟล์ ไม่ว่าเราจะอัปโหลดไฟล์อะไรขึ้นไปก็ตาม เช่น สมมติว่าผมอัปโหลดไฟล์รูปในเครื่องของผมที่ชื่อ `cat.png` ไฟล์นั้นจะถูกอัปโหลดขึ้นไปบน S3 โดยมีชื่อ key ถูกเปลี่ยนเป็น `aaa/bbb/ccc.png` ตามที่ระบุไว้ใน presigned URL เสมอ
 
-ด้วยเงื่อนไขแบบนี้ทำให้เราสามารถอัปโหลดไฟล์ได้แค่ 1 ไฟล์ต่อ presigned URL 1 อัน เพราะถ้าเราอัปโหลดหลาย ๆ ไฟล์ ไฟล์เหล่านั้นจะถูกอัปโหลดขึ้นไปที่โฟลเดอร์เดิมและมีชื่อไฟล์เหมือนกันหมด ซึ่งหมายถึงไฟล์เหล่านั้นจะถูกเขียนทับไปเรื่อย ๆ จนเหลือแค่ไฟล์สุดท้ายเท่านั้นครับ หรือก็คือถ้าผมอยากอัปโหลดไฟล์ซัก 20 ไฟล์ ผมจะต้องระบุโฟลเดอร์และชื่อของทุก ๆ ไฟล์แล้วสร้าง presigned URL ขึ้นมา 20 อัน ส่วนฝั่งคนที่ใช้งาน URL ก็ต้องจับคู่ URL กับไฟล์ที่จะอัปโหลดให้ตรงกัน จะเห็นได้ว่า presigned URL ไม่เหมาะกับกรณีที่มีไฟล์ที่ต้องอัปโหลดจำนวนมาก
+ด้วยเงื่อนไขแบบนี้ทำให้เราสามารถอัปโหลดไฟล์ได้แค่ 1 ไฟล์ต่อ presigned URL 1 อัน เพราะถ้าเราอัปโหลดหลาย ๆ ไฟล์ ไฟล์เหล่านั้นจะถูกอัปโหลดขึ้นไปที่โฟลเดอร์เดิมและมีชื่อไฟล์เหมือนกันหมด (key เหมือนกัน) ซึ่งหมายถึงไฟล์เหล่านั้นจะถูกเขียนทับไปเรื่อย ๆ จนเหลือแค่ไฟล์สุดท้ายเท่านั้นครับ หรือก็คือถ้าผมอยากอัปโหลดไฟล์ซัก 20 ไฟล์ ผมจะต้องระบุโฟลเดอร์และชื่อของทุก ๆ ไฟล์แล้วสร้าง presigned URL ขึ้นมา 20 อัน ส่วนฝั่งคนที่ใช้งาน URL ก็ต้องจับคู่ URL กับไฟล์ที่จะอัปโหลดให้ตรงกัน จะเห็นได้ว่า presigned URL ไม่เหมาะกับกรณีที่มีไฟล์ที่ต้องอัปโหลดจำนวนมาก
 
-บทความนี้ก็เลยจะมาแนะนำสิ่งที่เรียกว่า S3 presigned post request ที่เป็นเหมือนขั้นกว่าของ S3 presigned URL แต่วิธีใช้งานก็จะยุ่งยากกว่าเช่นกันครับ โดย S3 presigned post request ก็จะคล้าย ๆ กับ S3 presigned URL คือเราอัปโหลดได้ทีละไฟล์เหมือนเดิม แต่คนที่อัปโหลดไฟล์สามารถกำหนดโฟลเดอร์กับชื่อไฟล์เองได้ ทำให้เราสามารถสร้าง presigned post request ครั้งเดียว แต่สามารถอัปโหลดไฟล์อะไรเข้าไปใน bucket ก็ได้จนกว่าจะหมดอายุครับ
+บทความนี้ก็เลยจะมาแนะนำสิ่งที่เรียกว่า **S3 presigned post request** ที่เป็นเหมือนขั้นกว่าของ S3 presigned URL แต่วิธีใช้งานก็จะยุ่งยากกว่าเช่นกันครับ โดย S3 presigned post request ก็จะคล้าย ๆ กับ S3 presigned URL คือเราอัปโหลดได้ทีละไฟล์เหมือนเดิม แต่คนที่อัปโหลดไฟล์สามารถกำหนดโฟลเดอร์กับชื่อไฟล์เองได้ ทำให้เราสามารถสร้าง presigned post request ครั้งเดียว แต่ผู้ใช้สามารถอัปโหลดไฟล์อะไรเข้าไปใน bucket ก็ได้จนกว่าจะหมดอายุครับ
 
 ## สร้าง S3 Presigned Post Request
 
@@ -79,311 +82,402 @@ async function presignPostRequest() {
 ```
 </CodeBlock>
 
-โดยตอนที่เราสร้าง S3 presigned post request จะมี 5 อย่างที่เราสามารถกำหนดได้ ซึ่งจะเป็นตัวกำหนดว่า presigned post request ที่สร้างมาจะสามารถใช้อัปโหลดไฟล์อะไรได้บ้างแหละมีอายุเท่าไหร่
+โดยตอนที่เราสร้าง S3 presigned post request จะมี parameter 5 อย่างที่เราสามารถกำหนดได้ ซึ่งจะเป็นตัวกำหนดว่า presigned post request ที่สร้างมาจะสามารถใช้อัปโหลดไฟล์อะไรได้บ้างแหละมีอายุเท่าไหร่
 
-### มันคืออะไร
+### Bucket (required)
 
-S3 presigned URL คือ URL ที่เอาไว้ใช้สำหรับโหลดไฟล์ใน S3 ครับ แต่มันจะแตกต่างจาก URL ทั่วไปตรงที่จะมี permission สำหรับโหลดไฟล์แนบมากับ URL ด้วยแบบพร้อมใช้งานเลย ทีนี้พอเวลามีคนมาโหลดไฟล์โดยใช้ presigned URL S3 ก็จะเช็ค permission ที่อยู่ใน URL แทน นั่นหมายความว่าเราสามารถแชร์ไฟล์ใน S3 ได้ด้วย URL อันเดียวโดยไม่ต้องคิดอะไรให้ซับซ้อนแล้วครับ
+ชื่อ S3 bucket ที่จะอัปโหลดไฟล์ขึ้นไป
 
-แล้ว permission ที่ติดมากับ URL นี่มาจากไหนล่ะ คำตอบก็คือมาจากคนที่สร้าง presigned URL ครับ การสร้าง presigned URL คือการที่ user คนหนึ่ง (สมมติว่าเป็นนาย a) เอา permission ในการโหลดไฟล์จาก S3 ของตัวเองไปให้คนอื่นยืมในรูปแบบของ URL ครับ พออีกคนนึง (นาย b) มาโหลดไฟล์จาก S3 โดยใช้ presigned URL ที่ได้รับมา ใน CloudTrail ถ้าตั้งค่า Data Event ให้เก็บ S3 event เอาไว้ ก็จะมี event log ระบุเอาไว้ว่าคนที่สร้าง presigned URL (นาย a) เป็นคนเรียก api `getObject` เพื่อโหลดไฟล์จาก s3
+### Key (required)
 
-เนื่องจาก presigned URL เป็นการ “ให้ยืม” permission นั่นความว่าคนสร้าง presigned URL เองจำเป็นจะต้องมี permission นั้นอยู่กับตัวก่อนถึงจะสามารถสร้าง URL ได้
+ชื่อ key ของ object (โฟลเดอร์ + ชื่อไฟล์) ที่จะอัปโหลด โดยเราสามารถใส่คำว่า `${filename}` เป็น placeholder ไว้ใน key ได้ ซึ่ง placeholder นี้เอาไว้ใช้ทำอะไรเดี๋ยวผมจะอธิบายทีหลังครับ
 
-ซึ่งถ้ามองอีกมุมนึง มันก็คล้าย ๆ กับการที่นาย a โหลดไฟล์มาแล้วส่งไฟล์ต่อให้นาย b นั่นแหละ เพียงแต่แทนที่นาย a จะให้ไฟล์ไปตรง ๆ ก็ให้ยืมสิทธิ์ในการเข้าถึงไฟล์แทนแล้วให้นาย b ไปโหลดเอาเอง
+### Fields (optional)
 
-### มันดียังไง
+attribute ต่าง ๆ เพิ่มเติม (นอกเหนือจาก key กับ bucket) ของไฟล์ที่จะอัปโหลดขึ้นไป อธิบายเพิ่มเติมคือปกติแล้วตอนที่เราอัปโหลดไฟล์ขึ้นไปที่ S3 bucket นอกจาก bucket กับ key แล้วก็จะมี attribute อื่น ๆ เช่น ACL, tag, storage class, ฯลฯ ที่เราสามารถกำหนดได้ด้วย ซึ่งโดยปกติ attribute พวกนี้จะเป็น optional และเรามักจะไม่ได้ไปยุ่งกับมันนักยกเว้นตอนจำเป็นครับ ซึ่ง Fields ก็คือการกำหนด attribute พวกนี้ให้กับไฟล์ที่เราจะอัปโหลดขึ้นไปนั่นเอง โดย attribute ทั้งหมดสามารถดูได้ที่เอกสารด้านล่างนี้
 
-การใช้ presigned URL ในการแชร์ไฟล์จะมีข้อดีกว่าการแชร์ไฟล์แบบทั่วไปตรงที่
+<Link url="https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPOST.html" />
 
-1. ใช้งานง่าย สามารถแชร์ไฟล์ให้คนอื่นได้โดยไม่ต้องตั้งค่า permission เพิ่มเติมให้คนรับไฟล์
-2. ปลอดภัยกว่า ไม่ต้องเสี่ยงเปิด public access
-3. มีประสิทธิภาพกว่า ลองนึกภาพการแชร์ไฟล์ใหญ่ ๆ ดูนะครับ ถ้าให้นาย a โหลดไฟล์แล้วส่งไปให้นาย b อันดับแรกนาย a จะต้องเสียเวลาโหลดไฟล์ จากนั้นต้องอัพโหลดไฟล์เพื่อส่งไปให้นาย b แล้วนาย b ก็ต้องเสียเวลาโหลดไฟล์เข้ามาอีก ซึ่งถ้าใช้ presigned URL แทน นาย b ก็แค่ไปโหลดไฟล์มาเองตรง ๆ แค่นั้นเลย
+### Conditions (optional)
 
-### มันใช้ยังไง
+อันนี้เป็นส่วนสำคัญครับ 3 อันแรก (Bucket, Key, Fields) ที่เราใส่ไปเป็นการระบุว่าเราจะอัปโหลดไฟล์ key อะไรไปที่ bucket ไหน รวมถึง attribute ต่าง ๆ ของไฟล์นั้น ส่วน Conditions นี้จะเป็นการระบุว่าเราอนุญาตให้ใช้ presigned post request นี้ในการอัปโหลดไฟล์อะไรได้บ้าง ตัวอย่างเช่น Conditions ด้านล่างนี้จะอนุญาตให้อัพโหลดไฟล์ที่ตรงตามเงื่อนไขต่อไปนี้เท่านั้น
 
-สิบปากว่าไม่เท่าตาเห็น ลองไปดูจริงกันดีกว่าครับ
+- key ขึ้นต้นด้วยคำว่า ‘products’ เช่น ‘products/catfish.png’
+- เป็นการอัปโหลดไปที่ bucket ชื่อ ‘fish’
+- object (ไฟล์) ที่อัปโหลดถูกตั้งค่า ACL เป็น ‘bucket-owner-full-control’
 
-สมมติว่าผมมี S3 bucket ชื่อ `my-bucket-09e54cfa` (ตั้งชื่อ bucket ให้ unique นี่มันลำบากดีแท้) ที่ข้างในมีไฟล์ `song-of-the-day.txt` อยู่
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/01.png`}
-    alt="01.png"
-  />
-</p>
-
-สมมติว่าอยากแชร์ไฟล์นี้ให้คนอื่น เลย copy URL แล้วเปิดไฟล์จาก URL นั้นดู ก็จะพบว่าเปิดไม่ได้ เพราะไม่ได้เปิด public access ให้กับไฟล์นี้ไว้
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/02.png`}
-    alt="02.png"
-  />
-</p>
-
-ทีนี้ลองแชร์โดยใช้ presigned URL แทน โดยไปที่เมนู Actions → Share with a presigned URL จากนั้นใส่ระยะเวลาเข้าไปว่าอยากให้ URL นี้ใช้ได้นานเท่าไหร่ (สร้างผ่าน console จะเลือกได้สูงสุด 12 ชม. แต่ถ้าสร้างผ่าน CLI หรือ SDK จะได้สูงสุด 7 วัน)
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/03.png`}
-    alt="03.png"
-  />
-</p>
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/04.png`}
-    alt="04.png"
-  />
-</p>
-
-แล้วลองเปิดไฟล์ด้วย presigned URL ที่ได้มาก็จะพบว่าสามารถเข้าถึงไฟล์ได้แล้ว
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/05.png`}
-    alt="05.png"
-  />
-</p>
-
-พอ URL หมดอายุก็จะใช้งานไม่ได้อีก
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/06.png`}
-    alt="06.png"
-  />
-</p>
-
-### แถม
-
-นอกจากใช้โหลดไฟล์แล้ว S3 presigned URL ยังสามารถใช้ทำอย่างอื่นได้ด้วยครับ ไม่ว่าจะเป็นอัปโหลดไฟล์เข้าไปใน bucket, list ไฟล์ที่อยู่ใน bucket, ฯลฯ เพียงแต่ถ้าเราอยากจะสร้าง presigned URL สำหรับทำอย่างอื่นที่ไม่ใช้ดาวน์โหลดไฟล์ จะต้องใช้ SDK ในการสร้างเท่านั้น
-
-ตัวอย่าง code ด้านล่างนี้จะสร้าง presigned URL สำหรับอัปโหลดไฟล์ที่ชื่อ `game-of-the-day.txt` เข้าไปที่ bucket `my-bucket-09e54cfa` ซึ่ง URL นี้จะมีอายุอยู่ได้ 5 นาที
-
-```python
-import boto3
-from botocore.exceptions import ClientError
-
-def generate_presigned_url():
-    s3_client = boto3.client('s3')
-    try:
-        response = s3_client.generate_presigned_url(
-            'put_object',
-            Params={'Bucket': 'my-bucket-09e54cfa', 'Key': 'game-of-the-day.txt'},
-            ExpiresIn=300,
-        )
-    except ClientError as e:
-        logging.error(e)
-        return None
-
-    return response
-```
-
-เวลาใช้ก็สามารถใช้แบบ URL ทั่วไป ตัวอย่างเช่น ถ้าใช้กับ curl ก็จะเป็นประมาณด้านล่างนี้
-
-```bash
-curl -X PUT -T "game-of-the-day.txt" "<presigned-URL>"
-```
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/07.png`}
-    alt="07.png"
-  />
-</p>
-
-หรืออย่างอันนี้จะสร้าง presigned URL สำหรับ list ไฟล์ที่อยู่ใน bucket `my-bucket-09e54cfa`
-
-```python
-import boto3
-from botocore.exceptions import ClientError
-
-def generate_presigned_url():
-    s3_client = boto3.client('s3')
-    try:
-        response = s3_client.generate_presigned_url(
-            'list_objects',
-            Params={'Bucket': 'my-bucket-09e54cfa'},
-            ExpiresIn=300,
-        )
-    except ClientError as e:
-        logging.error(e)
-        return None
-
-    return response
-```
-
-เอา presigned URL ที่ได้ไปเปิดบน browser ก็ได้จะข้อมูลกลับมาในรูปของ XML
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/08.png`}
-    alt="08.png"
-  />
-</p>
-
-สำหรับรายละเอียดเพิ่มเติม ถ้าใครสนใจวิธีการสร้าง presigned URL สำหรับใช้ทำอย่างอื่นนอกเหนือจากนี้สามารถดูได้ที่ documentation ของ AWS ได้เลยครับ
-
-- [generate_presigned_url - Boto3 1.37.34 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/generate_presigned_url.html)
-
-แต่จริง ๆ แล้วเราสามารถสร้าง presigned URL เองได้โดยไม่ต้องใช้ SDK เลยนะครับ แถมสามารถใช้กับ API ของ service อื่นที่ไม่ใช่ S3 ได้ด้วย ไว้ผมจะเขียนเกี่ยวกับเรื่องนี้ในครั้งหน้าครับ
-
-## CloudFront Signed URL
-
-ลองนึกภาพตามนะครับ สมมติผมมีรูปอันนึงอยู่ใน S3 ที่เป็น origin ของ CloudFront ตราบใดที่รูปนี้ยังอยู่ใน S3 ขอแค่รู้ URL ของรูป ไม่ว่าใครก็สามารถดูได้ใช่มั้ยครับ แถมเปิดจากที่ไหนก็ได้ด้วย (ถ้าไม่ติด CORS)
-
-แล้วก็มีกรณีที่บางเว็บไซต์ (เช่นเว็บนี้) ใช้ URL ที่สามารถคาดเดาได้ง่าย ทำให้รู้ URL แค่อันเดียวก็สามารถเข้าถึง resource ต่าง ๆ เช่น รูปภาพ, ฯลฯ แทบทั้งหมดได้จากการเดา pattern ของ URL เลยครับ
-
-สำหรับเว็บไซต์นี้ปัญหาที่ว่ามาก็ไม่ได้ร้ายแรงอะไรขนาดนั้น เพราะเดิมทีก็ทำมาเพื่อเผยแพร่สู่สาธารณะอยู่แล้ว แต่หลาย ๆ เว็บไซต์ก็ไม่ต้องการแบบนั้น กลับกันอาจจะต้องการจำกัดการเข้าถึง resource เหล่านี้ เช่น ให้เข้าถึงได้ผ่านหน้าเว็บของตัวเองเท่านั้น, ให้ไม่สามารถเดา URL ได้, หรือจำกัดระยะเวลาการเข้าถึง เป็นต้น ซึ่ง signed URL มีไว้เพื่อการนี้เลยครับ
-
-### มันคืออะไร
-
-CloudFront signed URL คือฟีเจอร์ของ CloudFront ที่เอา URL ของ CloudFront มา signed ด้วย cryptographic key จากนั้นเวลาเราเข้าถึง resource ผ่าน CloudFront ตัว CloudFront จะทำการตรวจ signature ที่ติดมากับ URL ก่อน ซึ่งถ้าไม่มี signature หรือ signature ผิดหรือหมดอายุก็จะไม่ส่ง resource กลับไปให้ซึ่งการทำแบบนี้จะช่วยแก้ปัญหาทั้งหมดที่กล่าวมาเมื่อกี้
-
-1. URL ของ resource แต่ละอันจะถูก sign แยกกัน ทำให้ไม่สามารถเดา URL ได้
-2. ตัว signature มีอายุจำกัด ทำให้ต่อให้รู้ URL ไปก็สามารถใช้เข้าถึง resource ได้ไม่นาน
-
-### มันใช้ยังไง
-
-อธิบายคร่าว ๆ ก่อนครับ คือตอนนี้ผมมีรูปภาพ `thumbnail.png` อยู่ใน S3 bucket แล้วก็มี CloudFront distribution อันนึงที่มี bucket อันนี้เป็น origin ครับ หมายความว่าตอนนี้ผมสามารถดูรูปภาพนี้ได้ผ่าน `<distribution_domain_name>/thumbnail.png`
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/09.png`}
-    alt="09.png"
-  />
-</p>
-
-แล้วถ้าเกิดผมมีรูปอื่นอีก เช่น `thumbnail2.png` ผมก็แค่ไล่เปลี่ยนชื่อไฟล์ใน URL ไปเรื่อย ๆ ก็พอ เช่น `<distribution_domain_name>/thumbnail2.png`
-
-ทีนี้เราจะใช้ signed URL ทำให้เราไม่สามารถเปิดรูปภาพด้วย URL ที่ว่ามานี่ได้อีกต่อไป โดยก่อนอื่นก็เริ่มจากเตรียม keypair ก่อน ซึ่งในครั้งนี้ผมจะใช้ openssl สร้าง keypair นี้ขึ้นมา (AWS ระบุไว้ว่า keypair ที่ใช้จะต้องเป็น SSH-2 RSA 2048-bit เท่านั้น)
-
-```bash
-openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
-openssl rsa -in private.pem -pubout -out public.pem
-```
-
-จากนั้นก็สร้าง public key บน CloudFront ด้วย public key ที่เราสร้างขึ้นมาเมื่อกี้
-
-```bash
-aws cloudfront create-public-key --public-key-config "CallerReference=my-public-key,Name=my-public-key,EncodedKey=$(cat public.pem)"
-```
-
-สร้าง key group แล้วใส่ public key เมื่อกี้เข้าไป (เราสามารถใส่ key เข้าไปใน key group ได้สูงสุด 5 อัน เผื่อกรณีที่ต้องการ rotate key)
-
-```bash
-aws cloudfront create-key-group --key-group-config "Name=my-key-group,Items=<public-key-id>"
-```
-
-สุดท้ายก็ตั้งค่าให้ distribution ใช้ public key ใน key group เพื่อตรวจสอบ signature ของ request ที่เข้ามา
-
-เลือก distribution → behavior → edit → เปิด restrict viewer access → เลือก key group ที่สร้างไว้
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/10.png`}
-    alt="10.png"
-  />
-</p>
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/11.png`}
-    alt="11.png"
-  />
-</p>
-
-พอตั้งค่าเสร็จแล้วลองเปิดรูปภาพด้วย URL เดิม จะพบว่าเปิดไม่ได้แล้ว เพราะไม่มี signature
-
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/12.png`}
-    alt="12.png"
-  />
-</p>
-
-ขั้นตอนต่อไปเราก็จะสร้าง signed URL โดยใช้ SDK ซึ่ง URL ที่ได้จาก code ด้านล่างจะสามารถใช้เพื่อเข้าถึงไฟล์ `thumbnail.png` จนถึงวันที่ 15/04/2025 หลังจากนั้น URL ก็จะหมดอายุครับ
-
-**_NOTE:_** ในกรณีที่มี keypair หลายอัน สามารถเปลี่ยน private key และ keypair ID ที่ใช้เพื่อ rotate key ได้
-
+<CodeBlock client:visible>
 ```javascript
-import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
-import { readFileSync } from "fs";
+const Conditions = [
+	{ acl: "bucket-owner-full-control" },
+	{ bucket: "fish" },
+	["starts-with", "$key", "product/"]
+];
+```
+</CodeBlock>
 
-function signURL() {
-  const URL = "https://d2wv1gnkwl6nia.cloudfront.net/thumbnail.png";
-  const privateKey = readFileSync("./private.pem", "utf-8");
-  const keyPairId = "K1YNLME0H5Y5BA";
-  const dateLessThan = "2025-04-15";
+นั่นหมายความว่า Bucket, Key, Fields ที่เราระบุไว้ก่อนหน้านี้จะต้องเป็นไปตามเงื่อนไขที่เราระบุไว้ใน Conditions ด้วย ถ้าไม่อย่างนั้น presigned post request ที่เราสร้างขึ้นมาก็จะใช้งานไม่ได้ครับ ซึ่งในส่วนนี้ก็จะมีเงื่อนไขให้เราเลือกใช้ได้เยอะพอสมควร ไม่ว่าจะเป็นประเภทไฟล์, ขนาดไฟล์, ฯลฯ โดยเงื่อนไขทั้งหมดที่สามารถกำหนดได้สามารถดูได้ที่เอกสารด้านล่างนี้
 
-  const signedUrl = getSignedUrl({
-    URL,
-    keyPairId,
-    dateLessThan,
-    privateKey,
-  });
+<Link url="https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-HTTPPOSTConstructPolicy.html#sigv4-PolicyConditions" />
 
-  return signedUrl;
+แล้วก็ในการกำหนด Conditions บางครั้งเราสามารถละพวก condition ที่เกี่ยวกับ bucket หรือ key ได้ครับ เพราะทั้ง Bucket และ Key ถือเป็น required field ฉะนั้น SDK จะสร้าง condition ของ bucket และ key ให้เราแบบอัตโนมัติโดยอิงจากค่า Bucket และ Key ที่เรากำหนดไว้
+
+### Expires (optional)
+
+ระบุว่า presigned post request ที่สร้างมาจะใช้ได้นานเท่าไหร่ (ระบุเป็นวินาที)
+
+---
+
+อีกอย่างหนึ่งที่จำเป็นก็คือ เหมือนกับตอน S3 presigned URL ครับ คือเราจะต้องมี permission putObject สำหรับอัปโหลดไฟล์ไปที่ S3 bucket ด้วย ถึงจะสามารถสร้าง presigned post request ได้ หรือถ้ารันฟังก์ชันนี้บน Lambda ก็ต้องให้ permission นี้กับ execution role ของ Lambda ด้วยครับ
+
+## $\{filename\} Placeholder
+
+`${filename}` เป็น placeholder ที่เราสามารถใส่ลงไปใน Key ตอนสร้าง presigned post request ได้ครับ ก่อนหน้านี้ผมพูดไว้ในหัวข้อก่อนหน้าว่า SDK จะสร้าง condition ของ bucket และ key ให้เราแบบอัตโนมัติโดยอิงจากค่า Bucket และ Key ที่เรากำหนดไว้ ซึ่งการใส่ `${filename}` ลงไปใน key จะมีผลต่อตัว key condition ที่ SDK สร้างขึ้นมา โดยเราจะแบ่งออกเป็น 2 เคส คือใส่ `${filename}` กับไม่ใส่ครับ
+
+กรณีที่ผมไม่ใส่ `${filename}` ลงไปใน Key SDK จะสร้าง key condition ประมาณนี้ออกมาให้ ซึ่งผลลัพธ์ที่ได้คือเราสามารถอัปโหลดไฟล์โดยตั้งชื่อ key เป็น **my-key** แบบเป๊ะ ๆ เท่านั้น
+
+<CodeBlock client:visible>
+```javascript
+const Key = "my-key"; // Key แบบที่ไม่มี ${filename}
+const Conditions = [
+	["eq", "$key", "my-key"],
+	... // condition อื่น ๆ
+];
+```
+</CodeBlock>
+
+แต่ถ้าผมใส่ `${filename}` ลงไป key condition ที่ได้ก็จะเปลี่ยนไป ซึ่งทำให้เราสามารถอัปโหลดไฟล์โดยตั้งชื่อ key ตามใจชอบได้ ขอแค่ขึ้นต้นด้วยคำว่า **my-key** ก็พอ
+
+<CodeBlock client:visible>
+```javascript
+const Key = "my-key/${filename}"; // Key แบบมี ${filename}
+const Conditions = [
+	["start-with", "$key", "my-key/"],
+	... // condition อื่น ๆ
+];
+```
+</CodeBlock>
+
+หรือถ้าไม่อยากได้ **my-key** นำหน้า ก็สามารถเอาออกได้ ก็จะทำให้เราสามารถตั้งชื่อ key ได้อิสระ
+
+<CodeBlock client:visible>
+```javascript
+const Key = "${filename}"; // Key แบบมี ${filename} และไม่มี prefix
+const Conditions = [
+	["start-with", "$key", ""],
+	... // condition อื่น ๆ
+];
+```
+</CodeBlock>
+
+## ใช้งาน S3 Presigned Post Request
+
+ก่อนอื่นขอรีรัน code อีกซักรอบครับ โดยผมจะสร้าง presigned post request ด้วย configuration ตามนี้
+
+- Bucket: my-meme-collection
+- Key: avatar/$\{filename\}
+- Fields:
+    - acl: bucket-owner-full-control
+    - x-amz-storage-class: INTELLIGENT_TIERING
+- Conditions:
+    - bucket: my-meme-collection (ไม่ต้องใส่ก็ได้ ถ้าไม่ใส่เดี๋ยว SDK จะใส่ให้)
+    - key: ขึ้นต้นด้วย avatar/ (ไม่ต้องใส่ก็ได้ ถ้าไม่ใส่เดี๋ยว SDK จะใส่ให้)
+    - others:
+        - acl ต้องเป็น bucket-owner-full-control
+        - x-amz-storage-class ต้องเป็น INTELLIGENT_TIERING
+        - Content-Type ต้องขึ้นต้นด้วย image (เช่น image/jpeg, image/png, ฯลฯ) หรือก็คือต้องเป็นไฟล์รูปภาพ
+        - ขนาดไฟล์ต้องไม่เกิน 10 MiB (อยู่ระหว่าง 0 - 10485760 byte)
+- Expires: 3600 วินาที (1 ชั่วโมง)
+
+<CodeBlock client:visible>
+```javascript
+import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { S3Client } from "@aws-sdk/client-s3";
+
+const client = new S3Client({ region: "ap-southeast-1" });
+
+async function presignPostRequest() {
+	const Bucket = "my-meme-collection";
+	const Key = "avatar/${filename}";
+	const Fields = {
+	  acl: "bucket-owner-full-control",
+	  "x-amz-storage-class": "INTELLIGENT_TIERING",
+	};
+	const Conditions = [
+		{ bucket: "my-meme-collection" }, // ใส่หรือไม่ใส่ก็ได้
+		["starts-with", "$key", "avatar/"] // ใส่หรือไม่ใส่ก็ได้
+		{ acl: "bucket-owner-full-control" },
+		{ "x-amz-storage-class": "INTELLIGENT_TIERING" },
+		["starts-with", "$Content-Type", "image/"],
+		["content-length-range", 0, 10485760],
+	];
+	const Expires = 3600;
+	
+	return await createPresignedPost(client, {
+	  Bucket,
+	  Key,
+	  Fields,
+	  Conditions,
+	  Expires
+	});
 }
 ```
+</CodeBlock>
 
-ลองเปิด URL ดูก็จะพบว่าสามารถดูรูปภาพได้
+ซึ่งหลังจากผมรันฟังก์ชัน presignPostRequest ผมจะได้ response ประมาณนี้กลับมา (credentials ที่ผมใช้เป็นแบบ temporary เลยเอามาโชว์ได้ไม่มีปัญหาครับ)
 
-<p>
-  <img
-    src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/s3-pre-signed-url-vs-cloudfront-signed-url/13.png`}
-    alt="13.png"
-  />
-</p>
+<CodeBlock client:visible>
+```json
+{
+  "url": "https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/",
+  "fields": {
+    "acl": "bucket-owner-full-control",
+    "x-amz-storage-class": "INTELLIGENT_TIERING",
+    "bucket": "my-meme-collection",
+    "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+    "X-Amz-Credential": "ASIA2ZIONJJTWF6LRXMT/20260307/ap-southeast-1/s3/aws4_request",
+    "X-Amz-Date": "20260307T165624Z",
+    "X-Amz-Security-Token": "IQoJb3JpZ2luX2VjEDkaDmFwLXNvdXRoZWFzdC0xIkgwRgIhAJmwIBKvw7Db6THne/XeYNkBjqAAWF2X81gyfet5ZNguAiEA0E4+wvvn71oqCjV65AL3H6kvtjEHj38hqrQX8VWK4rgq+gIIAhAAGgw3NDE0NDg5NjA2MTUiDNU0hUUOJOC5TyB7NCrXAh5a+hrTYpFk+JutXiDNMxaRsbQkp9OE4UM/r6pd5fsgztYHdhujiF4QjY11g/UaMO+tUKkXjwwRQIv7HJGjuMKGt43MjbnqtyNGNSmZrLHg+F1wAQ6mR5lcL290zBfyjxzD1hXbcMkIdumHheA2cl8fm1QmsmO8JwRwxPjQUGxx8tt7JUNHyorFIJbs9HvQlWXopdd5sC7MwdBkJCGmQt1ki8TBpeNCwy6QjN0GjHlcer0+M2YBu9uycaHY7XT2HjaSg4gBk4LqhFO0JSVK6zurcHF1CL0tqbR7jIUv+g2VVb9oCByqzU6IgbjnXuspQSi8NC4d5r/CIRj4Bw2cPBuBc/2BuYSHEZO5PUjiskIQRzc3+RVzDpX0Cr2Yg7hSDdBSrxJeFpBsdoSU5M+2RQrIHrBZRb9CLL+wr+fQQGQLwP4A1zy/86o16Bt2xjQ/O4QjtXJVv50wpq+xzQY6pAEXfaqY4WmjgSbAYCYwIpn+IO4i/JT3QVxHqmj7ve3aQ0hdxJu8AqG30vaZzjqws78vGwvmQEa3PiLF0TNLwb7jckgs9w+V04vfaZ5kTTC5WKk53CXK1T7TiSabj4ZpkIL2t+SMPwvhWmnt/zPxeVAYzOEnrTbY0alZgoXI9j+lyXFxAQzkF2cMQ39TT9sW2vphSlQfel4WX37I6J2oK/i8YR2scA==",
+    "key": "avatar/${filename}",
+    "Policy": "eyJleHBpcmF0aW9uIjoiMjAyNi0wMy0wN1QxNzo1NjoyNFoiLCJjb25kaXRpb25zIjpbeyJhY2wiOiJidWNrZXQtb3duZXItZnVsbC1jb250cm9sIn0seyJ4LWFtei1zdG9yYWdlLWNsYXNzIjoiSU5URUxMSUdFTlRfVElFUklORyJ9LHsiYnVja2V0IjoibXktbWVtZS1jb2xsZWN0aW9uIn0sWyJzdGFydHMtd2l0aCIsIiRrZXkiLCJhdmF0YXIvIl0sWyJzdGFydHMtd2l0aCIsIiRDb250ZW50LVR5cGUiLCJpbWFnZS8iXSx7IlgtQW16LUFsZ29yaXRobSI6IkFXUzQtSE1BQy1TSEEyNTYifSx7IlgtQW16LUNyZWRlbnRpYWwiOiJBU0lBMlpJT05KSlRXRjZMUlhNVC8yMDI2MDMwNy9hcC1zb3V0aGVhc3QtMS9zMy9hd3M0X3JlcXVlc3QifSx7IlgtQW16LURhdGUiOiIyMDI2MDMwN1QxNjU2MjRaIn0seyJYLUFtei1TZWN1cml0eS1Ub2tlbiI6IklRb0piM0pwWjJsdVgyVmpFRGthRG1Gd0xYTnZkWFJvWldGemRDMHhJa2d3UmdJaEFKbXdJQkt2dzdEYjZUSG5lL1hlWU5rQmpxQUFXRjJYODFneWZldDVaTmd1QWlFQTBFNCt3dnZuNzFvcUNqVjY1QUwzSDZrdnRqRUhqMzhocXJRWDhWV0s0cmdxK2dJSUFoQUFHZ3czTkRFME5EZzVOakEyTVRVaUROVTBoVVVPSk9DNVR5QjdOQ3JYQWg1YStoclRZcEZrK0p1dFhpRE5NeGFSc2JRa3A5T0U0VU0vcjZwZDVmc2d6dFlIZGh1amlGNFFqWTExZy9VYU1PK3RVS2tYand3UlFJdjdISkdqdU1LR3Q0M01qYm5xdHlOR05TbVpyTEhnK0Yxd0FRNm1SNWxjTDI5MHpCZnlqeHpEMWhYYmNNa0lkdW1IaGVBMmNsOGZtMVFtc21POEp3Und4UGpRVUd4eDh0dDdKVU5IeW9yRklKYnM5SHZRbFdYb3BkZDVzQzdNd2RCa0pDR21RdDFraThUQnBlTkN3eTZRak4wR2pIbGNlcjArTTJZQnU5dXljYUhZN1hUMkhqYVNnNGdCazRMcWhGTzBKU1ZLNnp1cmNIRjFDTDB0cWJSN2pJVXYrZzJWVmI5b0NCeXF6VTZJZ2Jqblh1c3BRU2k4TkM0ZDVyL0NJUmo0QncyY1BCdUJjLzJCdVlTSEVaTzVQVWppc2tJUVJ6YzMrUlZ6RHBYMENyMllnN2hTRGRCU3J4SmVGcEJzZG9TVTVNKzJSUXJJSHJCWlJiOUNMTCt3citmUVFHUUx3UDRBMXp5Lzg2bzE2QnQyeGpRL080UWp0WEpWdjUwd3BxK3h6UVk2cEFFWGZhcVk0V21qZ1NiQVlDWXdJcG4rSU80aS9KVDNRVnhIcW1qN3ZlM2FRMGhkeEp1OEFxRzMwdmFaempxd3M3OHZHd3ZtUUVhM1BpTEYwVE5Md2I3amNrZ3M5dytWMDR2ZmFaNWtUVEM1V0trNTNDWEsxVDdUaVNhYmo0WnBrSUwydCtTTVB3dmhXbW50L3pQeGVWQVl6T0VuclRiWTBhbFpnb1hJOWorbHlYRnhBUXprRjJjTVEzOVRUOXNXMnZwaFNsUWZlbDRXWDM3STZKMm9LL2k4WVIyc2NBPT0ifV19",
+    "X-Amz-Signature": "2f7bc74c1eebe55f864bd9b0b30c36b4c9eba9a77e5c8ce6252a54bb51c05354"
+  }
+}
+```
+</CodeBlock>
 
-เราสามารถใช้ wildcard กับ URL ได้ด้วย แต่ไม่ใช่ว่าแค่เปลี่ยน URL เป็น `https://d2wv1gnkwl6nia.cloudfront.net/*.png` แล้วจะจบนะครับ เพราะแบบนี้ URL ที่ได้มาจะหมายถึงอนุญาตให้เข้าถึงไฟล์ชื่อ `*.png` (\* ที่ไม่ใช่ wildcard แต่หมายถึงไฟล์ที่ชื่อ \* จริง ๆ แบบ literally) เฉย ๆ
+จะสังเกตว่า **acl**, **x-amz-storage-class**, **bucket**, และ **key** จะตรงกับค่าที่เราใส่ไว้ใน code ข้างบน ส่วน **Policy** คือ **Conditions** และ field อื่น ๆ ที่เหลือจะเป็น credentials ใช้สำหรับ authorize request ตอนที่เราอัปโหลดไฟล์
 
-การใช้ wildcard จำเป็นจะต้องระบุ policy เองครับ ซึ่ง policy เป็นตัวกำหนดว่า URL นี้สามารถเข้าถึงอะไรได้บ้าง โดยใน code ด้านบนเมื่อกี้เราไม่ได้ระบุ policy ลงไป ตัว library ก็เลยกำหนด policy แบบพื้นฐานที่สุดให้เราเอง ก็คือสามารถเข้าถึงได้แค่ไฟล์ชื่อ thumbnail.png ตามที่อยู่ใน URL เท่านั้น
+จากนั้นก็ใช้ response ที่ได้มายิง post request เพื่ออัปโหลดไฟล์ ซึ่งโดยพื้นฐานจะต้องส่ง payload ในรูปของ FormData แต่จะใช้ HTML form หรือ FormData ใน JavaScript ก็ได้ทั้งคู่ครับ สิ่งสำคัญคือใน form จะต้องมี field ครบถ้วน ประกอบด้วยตัวไฟล์ที่จะอัปโหลด และ field ทั้งหมดที่ได้มาจาก response 
 
-ซึ่งพอเราระบุ policy เอง พวกข้อมูลอื่น ๆ เช่น URL, dateLessThan, ฯลฯ เราก็จะใส่เข้าไปใน policy เลย ไม่เอามาระบุแยกแบบ code ด้านบนเมื่อกี้ครับ
+จุดหนึ่งที่ต้องระวังตอนอัปโหลดคือเรื่องชื่อไฟล์หรือ key ครับ จากใน response จะเห็นว่า key ตอนนี้เป็น `avatar/${filename}` อยู่ เราต้องเปลี่ยน key เป็นชื่อไฟล์ที่เราต้องการด้วย อย่างในตัวอย่างนี้ผมจะเปลี่ยนเป็น `avatar/selfish.jpg`
 
+<CodeBlock client:visible>
 ```javascript
-import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
-import { readFileSync } from "fs";
+async function uploadFile({ url, fields, path }) {
+  const filename = path.split("/").pop();
+  const bytes = readFileSync(path);
 
-export const handler = async (event) => {
-  const URL = "https://d2wv1gnkwl6nia.cloudfront.net/*";
-  const privateKey = readFileSync("./private.pem", "utf-8");
-  const keyPairId = "K1YNLME0H5Y5BA";
-  const dateLessThan = "2025-04-15";
-  const policy = {
-    Statement: [
-      {
-        Resource: URL,
-        Condition: {
-          DateLessThan: {
-            "AWS:EpochTime": new Date(dateLessThan).getTime() / 1000,
-          },
-        },
-      },
-    ],
-  };
+  const form = new FormData();
+  Object.entries(fields).forEach(([field, value]) => {
+    form.append(field, value);
+  });
+  form.set("key", `avatar/${filename}`); // set key จาก "avatar/${filename}" เป็น "avatar/selfish.jpg"
+  form.append("Content-Type", "image/jpeg"); // เพิ่ม Content-Type ให้ตรงตาม condition
+  form.append("file", new Blob([bytes]), filename); // เพิ่ม file ด้วย blob ของไฟล์ที่จะอัปโหลด
 
-  const policyString = JSON.stringify(policy);
-
-  const signedUrl = getSignedUrl({
-    keyPairId,
-    privateKey,
-    policy: policyString,
+  const response = await fetch(url, {
+    method: "POST",
+    body: form,
   });
 
-  return signedUrl;
-};
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Upload failed: ${response.status} - ${text}`);
+  }
+
+  return response;
+}
 ```
+</CodeBlock>
 
-signed URL ที่ได้ออกมาก็จะหน้าตาคล้ายกับ URL ที่เรากำหนดไป เพียงแต่มี query string อื่น ๆ ติดมาด้วย (`https://d2wv1gnkwl6nia.cloudfront.net/*?Policy=…`) ซึ่งเราก็แค่ต้องเปลี่ยน `*` เป็น path ที่เราต้องการก็พอ เช่น `https://d2wv1gnkwl6nia.cloudfront.net/thumbnail.png?Policy=…`
+จากนั้นลองใช้ presigned post request ที่สร้างไว้ก่อนหน้า เรียกฟังก์ชัน `uploadFile` เพื่ออัปโหลดไฟล์รูปที่ชื่อ `selfish.jpg`
 
-### แถม
+<CodeBlock client:visible>
+```javascript
+const { url, fields } = {
+  "url": "https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/",
+  "fields": {
+    "acl": "bucket-owner-full-control",
+    "x-amz-storage-class": "INTELLIGENT_TIERING",
+    "bucket": "my-meme-collection",
+    "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+    "X-Amz-Credential": "ASIA2ZIONJJTWF6LRXMT/20260307/ap-southeast-1/s3/aws4_request",
+    "X-Amz-Date": "20260307T165624Z",
+    "X-Amz-Security-Token": "IQoJb3JpZ2luX2VjEDkaDmFwLXNvdXRoZWFzdC0xIkgwRgIhAJmwIBKvw7Db6THne/XeYNkBjqAAWF2X81gyfet5ZNguAiEA0E4+wvvn71oqCjV65AL3H6kvtjEHj38hqrQX8VWK4rgq+gIIAhAAGgw3NDE0NDg5NjA2MTUiDNU0hUUOJOC5TyB7NCrXAh5a+hrTYpFk+JutXiDNMxaRsbQkp9OE4UM/r6pd5fsgztYHdhujiF4QjY11g/UaMO+tUKkXjwwRQIv7HJGjuMKGt43MjbnqtyNGNSmZrLHg+F1wAQ6mR5lcL290zBfyjxzD1hXbcMkIdumHheA2cl8fm1QmsmO8JwRwxPjQUGxx8tt7JUNHyorFIJbs9HvQlWXopdd5sC7MwdBkJCGmQt1ki8TBpeNCwy6QjN0GjHlcer0+M2YBu9uycaHY7XT2HjaSg4gBk4LqhFO0JSVK6zurcHF1CL0tqbR7jIUv+g2VVb9oCByqzU6IgbjnXuspQSi8NC4d5r/CIRj4Bw2cPBuBc/2BuYSHEZO5PUjiskIQRzc3+RVzDpX0Cr2Yg7hSDdBSrxJeFpBsdoSU5M+2RQrIHrBZRb9CLL+wr+fQQGQLwP4A1zy/86o16Bt2xjQ/O4QjtXJVv50wpq+xzQY6pAEXfaqY4WmjgSbAYCYwIpn+IO4i/JT3QVxHqmj7ve3aQ0hdxJu8AqG30vaZzjqws78vGwvmQEa3PiLF0TNLwb7jckgs9w+V04vfaZ5kTTC5WKk53CXK1T7TiSabj4ZpkIL2t+SMPwvhWmnt/zPxeVAYzOEnrTbY0alZgoXI9j+lyXFxAQzkF2cMQ39TT9sW2vphSlQfel4WX37I6J2oK/i8YR2scA==",
+    "key": "avatar/${filename}",
+    "Policy": "eyJleHBpcmF0aW9uIjoiMjAyNi0wMy0wN1QxNzo1NjoyNFoiLCJjb25kaXRpb25zIjpbeyJhY2wiOiJidWNrZXQtb3duZXItZnVsbC1jb250cm9sIn0seyJ4LWFtei1zdG9yYWdlLWNsYXNzIjoiSU5URUxMSUdFTlRfVElFUklORyJ9LHsiYnVja2V0IjoibXktbWVtZS1jb2xsZWN0aW9uIn0sWyJzdGFydHMtd2l0aCIsIiRrZXkiLCJhdmF0YXIvIl0sWyJzdGFydHMtd2l0aCIsIiRDb250ZW50LVR5cGUiLCJpbWFnZS8iXSx7IlgtQW16LUFsZ29yaXRobSI6IkFXUzQtSE1BQy1TSEEyNTYifSx7IlgtQW16LUNyZWRlbnRpYWwiOiJBU0lBMlpJT05KSlRXRjZMUlhNVC8yMDI2MDMwNy9hcC1zb3V0aGVhc3QtMS9zMy9hd3M0X3JlcXVlc3QifSx7IlgtQW16LURhdGUiOiIyMDI2MDMwN1QxNjU2MjRaIn0seyJYLUFtei1TZWN1cml0eS1Ub2tlbiI6IklRb0piM0pwWjJsdVgyVmpFRGthRG1Gd0xYTnZkWFJvWldGemRDMHhJa2d3UmdJaEFKbXdJQkt2dzdEYjZUSG5lL1hlWU5rQmpxQUFXRjJYODFneWZldDVaTmd1QWlFQTBFNCt3dnZuNzFvcUNqVjY1QUwzSDZrdnRqRUhqMzhocXJRWDhWV0s0cmdxK2dJSUFoQUFHZ3czTkRFME5EZzVOakEyTVRVaUROVTBoVVVPSk9DNVR5QjdOQ3JYQWg1YStoclRZcEZrK0p1dFhpRE5NeGFSc2JRa3A5T0U0VU0vcjZwZDVmc2d6dFlIZGh1amlGNFFqWTExZy9VYU1PK3RVS2tYand3UlFJdjdISkdqdU1LR3Q0M01qYm5xdHlOR05TbVpyTEhnK0Yxd0FRNm1SNWxjTDI5MHpCZnlqeHpEMWhYYmNNa0lkdW1IaGVBMmNsOGZtMVFtc21POEp3Und4UGpRVUd4eDh0dDdKVU5IeW9yRklKYnM5SHZRbFdYb3BkZDVzQzdNd2RCa0pDR21RdDFraThUQnBlTkN3eTZRak4wR2pIbGNlcjArTTJZQnU5dXljYUhZN1hUMkhqYVNnNGdCazRMcWhGTzBKU1ZLNnp1cmNIRjFDTDB0cWJSN2pJVXYrZzJWVmI5b0NCeXF6VTZJZ2Jqblh1c3BRU2k4TkM0ZDVyL0NJUmo0QncyY1BCdUJjLzJCdVlTSEVaTzVQVWppc2tJUVJ6YzMrUlZ6RHBYMENyMllnN2hTRGRCU3J4SmVGcEJzZG9TVTVNKzJSUXJJSHJCWlJiOUNMTCt3citmUVFHUUx3UDRBMXp5Lzg2bzE2QnQyeGpRL080UWp0WEpWdjUwd3BxK3h6UVk2cEFFWGZhcVk0V21qZ1NiQVlDWXdJcG4rSU80aS9KVDNRVnhIcW1qN3ZlM2FRMGhkeEp1OEFxRzMwdmFaempxd3M3OHZHd3ZtUUVhM1BpTEYwVE5Md2I3amNrZ3M5dytWMDR2ZmFaNWtUVEM1V0trNTNDWEsxVDdUaVNhYmo0WnBrSUwydCtTTVB3dmhXbW50L3pQeGVWQVl6T0VuclRiWTBhbFpnb1hJOWorbHlYRnhBUXprRjJjTVEzOVRUOXNXMnZwaFNsUWZlbDRXWDM3STZKMm9LL2k4WVIyc2NBPT0ifV19",
+    "X-Amz-Signature": "2f7bc74c1eebe55f864bd9b0b30c36b4c9eba9a77e5c8ce6252a54bb51c05354"
+  }
+}
+const response = await uploadFile({ url, fields, path: "selfish.jpg" });
+console.log(response);
+```
+</CodeBlock>
 
-อันนี้เป็นแค่ความคิดเห็นส่วนตัวนะครับ แต่ผมคิดว่า signed URL เนี่ยมีข้อเสียอยู่อย่างนึง คือ URL ของเราจะเปลี่ยนครับ ทำให้ใช้กับเว็บไซต์ที่เป็น static ได้ค่อนข้างลำบาก เนื่องจากต้องคอย sign URL อยู่เรื่อย ๆ ทำให้ URL พวกนี้ก็จะเปลี่ยนไปเรื่อย ๆ เหมือนกัน ซึ่งก็จะทำให้ไฟล์ HTML มันไม่ static ขึ้นมา หรือต่อให้ไป sign ที่ฝั่ง client ก็ต้องใช้ private key อยู่ดี นั่นหมายความว่าจะต้องให้ฝั่ง client สามารถเข้าถึง private key ได้ (อย่าหาทำ)
+ถ้าไม่มีปัญหาอะไรเราก็จะได้ response 204 กลับมา ถือว่าอัปโหลดไฟล์สำเร็จ
 
-ซึ่งนอกจาก signed URL แล้วก็ยังมีอีกตัวเลือกนึงคือ signed cookies ที่การทำงานคล้าย ๆ กับ signed URL เพียงแต่เปลี่ยนที่เก็บ signature จาก URL เป็น cookies แทน โดยทั้งคู่ก็จะมี use case ที่เหมาะสมและไม่เหมาะสมอยู่ซึ่งเดี๋ยวผมจะเขียนถึงในโอกาสหน้าครับ
+<CodeBlock client:visible foldable summary="Status 204 Response From S3 (avatar/selfish.jpg)">
+```javascript
+Response {
+  status: 204,
+  statusText: 'No Content',
+  headers: Headers {
+    'x-amz-id-2': '2Ie5c7KM1770gPMVA2OQ/EfLEkyFPKESoZhavXnFnVZlebaN2XHWR0o11iesTXyofmOeDjols8w=',
+    'x-amz-request-id': '00Q5GZVMCDCD75T8',
+    date: 'Sat, 07 Mar 2026 16:57:31 GMT',
+    'x-amz-server-side-encryption': 'AES256',
+    etag: '"145d2bd945411c5ad464f9b977102afd"',
+    'x-amz-checksum-crc64nvme': 'Hv1I1d43JWQ=',
+    'x-amz-checksum-type': 'FULL_OBJECT',
+    'x-amz-storage-class': 'INTELLIGENT_TIERING',
+    location: 'https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/avatar%2Fselfish.jpg',
+    server: 'AmazonS3'
+  },
+  body: null,
+  bodyUsed: false,
+  ok: true,
+  redirected: false,
+  type: 'basic',
+  url: 'https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/'
+}
+```
+</CodeBlock>
+
+ไปดูบน S3 ก็จะเจอไฟล์รูป `avatar/selfish.jpg`
+
+<Image slug={frontmatter.slug} filename="01.png" altText="01.png" />
+
+<Image slug={frontmatter.slug} filename="02.png" altText="02.png" />
+
+ลองใช้ presigned post request เดิมอีกรอบกับไฟล์ชื่อ peanut.jpg
+
+<CodeBlock client:visible>
+```javascript
+const { url, fields } = { ... }
+const response = await uploadFile({ url, fields, path: "peanut.jpg" });
+console.log(response);
+```
+</CodeBlock>
+
+ได้ 204 กลับมาเหมือนกัน และบน S3 ก็เจอไฟล์รูป `avatar/peanut.jpg` เพิ่มขึ้นมา
+
+<CodeBlock client:visible foldable summary="Status 204 Response From S3 (avatar/peanut.jpg)">
+```javascript
+Response {
+  status: 204,
+  statusText: 'No Content',
+  headers: Headers {
+    'x-amz-id-2': 'wCAAvBhpL4uzThJWKYqEjOe6WrjxDR+obiOLtydPFOhUkUBzKQWkOudgPvE02EN/eV9NqeBm7hEXXCRSvIRrYpitPQ/OWU5Q',
+    'x-amz-request-id': 'JS708YBRHEGQYCPW',
+    date: 'Sat, 07 Mar 2026 17:03:09 GMT',
+    'x-amz-server-side-encryption': 'AES256',
+    etag: '"f247ed3b96d7da48c149be9c3cc7ed61"',
+    'x-amz-checksum-crc64nvme': 'mzlZYjigcK8=',
+    'x-amz-checksum-type': 'FULL_OBJECT',
+    'x-amz-storage-class': 'INTELLIGENT_TIERING',
+    location: 'https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/avatar%2Fpeanut.jpg',
+    server: 'AmazonS3'
+  },
+  body: null,
+  bodyUsed: false,
+  ok: true,
+  redirected: false,
+  type: 'basic',
+  url: 'https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/'
+}
+```
+</CodeBlock>
+
+<Image slug={frontmatter.slug} filename="03.png" altText="03.png" />
+
+<Image slug={frontmatter.slug} filename="04.png" altText="04.png" />
+
+แต่ถ้าลองเปลี่ยน key จาก `avatar/peanut.jpg` เป็น `peanut.jpg` เฉย ๆ แล้วอัปโหลด จะได้ 403 กลับมาเพราะ key ไม่ตรงกับ condition ที่ระบุไว้
+
+<CodeBlock client:visible>
+```javascript
+async function uploadFile({ url, fields, path }) {
+  ...
+  form.set("key", `${filename}`); // เปลี่ยนจาก "avatar/${filename}" เป็น "${filename}"
+  ...
+
+  return response;
+}
+```
+</CodeBlock>
+
+<CodeBlock client:visible>
+```javascript
+Error: Upload failed: 403 - <?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>AccessDenied</Code><Message>Invalid according to Policy: Policy Condition failed: ["starts-with", "$key", "avatar/"]</Message><RequestId>63P1DK9QTKGDKHT0</RequestId><HostId>9X9E6pXoOkZbYq1H5GKYqEzwXyEHEUlWG2tAyPuxnBZ51ee2ZVbAwIUu+WLzDAB32D5P+jh8bpuTG/UMv1Nob0j4LkKrjl9C</HostId></Error>
+```
+</CodeBlock>
+
+<Image slug={frontmatter.slug} filename="05.png" altText="05.png" />
+
+## ใช้งาน S3 Presigned Post Request ผ่าน web form
+
+จากตัวอย่างก่อนหน้า จะเห็นว่า presigned post request จะใช้โดยการส่งไฟล์ผ่านฟอร์มด้วย post request หมายความว่านอกจากการใช้ FormData ใน JavaScript แบบในตัวอย่างด้านบนแล้ว เราสามารถสร้างหน้าเว็บที่มี HTML form อยู่ แล้วอัปโหลดไฟล์ขึ้น S3 โดยใช้ฟอร์มนี้ได้ อย่างเช่นด้านล่างนี้จะเป็นตัวอย่างหน้าเว็บฟอร์มสำหรับอัปโหลดไฟล์อย่างง่าย ๆ
+
+โดยสมมติว่าผมเรียกฟังก์ชัน `presignPostRequest` อันเดิมแล้วได้ credentials แบบเดิมออกมา
+
+<CodeBlock client:visible>
+```json
+{
+  "url": "https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/",
+  "fields": {
+    "acl": "bucket-owner-full-control",
+    "x-amz-storage-class": "INTELLIGENT_TIERING",
+    "bucket": "my-meme-collection",
+    "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+    "X-Amz-Credential": "ASIA2ZIONJJT3WIUJOZ4/20260323/ap-southeast-1/s3/aws4_request",
+    "X-Amz-Date": "20260323T171507Z",
+    "X-Amz-Security-Token": "IQoJb3JpZ2luX2VjELn//////////wEaDmFwLXNvdXRoZWFzdC0xIkcwRQIgVe9lph1+PiHZtdP9hkJV3PID5oCb2/jDtMTSa95BHvACIQDFxXIaAf5jOrJgj949g0NGRlIF94xhfTQ0n41KwvfecyqDAwiC//////////8BEAAaDDc0MTQ0ODk2MDYxNSIMeYHhzHMnwd69N6m0KtcCCnVJN+hcmnr2LY7zpA5X33qjYsNn5BL/m/XEWtA+pTaUX5HWtaXmxC8swrbzgvHm6e44MVVPhOOtbvqDvMeaUV/uSnuMvlnRJLkLTydroJvAjhCDUYDa+JN2S+sMLCkM+03nMiBgOcY+rQpzCZNBQIQsdXzf9KnMD9g/1W72dWY6Esx2+lfknl9baeHM7/ZH68gHETk+1tDm90+Xei4q9NuCjVoYEgVtF4oIiPgA/5GKpxgVlyk6++6JW8ZFoDrVg5By6bGYXeoSHHtCuMfEijpo4uE/Omm9xE6MvSG5/k9H39muQFfuzqgGFLKllSyymj4vZDDdwVOIT/QILJXkjCNnjd+mayQLKhcko+WbHrNKrGpwgB9jRaNJ3k2OWP3sgtaTOvd1CnAt73NeC1uTPtdUnfaTSUfo1adXfboBN5CXRhzL0vthMytYsCY6Ux7L4jW7a3tE3TC35oXOBjqlAeRfc3IxwALd1OgTxVq0kyDzj/iAFcpSLQ309aJTiUNyXoeUF8bTKRmAwkABC9cdnyk8xOhtWi+JLB8lAPEywlc9C10EGmCWqUhRRdiFziZOuJ+O/vTUXmUE4bnEXLGTJO/1Sfi/UEmk7SDxC76LHdctEuS7j+0g4D+l/s0fVwAc1E31Q3eobQAEycXT8Ki3Awx4L5bi/UYXMgdcM06El+NiQ9JqsA==",
+    "key": "avatar/${filename}",
+    "Policy": "eyJleHBpcmF0aW9uIjoiMjAyNi0wMy0yM1QxODoxNTowN1oiLCJjb25kaXRpb25zIjpbeyJhY2wiOiJidWNrZXQtb3duZXItZnVsbC1jb250cm9sIn0seyJ4LWFtei1zdG9yYWdlLWNsYXNzIjoiSU5URUxMSUdFTlRfVElFUklORyJ9LHsiYnVja2V0IjoibXktbWVtZS1jb2xsZWN0aW9uIn0sWyJzdGFydHMtd2l0aCIsIiRrZXkiLCJhdmF0YXIvIl0sWyJzdGFydHMtd2l0aCIsIiRDb250ZW50LVR5cGUiLCJpbWFnZS8iXSx7IlgtQW16LUFsZ29yaXRobSI6IkFXUzQtSE1BQy1TSEEyNTYifSx7IlgtQW16LUNyZWRlbnRpYWwiOiJBU0lBMlpJT05KSlQzV0lVSk9aNC8yMDI2MDMyMy9hcC1zb3V0aGVhc3QtMS9zMy9hd3M0X3JlcXVlc3QifSx7IlgtQW16LURhdGUiOiIyMDI2MDMyM1QxNzE1MDdaIn0seyJYLUFtei1TZWN1cml0eS1Ub2tlbiI6IklRb0piM0pwWjJsdVgyVmpFTG4vLy8vLy8vLy8vd0VhRG1Gd0xYTnZkWFJvWldGemRDMHhJa2N3UlFJZ1ZlOWxwaDErUGlIWnRkUDloa0pWM1BJRDVvQ2IyL2pEdE1UU2E5NUJIdkFDSVFERnhYSWFBZjVqT3JKZ2o5NDlnME5HUmxJRjk0eGhmVFEwbjQxS3d2ZmVjeXFEQXdpQy8vLy8vLy8vLy84QkVBQWFERGMwTVRRME9EazJNRFl4TlNJTWVZSGh6SE1ud2Q2OU42bTBLdGNDQ25WSk4raGNtbnIyTFk3enBBNVgzM3FqWXNObjVCTC9tL1hFV3RBK3BUYVVYNUhXdGFYbXhDOHN3cmJ6Z3ZIbTZlNDRNVlZQaE9PdGJ2cUR2TWVhVVYvdVNudU12bG5SSkxrTFR5ZHJvSnZBamhDRFVZRGErSk4yUytzTUxDa00rMDNuTWlCZ09jWStyUXB6Q1pOQlFJUXNkWHpmOUtuTUQ5Zy8xVzcyZFdZNkVzeDIrbGZrbmw5YmFlSE03L1pINjhnSEVUaysxdERtOTArWGVpNHE5TnVDalZvWUVnVnRGNG9JaVBnQS81R0tweGdWbHlrNisrNkpXOFpGb0RyVmc1Qnk2YkdZWGVvU0hIdEN1TWZFaWpwbzR1RS9PbW05eEU2TXZTRzUvazlIMzltdVFGZnV6cWdHRkxLbGxTeXltajR2WkREZHdWT0lUL1FJTEpYa2pDTm5qZCttYXlRTEtoY2tvK1diSHJOS3JHcHdnQjlqUmFOSjNrMk9XUDNzZ3RhVE92ZDFDbkF0NzNOZUMxdVRQdGRVbmZhVFNVZm8xYWRYZmJvQk41Q1hSaHpMMHZ0aE15dFlzQ1k2VXg3TDRqVzdhM3RFM1RDMzVvWE9CanFsQWVSZmMzSXh3QUxkMU9nVHhWcTBreUR6ai9pQUZjcFNMUTMwOWFKVGlVTnlYb2VVRjhiVEtSbUF3a0FCQzljZG55azh4T2h0V2krSkxCOGxBUEV5d2xjOUMxMEVHbUNXcVVoUlJkaUZ6aVpPdUorTy92VFVYbVVFNGJuRVhMR1RKTy8xU2ZpL1VFbWs3U0R4Qzc2TEhkY3RFdVM3aiswZzREK2wvczBmVndBYzFFMzFRM2VvYlFBRXljWFQ4S2kzQXd4NEw1YmkvVVlYTWdkY00wNkVsK05pUTlKcXNBPT0ifV19",
+    "X-Amz-Signature": "c878304110a695a626ef40ab654d03a1d6cd9339d88136e5815000dad4b629dd"
+  }
+}
+```
+</CodeBlock>
+
+เพราะนี่เป็นแค่ตัวอย่างง่าย ๆ ผมก็จะยกทั้งหมดนี่ไปใส่ในฟอร์มดื้อ ๆ ได้เลย โดย url ก็ใส่ไว้ที่ form action ส่วน field แต่ละอันก็ใส่เป็น hidden input ในฟอร์มไป
+
+ส่วน input ตัว **Content-Type** อันนี้ผมเพิ่มแบบ hardcode เข้าไปเองครับ เพราะ presigned post request ที่ผมสร้างมี condition ว่าต้องอัปโหลดไฟล์ที่มี mime type ขึ้นต้นด้วย image/ เท่านั้น แต่เวลาใช้งานฟอร์มจริง ๆ เราก็ควรจะดัก submit event ของฟอร์มด้วย Javascript แล้วค่อยระบุ value ของ Content-Type อันนี้เป็น mime-type ของไฟล์จริง ๆ ที่ผู้ใช้อัปโหลดเข้ามานะครับ
+
+<CodeBlock client:visible>
+```html
+<form id="uploadForm" action="https://my-meme-collection.s3.ap-southeast-1.amazonaws.com/" method="post"
+    enctype="multipart/form-data">
+    <div class="row">
+      <!-- Fields from your presigned POST -->
+      <input type="hidden" name="acl" value="bucket-owner-full-control" />
+      <input type="hidden" name="x-amz-storage-class" value="INTELLIGENT_TIERING" />
+      <input type="hidden" name="bucket" value="my-meme-collection" />
+      <input type="hidden" name="X-Amz-Algorithm" value="AWS4-HMAC-SHA256" />
+      <input type="hidden" name="X-Amz-Credential"
+        value="ASIA2ZIONJJT3WIUJOZ4/20260323/ap-southeast-1/s3/aws4_request" />
+      <input type="hidden" name="X-Amz-Date" value="20260323T171507Z" />
+      <input type="hidden" name="X-Amz-Security-Token"
+        value="IQoJb3JpZ2luX2VjELn//////////wEaDmFwLXNvdXRoZWFzdC0xIkcwRQIgVe9lph1+PiHZtdP9hkJV3PID5oCb2/jDtMTSa95BHvACIQDFxXIaAf5jOrJgj949g0NGRlIF94xhfTQ0n41KwvfecyqDAwiC//////////8BEAAaDDc0MTQ0ODk2MDYxNSIMeYHhzHMnwd69N6m0KtcCCnVJN+hcmnr2LY7zpA5X33qjYsNn5BL/m/XEWtA+pTaUX5HWtaXmxC8swrbzgvHm6e44MVVPhOOtbvqDvMeaUV/uSnuMvlnRJLkLTydroJvAjhCDUYDa+JN2S+sMLCkM+03nMiBgOcY+rQpzCZNBQIQsdXzf9KnMD9g/1W72dWY6Esx2+lfknl9baeHM7/ZH68gHETk+1tDm90+Xei4q9NuCjVoYEgVtF4oIiPgA/5GKpxgVlyk6++6JW8ZFoDrVg5By6bGYXeoSHHtCuMfEijpo4uE/Omm9xE6MvSG5/k9H39muQFfuzqgGFLKllSyymj4vZDDdwVOIT/QILJXkjCNnjd+mayQLKhcko+WbHrNKrGpwgB9jRaNJ3k2OWP3sgtaTOvd1CnAt73NeC1uTPtdUnfaTSUfo1adXfboBN5CXRhzL0vthMytYsCY6Ux7L4jW7a3tE3TC35oXOBjqlAeRfc3IxwALd1OgTxVq0kyDzj/iAFcpSLQ309aJTiUNyXoeUF8bTKRmAwkABC9cdnyk8xOhtWi+JLB8lAPEywlc9C10EGmCWqUhRRdiFziZOuJ+O/vTUXmUE4bnEXLGTJO/1Sfi/UEmk7SDxC76LHdctEuS7j+0g4D+l/s0fVwAc1E31Q3eobQAEycXT8Ki3Awx4L5bi/UYXMgdcM06El+NiQ9JqsA==" />
+      <input type="hidden" name="Policy"
+        value="eyJleHBpcmF0aW9uIjoiMjAyNi0wMy0yM1QxODoxNTowN1oiLCJjb25kaXRpb25zIjpbeyJhY2wiOiJidWNrZXQtb3duZXItZnVsbC1jb250cm9sIn0seyJ4LWFtei1zdG9yYWdlLWNsYXNzIjoiSU5URUxMSUdFTlRfVElFUklORyJ9LHsiYnVja2V0IjoibXktbWVtZS1jb2xsZWN0aW9uIn0sWyJzdGFydHMtd2l0aCIsIiRrZXkiLCJhdmF0YXIvIl0sWyJzdGFydHMtd2l0aCIsIiRDb250ZW50LVR5cGUiLCJpbWFnZS8iXSx7IlgtQW16LUFsZ29yaXRobSI6IkFXUzQtSE1BQy1TSEEyNTYifSx7IlgtQW16LUNyZWRlbnRpYWwiOiJBU0lBMlpJT05KSlQzV0lVSk9aNC8yMDI2MDMyMy9hcC1zb3V0aGVhc3QtMS9zMy9hd3M0X3JlcXVlc3QifSx7IlgtQW16LURhdGUiOiIyMDI2MDMyM1QxNzE1MDdaIn0seyJYLUFtei1TZWN1cml0eS1Ub2tlbiI6IklRb0piM0pwWjJsdVgyVmpFTG4vLy8vLy8vLy8vd0VhRG1Gd0xYTnZkWFJvWldGemRDMHhJa2N3UlFJZ1ZlOWxwaDErUGlIWnRkUDloa0pWM1BJRDVvQ2IyL2pEdE1UU2E5NUJIdkFDSVFERnhYSWFBZjVqT3JKZ2o5NDlnME5HUmxJRjk0eGhmVFEwbjQxS3d2ZmVjeXFEQXdpQy8vLy8vLy8vLy84QkVBQWFERGMwTVRRME9EazJNRFl4TlNJTWVZSGh6SE1ud2Q2OU42bTBLdGNDQ25WSk4raGNtbnIyTFk3enBBNVgzM3FqWXNObjVCTC9tL1hFV3RBK3BUYVVYNUhXdGFYbXhDOHN3cmJ6Z3ZIbTZlNDRNVlZQaE9PdGJ2cUR2TWVhVVYvdVNudU12bG5SSkxrTFR5ZHJvSnZBamhDRFVZRGErSk4yUytzTUxDa00rMDNuTWlCZ09jWStyUXB6Q1pOQlFJUXNkWHpmOUtuTUQ5Zy8xVzcyZFdZNkVzeDIrbGZrbmw5YmFlSE03L1pINjhnSEVUaysxdERtOTArWGVpNHE5TnVDalZvWUVnVnRGNG9JaVBnQS81R0tweGdWbHlrNisrNkpXOFpGb0RyVmc1Qnk2YkdZWGVvU0hIdEN1TWZFaWpwbzR1RS9PbW05eEU2TXZTRzUvazlIMzltdVFGZnV6cWdHRkxLbGxTeXltajR2WkREZHdWT0lUL1FJTEpYa2pDTm5qZCttYXlRTEtoY2tvK1diSHJOS3JHcHdnQjlqUmFOSjNrMk9XUDNzZ3RhVE92ZDFDbkF0NzNOZUMxdVRQdGRVbmZhVFNVZm8xYWRYZmJvQk41Q1hSaHpMMHZ0aE15dFlzQ1k2VXg3TDRqVzdhM3RFM1RDMzVvWE9CanFsQWVSZmMzSXh3QUxkMU9nVHhWcTBreUR6ai9pQUZjcFNMUTMwOWFKVGlVTnlYb2VVRjhiVEtSbUF3a0FCQzljZG55azh4T2h0V2krSkxCOGxBUEV5d2xjOUMxMEVHbUNXcVVoUlJkaUZ6aVpPdUorTy92VFVYbVVFNGJuRVhMR1RKTy8xU2ZpL1VFbWs3U0R4Qzc2TEhkY3RFdVM3aiswZzREK2wvczBmVndBYzFFMzFRM2VvYlFBRXljWFQ4S2kzQXd4NEw1YmkvVVlYTWdkY00wNkVsK05pUTlKcXNBPT0ifV19" />
+      <input type="hidden" name="X-Amz-Signature"
+        value="c878304110a695a626ef40ab654d03a1d6cd9339d88136e5815000dad4b629dd" />
+      <input type="hidden" name="key" value="avatar/${filename}" />
+      <input type="hidden" name="Content-Type" value="image/jpeg" />
+
+      <label for="fileInput"><strong>Choose a file</strong></label>
+      <input id="fileInput" name="file" type="file" />
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+```
+</CodeBlock>
+
+ทีนี้พอผมลองอัปโหลดไฟล์รูปภาพอีกซักอันที่ชื่อว่า `sawfish.jpg` ผ่านฟอร์มตัวนี้ก็จะพบว่ามีไฟล์รูปภาพที่เลือกไว้อยู่บน S3 เหมือนกับการใช้ FormData ใน JavaScript ครับ (เพราะจริง ๆ แล้วมันก็คือฟอร์มเหมือนกัน 555)
+
+<Image slug={frontmatter.slug} filename="06.png" altText="06.png" />
+
+<Image slug={frontmatter.slug} filename="07.png" altText="07.png" />
+
+<Image slug={frontmatter.slug} filename="08.png" altText="08.png" />
+
+<Image slug={frontmatter.slug} filename="09.png" altText="09.png" />
+
+สำหรับบทความนี้คิดว่าคงต้องขอจบไว้เท่านี้ครับ ที่จริงเท่านี้ก็ยาวเกินความตั้งใจตอนแรกไปมากแล้ว แล้วพบกันโอกาสหน้าครับ
 
 ## อ้างอิง
 

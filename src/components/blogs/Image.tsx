@@ -14,7 +14,13 @@ export function Image({ slug, filename, altText }: ImageProps) {
       rel="noopener noreferrer"
     >
       <p>
-        <img src={imageSrc} alt={altText ?? ""} draggable="false" />
+        <img
+          src={imageSrc}
+          alt={altText ?? ""}
+          draggable="false"
+          loading="lazy"
+          fetchPriority="low"
+        />
       </p>
     </a>
   );

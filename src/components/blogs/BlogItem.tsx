@@ -39,7 +39,10 @@ export function BlogItem({
             <img
               src={thumbnail}
               alt={title + " thumbnail"}
-              className="rounded-tl-3xl"
+              className="rounded-tl-3xl select-none"
+              draggable="false"
+              loading="eager"
+              fetchPriority="auto"
             />
           </div>
           <div className="px-2 py-2">

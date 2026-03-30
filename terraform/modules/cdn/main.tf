@@ -126,6 +126,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["s3_origin_bucket"].id
     origin_request_policy_id   = trimspace(try(coalesce(var.s3_origin_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["s3_origin_bucket"].id : null
     response_headers_policy_id = trimspace(try(coalesce(var.s3_origin_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["s3_origin_bucket"].id : null
+    compress                   = true
 
     function_association {
       event_type   = "viewer-request"
@@ -155,6 +156,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["api_gateway"].id
     origin_request_policy_id   = trimspace(try(coalesce(var.api_gateway_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["api_gateway"].id : null
     response_headers_policy_id = trimspace(try(coalesce(var.api_gateway_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["api_gateway"].id : null
+    compress                   = true
 
     function_association {
       event_type   = "viewer-request"
