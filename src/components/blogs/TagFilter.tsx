@@ -133,10 +133,17 @@ export function TagFilter({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Category" />
+                    <SelectValue
+                      placeholder="Category"
+                      role="combobox"
+                      aria-label="Category"
+                      aria-controls="category-listbox"
+                      aria-expanded="false"
+                      aria-haspopup="listbox"
+                    />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent id="category-listbox">
                   {tags?.categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -160,10 +167,17 @@ export function TagFilter({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Subcategory" />
+                    <SelectValue
+                      placeholder="Subcategory"
+                      role="combobox"
+                      aria-label="Subcategory"
+                      aria-controls="subcategory-listbox"
+                      aria-expanded="false"
+                      aria-haspopup="listbox"
+                    />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent id="subcategory-listbox">
                   {category !== "" &&
                     tags?.subcategories[category].map((subcategory) => (
                       <SelectItem key={subcategory} value={subcategory}>

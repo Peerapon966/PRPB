@@ -12,6 +12,7 @@ export function Image({ slug, filename, altText }: ImageProps) {
       href={imageSrc}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label={`Open image ${imageSrc} in a new tab`}
     >
       <p>
         <img

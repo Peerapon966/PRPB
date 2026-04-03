@@ -11,6 +11,15 @@ import { Tag } from "@/components/blogs/Tag";
 import { TOC } from "@/components/blogs/TOC";
 
 const { frontmatter, headings } = Astro.props;
+const keywords = [
+  ...new Set([
+    "AWS",
+    "blog",
+    "cloud",
+    frontmatter?.category,
+    ...frontmatter?.subcategories,
+  ]),
+].join(", ");
 ---
 
 <!doctype html>
@@ -22,8 +31,19 @@ const { frontmatter, headings } = Astro.props;
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="generator" content={Astro.generator} />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="description" content={frontmatter?.description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="author" content={frontmatter?.author} />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <meta name="yandexbot" content="index, follow" />
+    <meta
+      name="sitemap"
+      content={import.meta.env.PUBLIC_SITE_URL + "/sitemap-index.xml"}
+    />
     <title>{frontmatter?.title + " | PRPB"}</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <script>
       const preferredTheme =
         localStorage && localStorage.getItem("PRPB_THEME")
@@ -72,6 +92,8 @@ const { frontmatter, headings } = Astro.props;
                   decoding="async"
                   class="rounded-xl select-none"
                   draggable="false"
+                  width={640}
+                  height={320}
                 />
               </div>
             )

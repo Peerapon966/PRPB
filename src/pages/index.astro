@@ -16,7 +16,10 @@ const pages = [
 ];
 ---
 
-<Layout title="Home">
+<Layout
+  title="Home"
+  description="A personal blog featuring walkthroughs and introductions to various AWS services and dev tools. Just sharing what I learn and how to set things up."
+>
   <div class="flex flex-col select-none md:overflow-hidden w-full">
     <div
       class="flex flex-col md:flex-row justify-center items-center pt-24 md:pt-28 pb-28 md:pb-32 font-semibold"
@@ -46,6 +49,7 @@ const pages = [
         pages.map((page) => (
           <a
             href={page.path}
+            aria-label={`Go to ${page.name} page`}
             class:list={[
               "w-3/4 md:w-1/3 md:min-w-[410px] max-w-[410px] flex justify-center border border-foreground bg-muted rounded-r-xl px-8 py-5 mx-4 md:mx-8 mb-8 md:mb-0 hover:opacity-80",
             ]}

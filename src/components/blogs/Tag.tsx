@@ -16,6 +16,7 @@ export function Tag({ name, category, subcategory, themeLock }: TagProps) {
           : `/blogs?category=${category}`
       }
       rel="noopener noreferrer nofollow"
+      aria-label={`Open ${subcategory ? `subcategory ${subcategory}` : `category ${category}`} in a new tab`}
     >
       <Button
         size="default"

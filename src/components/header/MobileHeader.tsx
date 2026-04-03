@@ -77,6 +77,7 @@ export function MobileHeader() {
           <div className="absolute w-full h-full opacity-0 z-full"></div>
           {menus.map(({ menu, link }) => (
             <a
+              aria-label={`Go to ${menu} page`}
               key={menu}
               className={cn([
                 buttonVariants({
@@ -92,6 +93,7 @@ export function MobileHeader() {
           <Button variant={"secondary"} className="menu-item about-me">
             <div className="flex items-center">
               <a
+                aria-label="Go to home page"
                 href="/"
                 className="prpb-icon font-semibold text-md"
                 rel="noopener noreferrer nofollow"
@@ -101,6 +103,7 @@ export function MobileHeader() {
             </div>
             <div className="flex items-center">
               <a
+                aria-label="Open owner's GitHub profile in a new tab"
                 href="https://github.com/Peerapon-Org/PRPB"
                 rel="noopener noreferrer nofollow"
                 target="_blank"
@@ -133,6 +136,7 @@ export function MobileHeader() {
                 </svg>
               </a>
               <a
+                aria-label="Open owner's LinkedIn profile in a new tab"
                 href="https://www.linkedin.com/in/peerapon-b-197172345"
                 rel="noopener noreferrer nofollow"
                 target="_blank"

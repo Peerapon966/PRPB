@@ -45,9 +45,15 @@ fi
 
 pushd ..
 
+export $(grep -v '^#' .env.development | xargs)
 npm run build -- --mode development
 
-aws s3 sync dist/ "s3://${ORIGIN_BUCKET_NAME}" --delete --exclude "assets/*" --profile dev
+aws s3 sync dist/ "s3://${ORIGIN_BUCKET_NAME}" --delete --cache-control "no-cache, must-revalidate" \
+  --exclude "_astro/*" --exclude "blog/*" --exclude "about/*" --exclude "blogs/*" --exclude "assets/*" --profile dev
+aws s3 sync dist/_astro/ "s3://${ORIGIN_BUCKET_NAME}/_astro" --delete --cache-control "public, max-age=31536000, immutable" --profile dev
+aws s3 sync dist/blog/ "s3://${ORIGIN_BUCKET_NAME}/blog" --delete --cache-control "no-cache, must-revalidate" --profile dev
+aws s3 sync dist/about/ "s3://${ORIGIN_BUCKET_NAME}/about" --delete --cache-control "no-cache, must-revalidate" --profile dev
+aws s3 sync dist/blogs/ "s3://${ORIGIN_BUCKET_NAME}/blogs" --delete --cache-control "no-cache, must-revalidate" --profile dev
 aws s3 sync src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --cache-control "public, max-age=604800, must-revalidate" --profile dev
 aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*" --profile dev | tee /dev/null
 

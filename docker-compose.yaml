@@ -6,6 +6,7 @@ services:
     ports:
       - "43210:43210"
     working_dir: /home/node/app
+    user: node
     command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
     volumes:
       - ./:/home/node/app:rw
