@@ -8,8 +8,14 @@ terraform apply \
   -var="account=$ACCOUNT_ID" \
   -auto-approve
 
-aws s3 sync ../dist/ "s3://$(terraform output -raw s3_origin_bucket_name)/" --delete --exclude "assets/*"
-aws s3 sync ../src/assets/ "s3://$(terraform output -raw s3_origin_bucket_name)/assets/" --delete
+ORIGIN_BUCKET_NAME=$(terraform output -raw s3_origin_bucket_name)
+aws s3 sync ../dist/ "s3://${ORIGIN_BUCKET_NAME}" --delete --cache-control "no-cache, must-revalidate" \
+  --exclude "_astro/*" --exclude "blog/*" --exclude "about/*" --exclude "blogs/*" --exclude "assets/*"
+aws s3 sync ../dist/_astro/ "s3://${ORIGIN_BUCKET_NAME}/_astro" --delete --cache-control "public, max-age=31536000, immutable"
+aws s3 sync ../dist/blog/ "s3://${ORIGIN_BUCKET_NAME}/blog" --delete --cache-control "no-cache, must-revalidate"
+aws s3 sync ../dist/about/ "s3://${ORIGIN_BUCKET_NAME}/about" --delete --cache-control "no-cache, must-revalidate"
+aws s3 sync ../dist/blogs/ "s3://${ORIGIN_BUCKET_NAME}/blogs" --delete --cache-control "no-cache, must-revalidate"
+aws s3 sync ../src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --cache-control "public, max-age=604800, must-revalidate"
 
 pushd ../.github/actions/deploy > /dev/null 2>&1
 while read -r BLOG; do

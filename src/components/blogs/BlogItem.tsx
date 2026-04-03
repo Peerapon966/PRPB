@@ -33,7 +33,7 @@ export function BlogItem({
             </div>
           ))}
       </div>
-      <a href={`/blog/${slug}`}>
+      <a href={`/blog/${slug}`} aria-label={`Open blog ${slug}`}>
         <div>
           <div>
             <img
@@ -42,7 +42,9 @@ export function BlogItem({
               className="rounded-tl-3xl select-none"
               draggable="false"
               loading="eager"
-              fetchPriority="auto"
+              fetchPriority="high"
+              height={320}
+              width={640}
             />
           </div>
           <div className="px-2 py-2">

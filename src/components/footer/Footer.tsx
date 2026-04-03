@@ -10,6 +10,7 @@ export function Footer() {
           rel="noopener noreferrer nofollow"
           target="_blank"
           className="mr-[.8rem] h-[1.6rem] w-[1.6rem]"
+          aria-label="Open owner's GitHub profile in a new tab"
         >
           <svg
             className="!w-full !h-full"
@@ -42,6 +43,7 @@ export function Footer() {
           rel="noopener noreferrer nofollow"
           target="_blank"
           className="h-[1.6rem] w-[1.6rem]"
+          aria-label="Open owner's LinkedIn profile in a new tab"
         >
           <svg
             className="!w-full !h-full"

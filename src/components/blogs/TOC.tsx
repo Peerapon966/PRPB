@@ -61,6 +61,7 @@ export function TOC({ headings }: { headings: Headings }) {
               return (
                 <li key={slug + "list"} className="py-1">
                   <a
+                    aria-label={`Go to ${text} section`}
                     key={slug + "anchor"}
                     href={"#" + slug}
                     className="text-wrap block bg-background hover:bg-muted px-2 py-1"
