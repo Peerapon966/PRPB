@@ -8,7 +8,7 @@ import "@fontsource/prompt/700.css";
 import { Header } from "@/components/header/Header";
 import { Footer } from "@/components/footer/Footer";
 import { Tag } from "@/components/blogs/Tag";
-import { TOC } from "@/components/blogs/TOC";
+import { TOC } from "@/components/blog/TOC";
 
 const { frontmatter, headings } = Astro.props;
 const keywords = [
@@ -43,7 +43,12 @@ const keywords = [
       content={import.meta.env.PUBLIC_SITE_URL + "/sitemap-index.xml"}
     />
     <title>{frontmatter?.title + " | PRPB"}</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="PRPB" />
+    <link rel="manifest" href="/site.webmanifest" />
     <script>
       const preferredTheme =
         localStorage && localStorage.getItem("PRPB_THEME")
