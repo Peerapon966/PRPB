@@ -1,0 +1,42 @@
+---
+import { parse } from "node-html-parser";
+
+const { url, size } = Astro.props;
+
+const res = await fetch(url, {
+  headers: {
+    "User-Agent": "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+  },
+});
+const html = await res.text();
+const root = parse(html);
+const title = root.querySelector("title")?.innerText;
+const description = root
+  .querySelector("meta[name='description']")
+  ?.getAttribute("content");
+---
+
+<a
+  href={url}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={`Open link ${url} in a new tab`}
+>
+  <div
+    class="bg-secondary/70 w-full h-28 border border-border rounded-lg flex select-none text-link"
+  >
+    <div class="basis-1/5 flex justify-center items-center border-r">
+      <img
+        src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=${size ?? 180}`}
+        width="35%"
+        alt="favicon"
+        draggable="false"
+        loading="lazy"
+      />
+    </div>
+    <div class="flex flex-col justify-center basis-4/5 px-6">
+      <div class="text-base text-ellipsis font-medium pb-2">{title}</div>
+      <div class="text-sm text-ellipsis">{description}</div>
+    </div>
+  </div>
+</a>

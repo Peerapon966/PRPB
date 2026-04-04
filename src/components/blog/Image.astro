@@ -1,0 +1,22 @@
+---
+const { slug, filename, altText } = Astro.props;
+const imageSrc: string = `${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/${slug}/${filename}`;
+---
+
+<a
+  class="!opacity-100"
+  href={imageSrc}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={`Open image ${imageSrc} in a new tab`}
+>
+  <p>
+    <img
+      src={imageSrc}
+      alt={altText ?? ""}
+      draggable="false"
+      loading="lazy"
+      fetchpriority="low"
+    />
+  </p>
+</a>
