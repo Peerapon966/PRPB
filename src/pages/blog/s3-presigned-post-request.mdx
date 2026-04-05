@@ -2,13 +2,12 @@
 layout: ../../layouts/BlogLayout.astro
 title: "S3 Presigned Post Request ขั้นกว่าของ S3 Presigned URL"
 author: "Peerapon Boonkaweenapanon"
-date: "2026-03-08"
+date: "2026-04-06"
 category: "AWS"
 subcategories: ["S3"]
 description: "เจาะลึกความต่างระหว่าง S3 Presigned URL และ Post Request พร้อมเหตุผลว่าทำไมการใช้ Post ถึงช่วยให้เราควบคุมการอัปโหลดไฟล์ (Policy) ได้ละเอียดและปลอดภัยกว่าเดิม"
 slug: "s3-presigned-post-request"
 thumbnail: true
-
 ---
 import { CodeBlock } from "@/components/blog/CodeBlock";
 import Image from "@/components/blog/Image.astro";
@@ -45,7 +44,7 @@ def generate_presigned_url():
 
 ด้วยเงื่อนไขแบบนี้ทำให้เราสามารถอัปโหลดไฟล์ได้แค่ 1 ไฟล์ต่อ presigned URL 1 อัน เพราะถ้าเราอัปโหลดหลาย ๆ ไฟล์ ไฟล์เหล่านั้นจะถูกอัปโหลดขึ้นไปที่โฟลเดอร์เดิมและมีชื่อไฟล์เหมือนกันหมด (key เหมือนกัน) ซึ่งหมายถึงไฟล์เหล่านั้นจะถูกเขียนทับไปเรื่อย ๆ จนเหลือแค่ไฟล์สุดท้ายเท่านั้นครับ หรือก็คือถ้าผมอยากอัปโหลดไฟล์ซัก 20 ไฟล์ ผมจะต้องระบุโฟลเดอร์และชื่อของทุก ๆ ไฟล์แล้วสร้าง presigned URL ขึ้นมา 20 อัน ส่วนฝั่งคนที่ใช้งาน URL ก็ต้องจับคู่ URL กับไฟล์ที่จะอัปโหลดให้ตรงกัน จะเห็นได้ว่า presigned URL ไม่เหมาะกับกรณีที่มีไฟล์ที่ต้องอัปโหลดจำนวนมาก
 
-บทความนี้ก็เลยจะมาแนะนำสิ่งที่เรียกว่า **S3 presigned post request** ที่เป็นเหมือนขั้นกว่าของ S3 presigned URL แต่วิธีใช้งานก็จะยุ่งยากกว่าเช่นกันครับ โดย S3 presigned post request ก็จะคล้าย ๆ กับ S3 presigned URL คือเราอัปโหลดได้ทีละไฟล์เหมือนเดิม แต่คนที่อัปโหลดไฟล์สามารถกำหนดโฟลเดอร์กับชื่อไฟล์เองได้ ทำให้เราสามารถสร้าง presigned post request ครั้งเดียว แต่ผู้ใช้สามารถอัปโหลดไฟล์อะไรเข้าไปใน bucket ก็ได้จนกว่าจะหมดอายุครับ
+บทความนี้ก็เลยจะมาแนะนำสิ่งที่เรียกว่า **S3 presigned post request** ที่เป็นเหมือนขั้นกว่าของ S3 presigned URL แต่วิธีใช้งานก็จะยุ่งยากกว่าเช่นกันครับ ซึ่งต้องบอกก่อนว่า S3 presigned post request ไม่ได้ทำให้เราสามารถอัปโหลดไฟล์ได้หลาย ๆ ไฟล์ในรวดเดียวนะครับ แต่เป็นการอนุญาตให้คนที่อัปโหลดไฟล์สามารถกำหนดโฟลเดอร์กับชื่อไฟล์เองได้ ทำให้เราสามารถสร้าง presigned post request แค่ครั้งเดียว แต่ผู้ใช้สามารถเรียกใช้ presigned post request อันเดิมซ้ำ ๆ เพื่ออัปโหลดไฟล์อะไรเข้าไปใน bucket ก็ได้จนกว่าตัว presigned post request จะหมดอายุครับ
 
 ## สร้าง S3 Presigned Post Request
 
@@ -82,7 +81,7 @@ async function presignPostRequest() {
 ```
 </CodeBlock>
 
-โดยตอนที่เราสร้าง S3 presigned post request จะมี parameter 5 อย่างที่เราสามารถกำหนดได้ ซึ่งจะเป็นตัวกำหนดว่า presigned post request ที่สร้างมาจะสามารถใช้อัปโหลดไฟล์อะไรได้บ้างและมีอายุเท่าไหร่
+โดยตอนที่เราสร้าง S3 presigned post request จะมี parameter 5 อย่างที่เราสามารถกำหนดได้ ซึ่งจะเป็นตัวกำหนดว่า presigned post request ที่สร้างมาจะสามารถใช้อัปโหลดไฟล์อะไรได้บ้างและมีอายุเท่าไหร่ โดย parameter ทั้งหมดจะประกอบด้วย
 
 ### Bucket (required)
 
@@ -136,7 +135,7 @@ const Conditions = [
 
 ---
 
-อีกอย่างหนึ่งที่จำเป็นก็คือ เหมือนกับตอน S3 presigned URL ครับ คือเราจะต้องมี permission putObject สำหรับอัปโหลดไฟล์ไปที่ S3 bucket ด้วย ถึงจะสามารถสร้าง presigned post request ได้ หรือถ้ารันฟังก์ชันนี้บน Lambda ก็ต้องให้ permission นี้กับ execution role ของ Lambda ด้วยครับ
+อีกอย่างหนึ่งที่จำเป็นก็คือ เหมือนกับตอน S3 presigned URL ครับ คือเราจะต้องมี permission `putObject` สำหรับอัปโหลดไฟล์ไปที่ S3 bucket ด้วย ถึงจะสามารถสร้าง presigned post request ได้ หรือถ้ารันฟังก์ชันนี้บน Lambda ก็ต้องให้ permission นี้กับ execution role ของ Lambda ด้วยครับ
 
 ## $\{filename\} Placeholder
 
@@ -256,7 +255,7 @@ async function presignPostRequest() {
 
 จะสังเกตว่า **acl**, **x-amz-storage-class**, **bucket**, และ **key** จะตรงกับค่าที่เราใส่ไว้ใน code ข้างบน ส่วน **Policy** คือ **Conditions** และ field อื่น ๆ ที่เหลือจะเป็น credentials ใช้สำหรับ authorize request ตอนที่เราอัปโหลดไฟล์
 
-จากนั้นก็ใช้ response ที่ได้มายิง post request เพื่ออัปโหลดไฟล์ ซึ่งโดยพื้นฐานจะต้องส่ง payload ในรูปของ FormData แต่จะใช้ HTML form หรือ FormData ใน JavaScript ก็ได้ทั้งคู่ครับ สิ่งสำคัญคือใน form จะต้องมี field ครบถ้วน ประกอบด้วยตัวไฟล์ที่จะอัปโหลด และ field ทั้งหมดที่ได้มาจาก response 
+จากนั้นก็ใช้ response ที่ได้มายิง post request เพื่ออัปโหลดไฟล์ ซึ่งโดยพื้นฐานจะต้องส่ง payload ในรูปของ FormData แต่จะใช้ HTML form หรือ FormData ใน JavaScript ก็ได้ทั้งคู่ครับ สิ่งสำคัญคือใน form จะต้องมี field ครบถ้วน ประกอบด้วยตัวไฟล์ที่จะอัปโหลด และ field ทั้งหมดที่ได้มาจาก response ข้างบน
 
 จุดหนึ่งที่ต้องระวังตอนอัปโหลดคือเรื่องชื่อไฟล์หรือ key ครับ จากใน response จะเห็นว่า key ตอนนี้เป็น `avatar/${filename}` อยู่ เราต้องเปลี่ยน key เป็นชื่อไฟล์ที่เราต้องการด้วย อย่างในตัวอย่างนี้ผมจะเปลี่ยนเป็น `avatar/selfish.jpg`
 

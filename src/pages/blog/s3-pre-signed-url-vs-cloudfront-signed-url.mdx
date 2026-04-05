@@ -11,6 +11,7 @@ thumbnail: true
 ---
 import { CodeBlock } from "@/components/blog/CodeBlock";
 import Image from "@/components/blog/Image.astro";
+import Link from "@/components/blog/Link.astro";
 
 S3 Presigned URL กับ CloudFront Signed URL ต่างกันยังไง? มีใครเคยสงสัยแบบผมมั้ยครับ คือตอนนี้ผมก็รู้แล้วแหละว่ามันต่างกันยังไงเพราะมันแทบจะคนละเรื่องคนละ service กันเลย แต่สมัยที่ผมพึ่งใช้ AWS ใหม่ ๆ ด้วยความที่ประสบการณ์แทบจะเป็น 0 แถมชื่อ presigned URL กับ signed URL ยังคล้ายกันมากจนผมเผลอคิดไปว่ามันคือสิ่งเดียวกันแต่แค่ AWS อินดี้ตั้งชื่อให้ไม่เหมือนกันเฉย ๆ ครับ 555
 
@@ -134,7 +135,7 @@ def generate_presigned_url():
 
 สำหรับรายละเอียดเพิ่มเติม ถ้าใครสนใจวิธีการสร้าง presigned URL สำหรับใช้ทำอย่างอื่นนอกเหนือจากนี้สามารถดูได้ที่ documentation ของ AWS ได้เลยครับ
 
-- [generate_presigned_url - Boto3 1.37.34 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/generate_presigned_url.html)
+<Link url="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/generate_presigned_url.html" />
 
 แต่จริง ๆ แล้วเราสามารถสร้าง presigned URL เองได้โดยไม่ต้องใช้ SDK เลยนะครับ แถมสามารถใช้กับ API ของ service อื่นที่ไม่ใช่ S3 ได้ด้วย ไว้ผมจะเขียนเกี่ยวกับเรื่องนี้ในครั้งหน้าครับ
 
