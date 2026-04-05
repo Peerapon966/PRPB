@@ -110,6 +110,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - name: Set environment variable
+        run: export $(grep -v '^#' .env.${{ inputs.environment || 'staging' }} | xargs)
       - name: Cache dependencies
         uses: actions/cache@v4
         id: npm-cache
