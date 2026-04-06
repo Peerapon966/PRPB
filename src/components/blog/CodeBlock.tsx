@@ -5,36 +5,33 @@ import { useRef, useState, useEffect, useMemo, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const CODE_LANGUAGES = [
-  "bash",
-  "c",
-  "cpp",
-  "css",
-  "diff",
-  "dockerfile",
-  "go",
-  "graphql",
-  "html",
-  "java",
-  "javascript",
-  "json",
-  "jsx",
-  "kotlin",
-  "markdown",
-  "php",
-  "plaintext",
-  "python",
-  "ruby",
-  "rust",
-  "shell",
-  "sql",
-  "toml",
-  "typescript",
-  "tsx",
-  "yaml",
-] as const;
-
-type CodeLanguage = (typeof CODE_LANGUAGES)[number];
+type CodeLanguage =
+  | "html"
+  | "ruby"
+  | "plaintext"
+  | "bash"
+  | "c"
+  | "cpp"
+  | "css"
+  | "diff"
+  | "dockerfile"
+  | "go"
+  | "graphql"
+  | "java"
+  | "javascript"
+  | "json"
+  | "jsx"
+  | "kotlin"
+  | "markdown"
+  | "php"
+  | "python"
+  | "rust"
+  | "shell"
+  | "sql"
+  | "toml"
+  | "typescript"
+  | "tsx"
+  | "yaml";
 
 type CodeBlockProps = {
   language?: CodeLanguage;
@@ -90,11 +87,10 @@ async function copyToClipboard(text: string) {
       await navigator.clipboard.writeText(text);
       return;
     } catch (err) {
-      // fallback if permission fails
+      console.error("Error copying text to clipboard using navigator.", err);
     }
   }
-
-  // Fallback for older browsers
+  // Fallback for older browsers if modern API fails
   if (typeof document === "undefined") return;
 
   const textarea = document.createElement("textarea");
