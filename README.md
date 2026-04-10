@@ -1,6 +1,6 @@
 # PRPB
 
-Source code for my blog post [prpblog.com](https://prpblog.com)
+Source code for my weblog [prpblog.com](https://prpblog.com)
 
 ```sh
 npm ci
