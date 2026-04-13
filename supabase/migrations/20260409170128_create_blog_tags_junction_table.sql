@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS blog_tags (
-  blog_id INTEGER REFERENCES blogs(id) ON DELETE CASCADE,
-  tag_id INTEGER REFERENCES tags(id) ON DELETE CASCADE,
+  blog_id INTEGER REFERENCES blogs(id) ON DELETE CASCADE NOT NULL,
+  tag_id INTEGER REFERENCES tags(id) ON DELETE CASCADE NOT NULL,
   PRIMARY KEY (blog_id, tag_id),
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
