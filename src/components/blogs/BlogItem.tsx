@@ -1,43 +1,27 @@
-import { Tag } from "./Tag";
-import { type BlogItemProps } from "./BlogList";
+import { Tag } from "@/components/blogs/Tag";
+import { type BlogItemProps } from "@/components/blogs/BlogList";
 
 export function BlogItem({
   title,
   description,
-  publishDate,
-  category,
-  subcategories,
   slug,
-  thumbnail,
+  publishDate,
+  tags,
 }: BlogItemProps) {
   return (
     <div className="relative">
       <div className="flex absolute top-0 left-2 mt-1">
-        <div className="ml-1 mr-2">
-          <Tag
-            key={slug + "category"}
-            name={category}
-            category={category}
-            themeLock
-          />
-        </div>
-        {subcategories &&
-          subcategories.map((subcategory) => (
-            <div key={slug + subcategory + "subcategory"} className="mr-2">
-              <Tag
-                name={subcategory}
-                category={category}
-                subcategory={subcategory}
-                themeLock
-              />
-            </div>
-          ))}
+        {tags.map((tag) => (
+          <div key={slug + tag} className="ml-1 mr-1">
+            <Tag value={tag} themeLock />
+          </div>
+        ))}
       </div>
-      <a href={`/blog/${slug}`} aria-label={`Open blog ${slug}`}>
+      <a href={`/blog/${slug}`} aria-label={`Open blog ${title}`}>
         <div>
           <div>
             <img
-              src={thumbnail}
+              src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.PUBLIC_IMAGE_ASSET_PREFIX}/${slug}/thumbnail.png`}
               alt={title + " thumbnail"}
               className="rounded-tl-3xl select-none"
               draggable="false"
