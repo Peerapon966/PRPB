@@ -12,13 +12,7 @@ import { TOC } from "@/components/blog/TOC";
 
 const { frontmatter, headings } = Astro.props;
 const keywords = [
-  ...new Set([
-    "AWS",
-    "blog",
-    "cloud",
-    frontmatter.category,
-    ...frontmatter.subcategories,
-  ]),
+  ...new Set(["AWS", "blog", "cloud", ...frontmatter.tags]),
 ].join(", ");
 ---
 
@@ -89,7 +83,7 @@ const keywords = [
             frontmatter?.thumbnail && (
               <div class="w-full mx-auto border rounded-xl">
                 <img
-                  src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.IMAGE_ASSET_PREFIX}/${frontmatter?.slug}/thumbnail.png`}
+                  src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.PUBLIC_IMAGE_ASSET_PREFIX}/${frontmatter?.slug}/thumbnail.png`}
                   data-image-component="true"
                   alt={frontmatter?.title + " thumbnail"}
                   loading="eager"
@@ -111,27 +105,11 @@ const keywords = [
           <div class="flex pb-6 justify-between items-center">
             <div class="flex">
               {
-                frontmatter?.category && (
-                  <div class="mr-3">
-                    <Tag
-                      name={frontmatter.category}
-                      category={frontmatter.category}
-                    />
+                frontmatter.tags.map((tag: string) => (
+                  <div class="mr-2">
+                    <Tag value={tag} />
                   </div>
-                )
-              }
-              {
-                frontmatter?.category &&
-                  frontmatter?.subcategories &&
-                  frontmatter.subcategories.map((subcategory: string) => (
-                    <div class="mr-2">
-                      <Tag
-                        name={subcategory}
-                        category={frontmatter.category}
-                        subcategory={subcategory}
-                      />
-                    </div>
-                  ))
+                ))
               }
             </div>
             <p class="text-xs opacity-70">{frontmatter?.date}</p>

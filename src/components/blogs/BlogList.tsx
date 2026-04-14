@@ -4,74 +4,145 @@ import { useState, useRef } from "react";
 
 import { TagFilter } from "@/components/blogs/TagFilter";
 import { BlogItem } from "@/components/blogs/BlogItem";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
-const BLOG_PER_REQUEST = 12;
+const BLOG_PER_REQUEST = Number(
+  import.meta.env.PUBLIC_BLOG_ITEMS_PER_PAGE ?? 12,
+);
 
 export type BlogItemProps = {
   title: string;
-  description?: string;
-  publishDate: string;
-  category: string;
-  subcategories?: string[];
+  description: string;
   slug: string;
-  thumbnail: string;
+  author: string;
+  publishDate: string;
+  tags: string[];
 };
 
 export type FetchBlogsProps = {
-  category: string;
-  subcategory: string;
-  lastBlog?: BlogItemProps;
+  page: number;
+  searchText: string;
+  selectedTags: string[];
+  useAndLogic: boolean;
 };
 
 export function BlogList() {
   const [blogs, setBlogs] = useState<BlogItemProps[]>([]);
-  const [lastBlog, setLastBlog] = useState<BlogItemProps>();
-  const [hasMore, setHasMore] = useState<boolean>(false);
-  const [category, setCategory] = useState<string>("");
-  const [subcategory, setSubcategory] = useState<string>("");
-  const prevCategory = useRef<string | null>(null);
-  const prevSubcategory = useRef<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [maxPage, setMaxPage] = useState<number>(1);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState<string>("");
+  const [useAndLogic, setUseAndLogic] = useState<boolean>(false);
+  const hasFetchedOnce = useRef<boolean>(false);
+  const prevPage = useRef<number | null>(null);
+  const prevSelectedTags = useRef<string[] | null>(null);
+  const prevSearchText = useRef<string | null>(null);
+  const prevUseAndLogic = useRef<boolean | null>(null);
 
   /* eslint-disable react/prop-types */
-  /* eslint-disable @typescript-eslint/no-unused-expressions */
-  function getQueryString(props: FetchBlogsProps): string {
-    let queryString = "";
-
-    if (props?.category) {
-      queryString
-        ? (queryString += `&cat=${props.category}`)
-        : (queryString = `?cat=${props.category}`);
-    }
-
-    if (props?.subcategory) {
-      queryString
-        ? (queryString += `&sub_cat=${props.subcategory}`)
-        : (queryString = `?sub_cat=${props.subcategory}`);
-    }
-
-    if (props?.lastBlog) {
-      queryString
-        ? (queryString += `&last_pub_date=${props.lastBlog.publishDate}&last_slug=${props.lastBlog.slug}`)
-        : (queryString = `?last_pub_date=${props.lastBlog.publishDate}&last_slug=${props.lastBlog.slug}`);
+  function getQueryString(
+    props: FetchBlogsProps = {
+      page: 1,
+      searchText: "",
+      selectedTags: [],
+      useAndLogic: false,
+    },
+  ): string {
+    const limit = BLOG_PER_REQUEST;
+    let queryString = `?select=*,publishDate:publish_date&order=publish_date.desc&limit=${limit}&offset=${limit * (props.page - 1)}`;
+    if (props.searchText !== "")
+      queryString += `&title=ilike.*${props.searchText}*`;
+    if (props.selectedTags.length > 0) {
+      props.useAndLogic
+        ? (queryString += `&tags=cs.{${props.selectedTags.join(",")}}`) // contains (@>)
+        : (queryString += `&tags=ov.{${props.selectedTags.join(",")}}`); // overlap (&&)
     }
 
     return queryString;
   }
 
-  async function fetchBlogs(
-    props: FetchBlogsProps = { category: "", subcategory: "" },
-  ) {
-    const categoryChanged = props.category !== prevCategory.current;
-    const subcategoryChanged = props.subcategory !== prevSubcategory.current;
-    const filterChanged = categoryChanged || subcategoryChanged;
+  function getCountQueryString(props: FetchBlogsProps): string {
+    let queryString = "?select=slug";
+    if (props.searchText !== "") {
+      queryString += `&title=ilike.*${props.searchText}*`;
+    }
+    if (props.selectedTags.length > 0) {
+      queryString += props.useAndLogic
+        ? `&tags=cs.{${props.selectedTags.join(",")}}`
+        : `&tags=ov.{${props.selectedTags.join(",")}}`;
+    }
+    return queryString;
+  }
 
-    // users click the 'Apply' button without changing the filter
-    if (!props.lastBlog && !filterChanged) return;
-
-    const queryString = getQueryString(props);
+  async function fetchTotalPages(props: FetchBlogsProps): Promise<number> {
     const response = await fetch(
-      `${import.meta.env.PUBLIC_API_ENDPOINT}/api/blogs${queryString}`,
+      `${import.meta.env.PUBLIC_API_ENDPOINT}/blogs_with_tags${getCountQueryString(props)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Range-Unit": "items",
+          Range: "0-0",
+          Prefer: "count=exact",
+        },
+      },
+    );
+    const contentRange = response.headers.get("content-range");
+    const totalCount = Number(contentRange?.split("/")?.[1] ?? "0");
+    console.group("content-range");
+    console.table({ contentRange, totalCount });
+    console.groupEnd();
+    if (!Number.isFinite(totalCount) || totalCount <= 0) return 1;
+    return Math.ceil(totalCount / BLOG_PER_REQUEST);
+  }
+
+  function setPageQueryParam(nextPage: number) {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("page", String(nextPage));
+    const nextQueryString = searchParams.toString();
+    window.history.pushState(
+      {},
+      "",
+      `${window.location.pathname}${nextQueryString ? `?${nextQueryString}` : ""}`,
+    );
+  }
+
+  async function fetchBlogs(
+    props: FetchBlogsProps = {
+      page: 1,
+      searchText: "",
+      selectedTags: [],
+      useAndLogic: false,
+    },
+  ) {
+    const pageChanged = props.page !== (prevPage.current ?? 1);
+    const searchTextChanged =
+      props.searchText !== (prevSearchText.current ?? "");
+    const selectedTagsChanged =
+      JSON.stringify(props.selectedTags) !==
+      JSON.stringify(prevSelectedTags.current ?? []);
+    const useAndLogicChanged =
+      props.useAndLogic !== (prevUseAndLogic.current ?? null);
+    const filterChanged =
+      pageChanged ||
+      selectedTagsChanged ||
+      searchTextChanged ||
+      useAndLogicChanged;
+
+    // Allow exactly one initial fetch on first load, even with empty params.
+    if (!hasFetchedOnce.current && !filterChanged) {
+      hasFetchedOnce.current = true;
+    } else if (!filterChanged) {
+      return;
+    }
+
+    const nextMaxPage = await fetchTotalPages(props);
+    setMaxPage(nextMaxPage);
+
+    const normalizedPage = Math.min(props.page, nextMaxPage);
+    const queryString = getQueryString({ ...props, page: normalizedPage });
+    const response = await fetch(
+      `${import.meta.env.PUBLIC_API_ENDPOINT}/blogs_with_tags${queryString}`,
       {
         method: "GET",
         headers: {
@@ -79,25 +150,36 @@ export function BlogList() {
         },
       },
     );
-    const { blogs } = (await response.json()) as { blogs: BlogItemProps[] };
+    const blogs = (await response.json()) as BlogItemProps[];
+    hasFetchedOnce.current = true;
+    if (normalizedPage !== page) {
+      setPage(normalizedPage);
+      setPageQueryParam(normalizedPage);
+    }
 
     filterChanged
       ? setBlogs(blogs)
       : setBlogs((oldBlogs) => [...oldBlogs, ...blogs]);
 
-    setHasMore(!(blogs.length < BLOG_PER_REQUEST));
-    setLastBlog(blogs[blogs.length - 1]);
-
-    if (categoryChanged) prevCategory.current = props.category;
-    if (subcategoryChanged) prevSubcategory.current = props.subcategory;
+    if (pageChanged) prevPage.current = normalizedPage;
+    if (searchTextChanged) prevSearchText.current = props.searchText ?? "";
+    if (selectedTagsChanged)
+      prevSelectedTags.current = props.selectedTags ?? [];
+    if (useAndLogicChanged)
+      prevUseAndLogic.current = props.useAndLogic ?? false;
   }
 
   return (
     <div className="w-full min-w-[300px] max-w-[1440px] flex flex-col items-center mt-8">
       <TagFilter
-        category={category}
-        setCategory={setCategory}
-        setSubcategory={setSubcategory}
+        page={page}
+        setPage={setPage}
+        selectedTags={selectedTags}
+        setSelectedTags={setSelectedTags}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        useAndLogic={useAndLogic}
+        setUseAndLogic={setUseAndLogic}
         fetchBlogs={fetchBlogs}
       />
       <div
@@ -110,21 +192,30 @@ export function BlogList() {
           <BlogItem key={idx} {...blog} />
         ))}
       </div>
-      {hasMore && (
-        <div className="my-8">
-          <Button
-            onClick={() => {
-              fetchBlogs({
-                category,
-                subcategory,
-                lastBlog,
-              });
-            }}
-          >
-            More
-          </Button>
-        </div>
-      )}
+      <div className="mt-8 mb-2 flex flex-wrap items-center justify-center gap-2">
+        {Array.from({ length: maxPage }, (_, index) => index + 1).map(
+          (pageNo) => (
+            <Button
+              key={pageNo}
+              type="button"
+              variant={pageNo === page ? "default" : "outline"}
+              onClick={() => {
+                if (pageNo === page) return;
+                setPage(pageNo);
+                setPageQueryParam(pageNo);
+                fetchBlogs({
+                  page: pageNo,
+                  searchText,
+                  selectedTags,
+                  useAndLogic,
+                });
+              }}
+            >
+              {pageNo}
+            </Button>
+          ),
+        )}
+      </div>
     </div>
   );
 }

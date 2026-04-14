@@ -1,29 +1,23 @@
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 export type TagProps = {
-  name: string;
-  category: string;
-  subcategory?: string;
+  value: string;
   themeLock?: boolean;
 };
 
-export function Tag({ name, category, subcategory, themeLock }: TagProps) {
+export function Tag({ value, themeLock }: TagProps) {
   return (
     <a
-      href={
-        subcategory
-          ? `/blogs?category=${category}&subcategory=${subcategory}`
-          : `/blogs?category=${category}`
-      }
+      href={`/blogs?tag=${value}`}
       rel="noopener noreferrer nofollow"
-      aria-label={`Open ${subcategory ? `subcategory ${subcategory}` : `category ${category}`} in a new tab`}
+      aria-label={`Open list of blogs with tag = ${value} in a new tab`}
     >
       <Button
         size="default"
         variant={themeLock ? "tag" : "default"}
         className="h-auto text-sm sm:text-xs rounded-2xl select-none"
       >
-        {name}
+        {value}
       </Button>
     </a>
   );
