@@ -45,61 +45,10 @@ variable "profile" {
 }
 
 # ==========================================================================================
-# module: api
-# ==========================================================================================
-
-variable "api_definition_path" {
-  type        = string
-  description = "(Required) Path to the API Gateway definition JSON file (relative to the Terraform root module directory)"
-}
-
-variable "throttling_burst_limit" {
-  type        = number
-  description = "(Optional) The API Gateway stage throttling burst limit"
-  default     = 500
-}
-
-variable "throttling_rate_limit" {
-  type        = number
-  description = "(Optional) The API Gateway stage throttling rate limit"
-  default     = 1000
-}
-
-# ==========================================================================================
-# module: db
-# ==========================================================================================
-
-variable "blog_table_max_read_request_units" {
-  type        = number
-  description = "(Required) Maximum number of strongly consistent reads consumed per second for the main table before DynamoDB returns a ThrottlingException."
-}
-
-variable "blog_table_max_write_request_units" {
-  type        = number
-  description = "(Required) Maximum number of writes consumed per second for the main table before DynamoDB returns a ThrottlingException."
-}
-
-variable "tag_ref_table_max_read_request_units" {
-  type        = number
-  description = "(Required) Maximum number of strongly consistent reads consumed per second for the tag reference table before DynamoDB returns a ThrottlingException."
-}
-
-variable "tag_ref_table_max_write_request_units" {
-  type        = number
-  description = "(Required) Maximum number of writes consumed per second for the tag reference table before DynamoDB returns a ThrottlingException."
-}
-
-variable "point_in_time_recovery_days" {
-  type        = number
-  description = "(Optional) The number of days to retain point-in-time recovery data for the DynamoDB table."
-  default     = 14
-}
-
-# ==========================================================================================
 # module: cdn
 # ==========================================================================================
 
-variable "s3_origin_cache_behavior" {
+variable "s3_bucket_cache_behavior" {
   type = object({
     cloudfront_cache_policy_name            = string
     cloudfront_origin_request_policy_name   = optional(string)
@@ -108,23 +57,28 @@ variable "s3_origin_cache_behavior" {
   description = "(Required) Cache behavior for the S3 origin bucket."
 
   validation {
-    condition     = var.s3_origin_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
+    condition     = var.s3_bucket_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
     error_message = "S3 expects the origin's host and cannot resolve the distribution's host."
   }
 }
 
-variable "api_gateway_cache_behavior" {
+variable "supabase_api_origin" {
+  type = object({
+    origin_domain = string
+    origin_path = string
+    origin_name = string
+    custom_headers = optional(map(string), {})
+  })
+  description = "(Required) Origin details for Supabase PostgREST API."
+}
+
+variable "supabase_api_cache_behavior" {
   type = object({
     cloudfront_cache_policy_name            = string
     cloudfront_origin_request_policy_name   = optional(string)
     cloudfront_response_headers_policy_name = optional(string)
   })
-  description = "(Required) Cache behavior for the API Gateway REST API."
-
-  validation {
-    condition     = var.api_gateway_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
-    error_message = "API Gateway expects the origin's host and cannot resolve the distribution's host."
-  }
+  description = "(Required) Cache behavior for Supabase PostgREST API."
 }
 
 variable "add_index_cf_function_source_code" {

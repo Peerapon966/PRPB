@@ -49,15 +49,14 @@ resource "aws_route53_record" "cloudfront_cert_validation" {
   records         = [each.value.value]
 }
 
-
 # ==========================================================================================
 # CloudFront Distribution
 # ==========================================================================================
 
 locals {
   cloudfront_origins = {
-    s3_origin_bucket = var.s3_origin_cache_behavior,
-    api_gateway      = var.api_gateway_cache_behavior
+    s3_bucket    = var.s3_bucket_cache_behavior,
+    supabase_api = var.supabase_api_cache_behavior
   }
 }
 
@@ -98,7 +97,7 @@ resource "aws_cloudfront_function" "add_index_cf_function" {
 resource "aws_cloudfront_function" "remove_path_cf_function" {
   name    = "${var.global_variables.prefix}-remove-path-function"
   runtime = "cloudfront-js-2.0"
-  comment = "Remove '/api/ or /assets/' part from the incoming viewer request URI"
+  comment = "Remove '/api/' part from the incoming viewer request URI if exists"
   publish = true
   code    = file(join("", [path.root, startswith(var.remove_path_cf_function_source_code, "/") ? "${var.remove_path_cf_function_source_code}" : "/${var.remove_path_cf_function_source_code}"]))
 
@@ -123,9 +122,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     cached_methods             = ["GET", "HEAD", "OPTIONS"]
     viewer_protocol_policy     = "redirect-to-https"
     target_origin_id           = var.s3_origin_bucket.id
-    cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["s3_origin_bucket"].id
-    origin_request_policy_id   = trimspace(try(coalesce(var.s3_origin_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["s3_origin_bucket"].id : null
-    response_headers_policy_id = trimspace(try(coalesce(var.s3_origin_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["s3_origin_bucket"].id : null
+    cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["s3_bucket"].id
+    origin_request_policy_id   = trimspace(try(coalesce(var.s3_bucket_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["s3_bucket"].id : null
+    response_headers_policy_id = trimspace(try(coalesce(var.s3_bucket_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["s3_bucket"].id : null
     compress                   = true
 
     function_association {
@@ -135,15 +134,24 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   origin {
-    domain_name = trimprefix(trimsuffix(var.api.url, "/${var.global_variables.environment}"), "https://")
-    origin_id   = var.api.id
-    origin_path = "/${var.global_variables.environment}"
+    domain_name = trimsuffix(trimprefix(var.supabase_api_origin.origin_domain, "https://"), "/")
+    origin_id   = var.supabase_api_origin.origin_name
+    origin_path = "/${trimprefix(var.supabase_api_origin.origin_path, "/")}"
 
     custom_origin_config {
       http_port              = "80"
       https_port             = "443"
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
+    }
+
+    dynamic "custom_header" {
+      for_each = var.supabase_api_origin.custom_headers
+
+      content {
+        name  = custom_header.key
+        value = custom_header.value
+      }
     }
   }
 
@@ -152,10 +160,10 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD", "OPTIONS"]
     viewer_protocol_policy     = "redirect-to-https"
-    target_origin_id           = var.api.id
-    cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["api_gateway"].id
-    origin_request_policy_id   = trimspace(try(coalesce(var.api_gateway_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["api_gateway"].id : null
-    response_headers_policy_id = trimspace(try(coalesce(var.api_gateway_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["api_gateway"].id : null
+    target_origin_id           = var.supabase_api_origin.origin_name
+    cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["supabase_api"].id
+    origin_request_policy_id   = trimspace(try(coalesce(var.supabase_api_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["supabase_api"].id : null
+    response_headers_policy_id = trimspace(try(coalesce(var.supabase_api_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["supabase_api"].id : null
     compress                   = true
 
     function_association {

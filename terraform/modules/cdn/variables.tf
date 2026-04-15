@@ -19,15 +19,7 @@ variable "s3_origin_bucket" {
   description = "S3 origin bucket attributes"
 }
 
-variable "api" {
-  type = object({
-    id  = string
-    url = string
-  })
-  description = "API Gateway API attributes"
-}
-
-variable "s3_origin_cache_behavior" {
+variable "s3_bucket_cache_behavior" {
   type = object({
     cloudfront_cache_policy_name            = string
     cloudfront_origin_request_policy_name   = optional(string)
@@ -36,23 +28,28 @@ variable "s3_origin_cache_behavior" {
   description = "(Required) Cache behavior for the S3 origin bucket."
 
   validation {
-    condition     = var.s3_origin_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
+    condition     = var.s3_bucket_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
     error_message = "S3 expects the origin's host and cannot resolve the distribution's host."
   }
 }
 
-variable "api_gateway_cache_behavior" {
+variable "supabase_api_origin" {
+  type = object({
+    origin_domain  = string
+    origin_path    = string
+    origin_name    = string
+    custom_headers = optional(map(string), {})
+  })
+  description = "(Required) Origin details for Supabase PostgREST API."
+}
+
+variable "supabase_api_cache_behavior" {
   type = object({
     cloudfront_cache_policy_name            = string
     cloudfront_origin_request_policy_name   = optional(string)
     cloudfront_response_headers_policy_name = optional(string)
   })
-  description = "(Required) Cache behavior for the API Gateway REST API."
-
-  validation {
-    condition     = var.api_gateway_cache_behavior.cloudfront_origin_request_policy_name != "Managed-AllViewer"
-    error_message = "API Gateway expects the origin's host and cannot resolve the distribution's host."
-  }
+  description = "(Required) Cache behavior for Supabase PostgREST API."
 }
 
 variable "add_index_cf_function_source_code" {

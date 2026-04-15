@@ -89,9 +89,6 @@ export function BlogList() {
     );
     const contentRange = response.headers.get("content-range");
     const totalCount = Number(contentRange?.split("/")?.[1] ?? "0");
-    console.group("content-range");
-    console.table({ contentRange, totalCount });
-    console.groupEnd();
     if (!Number.isFinite(totalCount) || totalCount <= 0) return 1;
     return Math.ceil(totalCount / BLOG_PER_REQUEST);
   }
