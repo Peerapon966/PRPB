@@ -8,28 +8,19 @@ is_production = false
 environment   = "staging"
 
 # ==========================================================================================
-# module: api
-# ==========================================================================================
-
-api_definition_path    = "assets/api/api.json.tftpl"
-throttling_burst_limit = 250
-throttling_rate_limit  = 500
-
-# ==========================================================================================
-# module: db
-# ==========================================================================================
-
-blog_table_max_read_request_units     = 5
-blog_table_max_write_request_units    = 5
-tag_ref_table_max_read_request_units  = 5
-tag_ref_table_max_write_request_units = 5
-
-# ==========================================================================================
 # module: cdn
 # ==========================================================================================
 
 s3_origin_cache_behavior = {
   cloudfront_cache_policy_name = "Managed-CachingOptimized"
+}
+supabase_api_origin = {
+  origin_domain = "xsoubwmlxtaetnuupdjq.supabase.co"
+  origin_path   = "/rest/v1"
+  origin_name   = "xsoubwmlxtaetnuupdjq.supabase.co"
+  custom_headers = {
+    apiKey = "sb_publishable_y7lwogOpVfX20uah84eGYA_urwCW4_t" // Supabase publishable key
+  }
 }
 api_gateway_cache_behavior = {
   cloudfront_cache_policy_name          = "Managed-CachingDisabled",

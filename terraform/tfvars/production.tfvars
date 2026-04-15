@@ -8,27 +8,19 @@ is_production = true
 environment   = "prod"
 
 # ==========================================================================================
-# module: api
-# ==========================================================================================
-
-api_definition_path = "assets/api/api.json.tftpl"
-
-# ==========================================================================================
-# module: db
-# ==========================================================================================
-
-blog_table_max_read_request_units     = 5
-blog_table_max_write_request_units    = 5
-tag_ref_table_max_read_request_units  = 5
-tag_ref_table_max_write_request_units = 5
-point_in_time_recovery_days           = 14
-
-# ==========================================================================================
 # module: cdn
 # ==========================================================================================
 
 s3_origin_cache_behavior = {
   cloudfront_cache_policy_name = "Managed-CachingOptimized"
+}
+supabase_api_origin = {
+  origin_domain = "xxx.supabase.co"
+  origin_path   = "/rest/v1"
+  origin_name   = "xxx.supabase.co"
+  custom_headers = {
+    apiKey = "sb_publishable_xxx_yyy_t" // Supabase publishable key
+  }
 }
 api_gateway_cache_behavior = {
   cloudfront_cache_policy_name          = "Managed-CachingDisabled",
