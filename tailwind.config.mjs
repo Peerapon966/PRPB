@@ -66,7 +66,6 @@ export default {
       },
       screens: {
         xs: "420px",
-        xl: "1210px",
       },
       zIndex: {
         full: "9999",
