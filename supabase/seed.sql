@@ -10,14 +10,6 @@ VALUES
 WITH blog_data AS (
   SELECT * FROM (VALUES
     (
-      'S3 Presigned Post Request ขั้นกว่าของ S3 Presigned URL',
-      'รู้จักกับ S3 Presigned URL ชุบแป้งทอด (S3 Presigned Post Request) พร้อมเหตุผลว่าทำไมการใช้ Post Request ถึงช่วยให้เราควบคุมการอัปโหลดไฟล์ได้ละเอียดกว่าเดิม',
-      's3-presigned-post-request',
-      'Peerapon Boonkaweenapanon',
-      '2026-04-15'::DATE,
-      ARRAY['AWS', 'S3']
-    ),
-    (
       'S3 Presigned URL VS CloudFront Signed URL',
       'อธิบายเครื่องมือ 2 อย่างจาก 2 service ที่ชื่อคล้ายจนแทบนึกว่าเป็นญาติกัน',
       's3-presigned-url-vs-cloudfront-signed-url',
