@@ -123,9 +123,8 @@ export function TagFilter({
   useEffect(() => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const queryPage = Number(urlSearchParams.get("page") ?? "1");
-    const pageFromQuery = Number.isFinite(queryPage) && queryPage > 0
-      ? queryPage
-      : 1;
+    const pageFromQuery =
+      Number.isFinite(queryPage) && queryPage > 0 ? queryPage : 1;
     const querySearchText = urlSearchParams.get("search") ?? "";
     const selectedTagValues = urlSearchParams.getAll("tag");
     const validSelectedTagValues = selectedTagValues.filter((value) =>
@@ -199,7 +198,7 @@ export function TagFilter({
                             return (
                               <span
                                 key={selectedValue}
-                                className="inline-flex items-center rounded-md bg-tag px-2 py-1 text-xs leading-none text-tag-foreground"
+                                className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-xs leading-none text-primary-foreground font-medium"
                               >
                                 {option?.label ?? selectedValue}
                                 <button
@@ -219,14 +218,13 @@ export function TagFilter({
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg"
-                                    className="h-3.5 w-3.5"
+                                    className="h-3.5 w-3.5 fill-primary-foreground"
                                     aria-hidden="true"
                                   >
                                     <path
                                       fillRule="evenodd"
                                       clipRule="evenodd"
                                       d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"
-                                      fill="currentColor"
                                     />
                                   </svg>
                                 </button>

@@ -109,12 +109,12 @@ export function TOC({ headings }: { headings: Headings }) {
         </div>
         <div
           ref={navBar}
-          className="relative break-word overflow-y-scroll h-dvh pt-4 lg:pt-[3.3rem] translate-x-7 bg-background flex flex-col items-center hidden xl:flex border-l scrollbar-hide z-[1010]"
+          className="relative break-word overflow-y-scroll w-[300px] h-dvh pt-4 lg:pt-[3.3rem] translate-x-7 bg-background flex flex-col items-center hidden xl:flex border-l scrollbar-hide z-[1010]"
         >
           <div className="py-6 text-lg font-semibold xl:mr-7 select-none">
             Table of content
           </div>
-          <div className="pr-8 ml-2 h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="pr-8 ml-2 w-full h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {generateTOC(
               headings.map((heading) => {
                 if (heading.depth < floorDepth)
