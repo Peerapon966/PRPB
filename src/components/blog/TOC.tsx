@@ -114,7 +114,10 @@ export function TOC({ headings }: { headings: Headings }) {
           <div className="py-6 text-lg font-semibold xl:mr-7 select-none">
             Table of content
           </div>
-          <div className="pr-8 ml-2 w-full h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div
+            className="pr-8 ml-2 w-full h-[75vh] lg:h-[80vh] overflow-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            onClickCapture={(e) => e.stopPropagation()}
+          >
             {generateTOC(
               headings.map((heading) => {
                 if (heading.depth < floorDepth)
