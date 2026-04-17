@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "astro dev --port 43210",
     "build": "astro build",
-    "test": "playwright test --fully-parallel",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test --fully-parallel",
     "lint": "eslint",
     "preview": "astro preview",
     "deploy": "bash scripts/deploy-dev.sh",
@@ -25,7 +26,7 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@types/react": "^19.0.3",
     "@types/react-dom": "^19.0.2",
-    "astro": "^5.1.3",
+    "astro": "^5.18.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.469.0",
@@ -50,6 +51,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.4",
     "globals": "^15.15.0",
-    "typescript-eslint": "^8.24.0"
+    "typescript-eslint": "^8.24.0",
+    "vitest": "^4.1.4"
   }
 }

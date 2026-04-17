@@ -53,9 +53,9 @@ export function BlogList() {
     if (props.searchText !== "")
       queryString += `&title=ilike.*${props.searchText}*`;
     if (props.selectedTags.length > 0) {
-      props.useAndLogic
-        ? (queryString += `&tags=cs.{${props.selectedTags.join(",")}}`) // contains (@>)
-        : (queryString += `&tags=ov.{${props.selectedTags.join(",")}}`); // overlap (&&)
+      queryString += props.useAndLogic
+        ? `&tags=cs.{${props.selectedTags.join(",")}}` // contains (@>)
+        : `&tags=ov.{${props.selectedTags.join(",")}}`; // overlap (&&)
     }
 
     return queryString;
@@ -154,9 +154,7 @@ export function BlogList() {
       setPageQueryParam(normalizedPage);
     }
 
-    filterChanged
-      ? setBlogs(blogs)
-      : setBlogs((oldBlogs) => [...oldBlogs, ...blogs]);
+    setBlogs(filterChanged ? blogs : (oldBlogs) => [...oldBlogs, ...blogs]);
 
     if (pageChanged) prevPage.current = normalizedPage;
     if (searchTextChanged) prevSearchText.current = props.searchText ?? "";
