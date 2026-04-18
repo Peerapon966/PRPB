@@ -3,9 +3,8 @@ run-name: Deploy new commit '${{ github.head_ref }}' (${{ github.sha }}) to targ
 
 on:
   pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened]
-    # types: [closed]
+    branches: [main, test/deploy-workflow]
+    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
     inputs:
       environment:
@@ -26,7 +25,7 @@ permissions:
 
 jobs:
   build:
-    if: startsWith(github.head_ref, 'dependabot/') == false
+    if: false
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     steps:
@@ -61,9 +60,6 @@ jobs:
           if-no-files-found: error
           overwrite: true
   deploy:
-    needs: 
-      - build
-    if: ${{ needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     timeout-minutes: 60
@@ -82,12 +78,6 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.TF_REMOTE_STATE_REGION }}
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: astro-build
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: ${{ github.workspace }}/dist
       - name: Deploy Application
         uses: ./.github/actions/deploy
         with:

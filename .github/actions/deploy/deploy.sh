@@ -2,6 +2,7 @@
 set -e
 
 echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+echo "GITHUB_BASE_REF: $GITHUB_BASE_REF"
 cat $GITHUB_EVENT_PATH
 
 # Deploy to the same AWS account as the assumed role
