@@ -26,10 +26,7 @@ permissions:
 
 jobs:
   build:
-    if: |
-      (startsWith(github.head_ref, 'dependabot/') == false &&
-      github.event.pull_request.merged == true) ||
-      github.event_name == 'workflow_dispatch'
+    if: startsWith(github.head_ref, 'dependabot/') == false
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     steps:
