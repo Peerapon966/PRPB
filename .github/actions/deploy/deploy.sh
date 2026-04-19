@@ -3,9 +3,8 @@ set -e
 
 echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
 echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
+GITHUB_BASE_REF_SHA=$(cat $GITHUB_EVENT_PATH | jq -r '.pull_request.base.sha')
 if [[ "${GITHUB_EVENT_NAME}" = 'closed' ]]; then
-  GITHUB_BASE_REF_SHA=$(cat $GITHUB_EVENT_PATH | jq -r '.pull_request.base.sha')
-
   git config user.name "github-actions[bot]"
   git config user.email "github-actions[bot]@users.noreply.github.com"
   git tag -f last-base-ref-sha $GITHUB_BASE_REF_SHA
