@@ -2,9 +2,23 @@
 set -e
 
 echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
-GITHUB_BASE_REF_SHA=$(cat $GITHUB_EVENT_PATH | jq -r '.pull_request.base.sha')
+echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
+if [[ "${GITHUB_EVENT_NAME}" = 'closed' ]]; then
+  GITHUB_BASE_REF_SHA=$(cat $GITHUB_EVENT_PATH | jq -r '.pull_request.base.sha')
+
+  git config user.name "github-actions[bot]"
+  git config user.email "github-actions[bot]@users.noreply.github.com"
+  git tag -f last-base-ref-sha $GITHUB_BASE_REF_SHA
+  git push -f origin last-base-ref-sha
+elif [[ "${GITHUB_EVENT_NAME}" = 'workflow_dispatch' ]]; then
+  GITHUB_BASE_REF_SHA=$(git rev-parse last-base-ref-sha)
+fi
+
 echo "GITHUB_BASE_REF_SHA: $GITHUB_BASE_REF_SHA"
-git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$'
+if [[ "${GITHUB_BASE_REF_SHA}" != 'null' ]]; then
+  git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$'
+fi
+
 cat $GITHUB_EVENT_PATH
 
 # Deploy to the same AWS account as the assumed role
