@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -xe
 
 echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
 echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
