@@ -19,9 +19,6 @@ if [[ "${GITHUB_BASE_REF_SHA}" != 'null' ]]; then
   NEW_BLOG_COUNT=$(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | (grep 'src/pages/blog/.*\.mdx$' || true) | wc -l)
 fi
 echo "NEW_BLOG_COUNT: $NEW_BLOG_COUNT"
-which psql
-
-cat $GITHUB_EVENT_PATH
 
 # Deploy to the same AWS account as the assumed role
 # ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -48,7 +45,9 @@ cat $GITHUB_EVENT_PATH
 # aws s3 sync ../src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --cache-control "public, max-age=604800, must-revalidate"
 
 if [[ $NEW_BLOG_COUNT -gt 0 ]]; then
+  echo "========== BLOGS =========="
   git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$'
+  echo "========== BLOGS =========="
   while read -r BLOG; do
     SLUG="${BLOG#src/pages/blog/}"
     SLUG="${SLUG%.mdx}"
@@ -61,20 +60,30 @@ if [[ $NEW_BLOG_COUNT -gt 0 ]]; then
     AUTHOR=$(echo "$METADATA" | awk -F ': ' '/^author/ {print $NF}' | tr -d '"')
     PUBLISH_DATE=$(echo "$METADATA" | awk -F ': ' '/^date/ {print $NF}' | tr -d '"')
     TAGS=$(echo "$METADATA" | awk -F ': ' '/^tags/ {print $NF}' | tr '"' "\'")
+    echo "TITLE: ${TITLE}"
+    echo "DESCRIPTION: ${DESCRIPTION}"
+    echo "SLUG: ${SLUG}"
+    echo "AUTHOR: ${AUTHOR}"
+    echo "PUBLISH_DATE: ${PUBLISH_DATE}"
+    echo "TAGS: ${TAGS}"
 
     psql "${DB_CONNECTION_STRING}" \
-      -c "CALL insert_blog(
-        '${TITLE}',
-        '${DESCRIPTION}',
-        '${SLUG}',
-        '${AUTHOR}',
-        '${PUBLISH_DATE}::DATE',
-        ARRAY${TAG}
-      );"
-    psql "${DB_CONNECTION_STRING}" -c "REFRESH MATERIALIZED VIEW blogs_with_tags;"
+      -c "
+        CALL insert_blog(
+          p_title => '${TITLE}',
+          p_description => '${DESCRIPTION}',
+          p_slug => '${SLUG}',
+          p_author => '${AUTHOR}',
+          p_publish_date => '${PUBLISH_DATE}::DATE',
+          p_tags => ARRAY${TAG}
+        );
+
+        REFRESH MATERIALIZED VIEW blogs_with_tags;
+      "
   done < <(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$')
 fi
 
+cat $GITHUB_EVENT_PATH
 # DISTRIBUTION_ID=$(terraform output -raw distribution_id)
 # aws cloudfront create-invalidation --distribution-id "${DISTRIBUTION_ID}" --paths "/*"
 
