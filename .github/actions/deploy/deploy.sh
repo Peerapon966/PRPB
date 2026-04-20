@@ -15,7 +15,10 @@ fi
 
 echo "GITHUB_BASE_REF_SHA: $GITHUB_BASE_REF_SHA"
 if [[ "${GITHUB_BASE_REF_SHA}" != 'null' ]]; then
-  git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$'
+  NEW_BLOG_COUNT=$(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$' | wc -l)
+  if [[ ${NEW_BLOG_COUNT} -ge 0 ]]; then
+    git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$'
+  fi
 fi
 
 cat $GITHUB_EVENT_PATH
