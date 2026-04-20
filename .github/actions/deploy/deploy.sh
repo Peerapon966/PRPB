@@ -75,7 +75,7 @@ if [[ $NEW_BLOG_COUNT -gt 0 ]]; then
           p_slug => '${SLUG}',
           p_author => '${AUTHOR}',
           p_publish_date => '${PUBLISH_DATE}::DATE',
-          p_tags => ARRAY${TAG}
+          p_tags => ARRAY${TAGS}
         );
 
         REFRESH MATERIALIZED VIEW blogs_with_tags;
