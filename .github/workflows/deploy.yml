@@ -71,7 +71,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_PAT }}
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
       - name: Assume AWS role
