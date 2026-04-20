@@ -1,8 +1,8 @@
 #!/bin/bash
-set -xe
+set -e
 
-echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
 echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
+
 GITHUB_BASE_REF_SHA=$(cat $GITHUB_EVENT_PATH | jq -r '.pull_request.base.sha')
 if [[ "${GITHUB_EVENT_NAME}" = 'pull_request' ]]; then
   git config user.name "github-actions[bot]"
@@ -12,11 +12,14 @@ if [[ "${GITHUB_EVENT_NAME}" = 'pull_request' ]]; then
 elif [[ "${GITHUB_EVENT_NAME}" = 'workflow_dispatch' ]]; then
   GITHUB_BASE_REF_SHA=$(git rev-parse last-base-ref-sha)
 fi
-
 echo "GITHUB_BASE_REF_SHA: $GITHUB_BASE_REF_SHA"
+
+NEW_BLOG_COUNT=0
 if [[ "${GITHUB_BASE_REF_SHA}" != 'null' ]]; then
-  git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | (grep 'src/pages/blog/.*\.mdx$' || true)
+  NEW_BLOG_COUNT=$(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | (grep 'src/pages/blog/.*\.mdx$' || true) | wc -l)
 fi
+echo "NEW_BLOG_COUNT: $NEW_BLOG_COUNT"
+which psql
 
 cat $GITHUB_EVENT_PATH
 
@@ -44,38 +47,40 @@ cat $GITHUB_EVENT_PATH
 # aws s3 sync ../dist/blogs/ "s3://${ORIGIN_BUCKET_NAME}/blogs" --delete --cache-control "no-cache, must-revalidate"
 # aws s3 sync ../src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --cache-control "public, max-age=604800, must-revalidate"
 
-# while read -r BLOG; do
-#   SLUG="${BLOG#src/pages/blog/}"
-#   SLUG="${SLUG%.mdx}"
-#   echo "Deploying blog: $SLUG"
+# if [[ $NEW_BLOG_COUNT -ge 0 ]]; then
+  # while read -r BLOG; do
+  #   SLUG="${BLOG#src/pages/blog/}"
+  #   SLUG="${SLUG%.mdx}"
+  #   echo "Deploying blog: $SLUG"
 
-#   METADATA=$(sed 10q "../src/pages/blog/$SLUG.mdx")
-#   CATEGORY=$(echo "$METADATA" | awk -F ': ' '/^category/ {print $NF}' | tr -d '"')
-#   SUBCATEGORIES=$(echo "$METADATA" | awk -F ': ' '/^subcategories/ {print $NF}')
-#   DATE=$(echo "$METADATA" | awk -F ': ' '/^date/ {print $NF}' | tr -d '"')
-#   TITLE=$(echo "$METADATA" | awk -F ': ' '/^title/ {print $NF}' | tr -d '"')
-#   DESCRIPTION=$(echo "$METADATA" | awk -F ': ' '/^description/ {print $NF}' | tr -d '"')
-#   THUMBNAIL="https://$(terraform output -raw app_domain_name)/assets/blog/$SLUG/thumbnail.png"
+  #   METADATA=$(sed 10q "../src/pages/blog/$SLUG.mdx")
+  #   CATEGORY=$(echo "$METADATA" | awk -F ': ' '/^category/ {print $NF}' | tr -d '"')
+  #   SUBCATEGORIES=$(echo "$METADATA" | awk -F ': ' '/^subcategories/ {print $NF}')
+  #   DATE=$(echo "$METADATA" | awk -F ': ' '/^date/ {print $NF}' | tr -d '"')
+  #   TITLE=$(echo "$METADATA" | awk -F ': ' '/^title/ {print $NF}' | tr -d '"')
+  #   DESCRIPTION=$(echo "$METADATA" | awk -F ': ' '/^description/ {print $NF}' | tr -d '"')
+  #   THUMBNAIL="https://$(terraform output -raw app_domain_name)/assets/blog/$SLUG/thumbnail.png"
 
-#   jq \
-#     --arg title "$TITLE" \
-#     --arg description "$DESCRIPTION" \
-#     --arg thumbnail "$THUMBNAIL" \
-#     --arg slug "$SLUG" \
-#     --arg category "$CATEGORY" \
-#     --argjson subcategories "$SUBCATEGORIES" \
-#     --arg date "$DATE" \
-#     '.blogs = [{"title": $title, "description": $description, "thumbnail": $thumbnail, "slug": $slug, "category": $category, "subcategories": $subcategories, "publish_date": $date}]' \
-#     item.json > item.json.tmp
-#   mv item.json.tmp item.json
+  #   jq \
+  #     --arg title "$TITLE" \
+  #     --arg description "$DESCRIPTION" \
+  #     --arg thumbnail "$THUMBNAIL" \
+  #     --arg slug "$SLUG" \
+  #     --arg category "$CATEGORY" \
+  #     --argjson subcategories "$SUBCATEGORIES" \
+  #     --arg date "$DATE" \
+  #     '.blogs = [{"title": $title, "description": $description, "thumbnail": $thumbnail, "slug": $slug, "category": $category, "subcategories": $subcategories, "publish_date": $date}]' \
+  #     item.json > item.json.tmp
+  #   mv item.json.tmp item.json
 
-#   curl \
-#     -X POST \
-#     -H "Content-Type: application/json" \
-#     -H "X-API-Key: $API_KEY" \
-#     -d @item.json \
-#     "$(terraform output -raw api_invoke_url)/blogs"
-# done < <(git diff --name-only --diff-filter=A origin/main...HEAD | grep 'src/pages/blog/.*\.mdx$' || true)
+  #   curl \
+  #     -X POST \
+  #     -H "Content-Type: application/json" \
+  #     -H "X-API-Key: $API_KEY" \
+  #     -d @item.json \
+  #     "$(terraform output -raw api_invoke_url)/blogs"
+  # done < <(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$')
+# fi
 
 # DISTRIBUTION_ID=$(terraform output -raw distribution_id)
 # aws cloudfront create-invalidation --distribution-id "${DISTRIBUTION_ID}" --paths "/*"
