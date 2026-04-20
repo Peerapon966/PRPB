@@ -16,9 +16,9 @@ inputs:
   tfvars-file:
     description: "Path to the tfvars file to use (relative to the terraform directory)"
     required: true
-  # api-key:
-  #   description: "API key for API Gateway REST API"
-  #   required: true
+  db-connection-string:
+    description: "Connection string for accessing database"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -38,4 +38,4 @@ runs:
         REGION: ${{ inputs.region }}
         WORKSPACE: ${{ inputs.workspace }}
         TFVARS_FILE: ${{ inputs.tfvars-file }}
-        # API_KEY: ${{ inputs.api-key }}
+        DB_CONNECTION_STRING: ${{ inputs.db-connection-string }}

@@ -86,3 +86,4 @@ jobs:
           region: ${{ vars.TF_REMOTE_STATE_REGION }}
           workspace: ${{ vars.TF_WORKSPACE }}
           tfvars-file: tfvars/${{ inputs.environment || 'staging' }}.tfvars
+          db-connection-string: ${{ secrets.DB_CONNECTION_STRING }}
