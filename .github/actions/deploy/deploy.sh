@@ -74,7 +74,7 @@ if [[ $NEW_BLOG_COUNT -gt 0 ]]; then
           p_description => '${DESCRIPTION}',
           p_slug => '${SLUG}',
           p_author => '${AUTHOR}',
-          p_publish_date => '${PUBLISH_DATE}::DATE',
+          p_publish_date => '${PUBLISH_DATE}'::DATE,
           p_tags => ARRAY${TAGS}
         );
 
