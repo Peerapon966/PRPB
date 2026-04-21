@@ -3,8 +3,8 @@ run-name: Deploy new commit '${{ github.head_ref }}' (${{ github.sha }}) to targ
 
 on:
   pull_request:
-    branches: [main, test/deploy-workflow]
-    types: [opened, synchronize, closed]
+    branches: [test/deploy-workflow]
+    types: [closed]
   workflow_dispatch:
     inputs:
       environment:
