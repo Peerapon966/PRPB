@@ -1,11 +1,10 @@
 name: Deploy
-run-name: Deploy new commit '${{ github.head_ref }}' (${{ github.sha }}) to target environment
+run-name: Deploy new commit '${{ github.head_ref }}' (${{ github.sha }}) to ${{ inputs.environment || 'staging' }} environment
 
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
-    # types: [closed]
+    types: [closed]
   workflow_dispatch:
     inputs:
       environment:
@@ -26,7 +25,10 @@ permissions:
 
 jobs:
   build:
-    if: startsWith(github.head_ref, 'dependabot/') == false
+    if: |
+      (startsWith(github.head_ref, 'dependabot/') == false &&
+      github.event.pull_request.merged == true) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     steps:
@@ -69,7 +71,7 @@ jobs:
     timeout-minutes: 60
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -95,4 +97,5 @@ jobs:
           dynamodb-table-name: ${{ vars.TF_REMOTE_STATE_DYNAMODB_TABLE }}
           region: ${{ vars.TF_REMOTE_STATE_REGION }}
           workspace: ${{ vars.TF_WORKSPACE }}
-          tfvars-file: tfvars/${{ inputs.environment || 'staging' }}.tfvars
+          environment: ${{ inputs.environment || 'staging' }}
+          db-connection-string: ${{ secrets.DB_CONNECTION_STRING }}
