@@ -11,7 +11,7 @@ environment   = "staging"
 # module: cdn
 # ==========================================================================================
 
-s3_origin_cache_behavior = {
+s3_bucket_cache_behavior = {
   cloudfront_cache_policy_name = "Managed-CachingOptimized"
 }
 supabase_api_origin = {
