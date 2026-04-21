@@ -4,7 +4,7 @@ run-name: Build and test '${{ github.head_ref }}' (${{ github.sha }})
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
