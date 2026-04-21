@@ -24,11 +24,30 @@ permissions:
   contents: read
 
 jobs:
+  setup:
+    if: startsWith(github.head_ref, 'dependabot/') == false
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.set-short-sha.outputs.short_sha }}
+      branch_name: ${{ steps.sanitize-branch-name.outputs.branch_name }}
+    steps:
+      - name: Set short commit SHA
+        id: set-short-sha
+        run: echo "short_sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+        # The artifact name cannot include these characters: Double quote ", Colon :, Less than <, Greater than >, Vertical bar |, Asterisk *, Question mark ?, Carriage return \r, Line feed \n, Backslash \, Forward slash /
+      - name: Sanitize branch name
+        id: sanitize-branch-name
+        run: |
+          raw="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          echo "branch_name=$(echo "$raw" | sed 's/["<>:|*?\\\/\r\n]/_/g')" >> "$GITHUB_OUTPUT"
+        
   build:
+    needs: 
+      - setup
     if: |
-      (startsWith(github.head_ref, 'dependabot/') == false &&
-      github.event.pull_request.merged == true) ||
-      github.event_name == 'workflow_dispatch'
+      needs.setup.result == 'success' &&
+      (github.event.pull_request.merged == true ||
+      github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     steps:
@@ -57,15 +76,16 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: astro-build
+          name: astro-build_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
           path: dist/
           retention-days: 7
           if-no-files-found: error
           overwrite: true
   deploy:
-    needs: 
+    needs:
+      - setup
       - build
-    if: ${{ needs.build.result == 'success' }}
+    if: needs.setup.result == 'success' && needs.build.result == 'success'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     timeout-minutes: 60
@@ -87,7 +107,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: astro-build
+          name: astro-build_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ${{ github.workspace }}/dist
       - name: Deploy Application
