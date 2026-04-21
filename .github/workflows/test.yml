@@ -25,6 +25,7 @@ jobs:
     outputs:
       target_env: ${{ steps.set-target-env.outputs.target_env }}
       short_sha: ${{ steps.set-short-sha.outputs.short_sha }}
+      branch_name: ${{ steps.sanitize-branch-name.outputs.branch_name }}
     steps:
       - name: Set target environment
         id: set-target-env
@@ -32,6 +33,12 @@ jobs:
       - name: Set short commit SHA
         id: set-short-sha
         run: echo "short_sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+        # The artifact name cannot include these characters: Double quote ", Colon :, Less than <, Greater than >, Vertical bar |, Asterisk *, Question mark ?, Carriage return \r, Line feed \n, Backslash \, Forward slash /
+      - name: Sanitize branch name
+        id: sanitize-branch-name
+        run: |
+          raw="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          echo "branch_name=$(echo "$raw" | sed 's/["<>:|*?\\\/\r\n]/_/g')" >> "$GITHUB_OUTPUT"
         
   test:
     needs: 
@@ -75,7 +82,7 @@ jobs:
       - name: Upload unit test report
         uses: actions/upload-artifact@v4
         with:
-          name: unit-test-report_${{ github.head_ref }}:${{ needs.setup.outputs.short_sha }}
+          name: unit-test-report_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
           path: test-results/
           retention-days: 7
           overwrite: true
@@ -84,7 +91,7 @@ jobs:
       - name: Upload E2E test report
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-test-report_${{ github.head_ref }}:${{ needs.setup.outputs.short_sha }}
+          name: e2e-test-report_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
           path: playwright-report/
           retention-days: 7
           overwrite: true
