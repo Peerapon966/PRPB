@@ -13,12 +13,12 @@ inputs:
   workspace:
     description: "Terraform workspace name to deploy resources"
     required: true
-  tfvars-file:
-    description: "Path to the tfvars file to use (relative to the terraform directory)"
+  environment:
+    description: "Target environment to deploy resources and application (workflow will use file 'tfvars/<environment>.tfvars' when deploying Terraform)"
     required: true
-  # api-key:
-  #   description: "API key for API Gateway REST API"
-  #   required: true
+  db-connection-string:
+    description: "Connection string for accessing backend database"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -37,5 +37,5 @@ runs:
         DYNAMODB_TABLE_NAME: ${{ inputs.dynamodb-table-name }}
         REGION: ${{ inputs.region }}
         WORKSPACE: ${{ inputs.workspace }}
-        TFVARS_FILE: ${{ inputs.tfvars-file }}
-        # API_KEY: ${{ inputs.api-key }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        DB_CONNECTION_STRING: ${{ inputs.db-connection-string }}
