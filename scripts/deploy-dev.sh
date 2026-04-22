@@ -34,7 +34,7 @@ pushd ../terraform
 
 aws sts get-caller-identity --profile dev || { echo "Couldn't authenticate AWS profile 'dev'"; exit 1; }
 
-terraform init -backend-config=init/backend-dev.hcl
+terraform init -backend-config=init/backend-development.hcl
 
 ORIGIN_BUCKET_NAME=$(terraform output -raw s3_origin_bucket_name)
 DISTRIBUTION_ID=$(terraform output -raw distribution_id)
