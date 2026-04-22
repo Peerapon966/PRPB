@@ -1,15 +1,6 @@
 name: "Deploy"
 description: "Deploy application (Terraform and build artifacts) to AWS"
 inputs:
-  s3-bucket-name:
-    description: "Terraform remote state S3 bucket name"
-    required: true
-  dynamodb-table-name:
-    description: "Terraform remote state DynamoDB table name"
-    required: true
-  region:
-    description: "AWS Region where Terraform remote state S3 bucket and DynamoDB table exist"
-    required: true
   workspace:
     description: "Terraform workspace name to deploy resources"
     required: true
@@ -36,9 +27,6 @@ runs:
       shell: bash
       working-directory: ${{ github.workspace }}/terraform
       env:
-        S3_BUCKET_NAME: ${{ inputs.s3-bucket-name }}
-        DYNAMODB_TABLE_NAME: ${{ inputs.dynamodb-table-name }}
-        REGION: ${{ inputs.region }}
         WORKSPACE: ${{ inputs.workspace }}
         ENVIRONMENT: ${{ inputs.environment }}
         DB_CONNECTION_STRING: ${{ inputs.db-connection-string }}

@@ -103,7 +103,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.TF_REMOTE_STATE_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
@@ -113,9 +113,6 @@ jobs:
       - name: Deploy Application
         uses: ./.github/actions/deploy
         with:
-          s3-bucket-name: ${{ vars.TF_REMOTE_STATE_S3_BUCKET }}
-          dynamodb-table-name: ${{ vars.TF_REMOTE_STATE_DYNAMODB_TABLE }}
-          region: ${{ vars.TF_REMOTE_STATE_REGION }}
           workspace: ${{ vars.TF_WORKSPACE }}
           environment: ${{ inputs.environment || 'staging' }}
           db-connection-string: ${{ secrets.DB_CONNECTION_STRING }}

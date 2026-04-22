@@ -31,19 +31,17 @@ echo "|     Deploy Terraform      |"
 echo "============================="
 echo ""
 echo "WORKSPACE: $WORKSPACE"
+echo "TF_INIT_FILE: init/backend-${ENVIRONMENT}.hcl"
 echo "TFVARS_FILE: tfvars/${ENVIRONMENT}.tfvars"
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 terraform init \
-  -backend-config "bucket=$S3_BUCKET_NAME" \
-  -backend-config "dynamodb_table=$DYNAMODB_TABLE_NAME" \
-  -backend-config "region=$REGION" \
-  -backend-config "key=terraform.tfstate" \
+  -backend-config "init/backend-${ENVIRONMENT}.hcl" \
   -reconfigure
 terraform workspace select -or-create "$WORKSPACE"
 terraform validate
 terraform apply \
   -var-file "tfvars/${ENVIRONMENT}.tfvars" \
-  -var="account=$ACCOUNT_ID" \
+  -var "account=$ACCOUNT_ID" \
   -auto-approve
 
 echo ""
