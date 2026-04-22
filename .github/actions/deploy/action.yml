@@ -19,6 +19,9 @@ inputs:
   db-connection-string:
     description: "Connection string for accessing database"
     required: true
+  base-ref-sha:
+    description: "Reference base commit SHA-256 (used for comparing file diff between 2 commits)"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -39,3 +42,4 @@ runs:
         WORKSPACE: ${{ inputs.workspace }}
         TFVARS_FILE: ${{ inputs.tfvars-file }}
         DB_CONNECTION_STRING: ${{ inputs.db-connection-string }}
+        BASE_REF_SHA: ${{ inputs.base-ref-sha }}

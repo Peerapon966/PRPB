@@ -8,13 +8,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy to"
+        description: "Target environment"
+        type: environment
         required: true
-        default: "staging"
-        type: choice
-        options:
-          - staging
-          - production
+      base-ref-sha:
+        description: "Reference base commit SHA-256 (used for comparing file diff between 2 commits)"
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -87,3 +87,4 @@ jobs:
           workspace: ${{ vars.TF_WORKSPACE }}
           tfvars-file: tfvars/${{ inputs.environment || 'staging' }}.tfvars
           db-connection-string: ${{ secrets.DB_CONNECTION_STRING }}
+          base-ref-sha: ${{ inputs.base-ref-sha }}
