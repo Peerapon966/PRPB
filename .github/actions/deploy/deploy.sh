@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
 
