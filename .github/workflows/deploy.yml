@@ -8,13 +8,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy to"
+        description: "Target environment"
+        type: environment
         required: true
-        default: "staging"
-        type: choice
-        options:
-          - staging
-          - production
+      base-ref-sha:
+        description: "Base/reference commit SHA-256"
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -91,12 +91,12 @@ jobs:
     timeout-minutes: 60
     permissions:
       id-token: write
-      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
       - name: Assume AWS role
@@ -119,3 +119,4 @@ jobs:
           workspace: ${{ vars.TF_WORKSPACE }}
           environment: ${{ inputs.environment || 'staging' }}
           db-connection-string: ${{ secrets.DB_CONNECTION_STRING }}
+          base-ref-sha: ${{ inputs.base-ref-sha }}

@@ -19,6 +19,9 @@ inputs:
   db-connection-string:
     description: "Connection string for accessing backend database"
     required: true
+  base-ref-sha:
+    description: "Base/reference commit SHA-256"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -39,3 +42,4 @@ runs:
         WORKSPACE: ${{ inputs.workspace }}
         ENVIRONMENT: ${{ inputs.environment }}
         DB_CONNECTION_STRING: ${{ inputs.db-connection-string }}
+        BASE_REF_SHA: ${{ inputs.base-ref-sha }}
