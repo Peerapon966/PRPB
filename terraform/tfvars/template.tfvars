@@ -24,7 +24,7 @@ supabase_api_origin = {
     apiKey = "sb_publishable_xxx_yyy_t" // Supabase publishable key
   }
 }
-api_gateway_cache_behavior = {
+supabase_api_cache_behavior = {
   cloudfront_cache_policy_name          = "Managed-CachingDisabled",
   cloudfront_origin_request_policy_name = "Managed-AllViewerExceptHostHeader"
 }
