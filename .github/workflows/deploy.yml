@@ -25,7 +25,6 @@ permissions:
 
 jobs:
   setup:
-    if: startsWith(github.head_ref, 'dependabot/') == false
     runs-on: ubuntu-latest
     outputs:
       short_sha: ${{ steps.set-short-sha.outputs.short_sha }}

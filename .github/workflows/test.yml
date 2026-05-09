@@ -1,5 +1,5 @@
-name: Test
-run-name: Build and test '${{ github.head_ref }}' (${{ github.sha }})
+name: Test PR
+run-name: Build, test and scan '${{ github.head_ref }}' (${{ github.sha }})
 
 on:
   pull_request:
@@ -20,7 +20,6 @@ env:
 jobs:
   # Propagate TARGET_ENV variable and other data to other jobs by its output
   setup:
-    if: startsWith(github.head_ref, 'dependabot/') == false
     runs-on: ubuntu-latest
     outputs:
       target_env: ${{ steps.set-target-env.outputs.target_env }}
