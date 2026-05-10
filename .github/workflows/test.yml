@@ -152,7 +152,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
-          scan-ref: '/github/workspace/terraform/'
+          scan-ref: './terraform/'
           tf-vars: 'terraform/tfvars/${{ needs.setup.outputs.target_env }}.tfvars'
           skip-setup-trivy: true
       
