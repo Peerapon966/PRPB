@@ -152,7 +152,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
-          tf-vars: 'terraform/tfvars/${{ needs.setup.outputs.target_env }}'
+          scan-ref: '/github/workspace/terraform/'
+          tf-vars: 'terraform/tfvars/${{ needs.setup.outputs.target_env }}.tfvars'
           skip-setup-trivy: true
       
       - name: Upload Trivy scan results to GitHub Security tab
