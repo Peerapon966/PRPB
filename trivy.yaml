@@ -1,0 +1,8 @@
+severity:
+  - HIGH
+  - CRITICAL
+# scan:
+#   scanners:
+#     - misconfig
+format: sarif
+output: trivy-results.sarif
