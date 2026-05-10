@@ -155,6 +155,7 @@ jobs:
           scan-ref: 'terraform/'
           tf-vars: 'terraform/tfvars/${{ needs.setup.outputs.target_env }}.tfvars'
           skip-setup-trivy: true
+          output: 'trivy.txt'
       
       - name: Publish Trivy Output to Summary
         if: always()
