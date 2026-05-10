@@ -2,6 +2,7 @@ severity:
   - HIGH
   - CRITICAL
 ignore-unfixed: true
-format: sarif
-output: trivy-results.sarif
+# format: sarif
+# output: trivy-results.sarif
+output: trivy.txt
 exit-code: 1
