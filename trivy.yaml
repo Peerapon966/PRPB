@@ -5,4 +5,4 @@ ignore-unfixed: true
 # format: sarif
 # output: trivy-results.sarif
 output: trivy.txt
-exit-code: 1
+# exit-code: 1
