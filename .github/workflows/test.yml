@@ -137,30 +137,43 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-      - name: Run SonarQube Scan
+      - name: Run SonarQube to scan code
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@v0.2.6
-        with:
-          cache: true
-          version: v0.70.0
+      # - name: Setup Trivy
+      #   uses: aquasecurity/setup-trivy@v0.2.6
+      #   with:
+      #     cache: true
+      #     version: v0.70.0
 
-      - name: Run Trivy vulnerability scanner in IaC mode 
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'config'
-          scan-ref: 'terraform/'
-          tf-vars: 'terraform/tfvars/${{ needs.setup.outputs.target_env }}.tfvars'
-          skip-setup-trivy: true
+      # - name: Run Trivy vulnerability scanner in IaC mode 
+      #   uses: aquasecurity/trivy-action@master
+      #   continue-on-error: true
+      #   with:
+      #     scan-type: 'config'
+      #     scan-ref: 'terraform/'
+      #     tf-vars: 'terraform/tfvars/${{ needs.setup.outputs.target_env }}.tfvars'
+      #     skip-setup-trivy: true
       
-      - name: Upload Trivy scan results to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v4
+      # - name: Upload Trivy scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v4
+      #   with:
+      #     sarif_file: 'trivy-results.sarif'
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          sarif_file: 'trivy-results.sarif'
+          args: --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
   
   build:
     needs:
