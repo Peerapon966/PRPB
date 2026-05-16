@@ -12,6 +12,7 @@ concurrency:
 
 permissions:
   contents: read
+  security-events: write
 
 # Specify target environment to run this workflow
 env:
@@ -34,17 +35,34 @@ jobs:
         id: set-short-sha
         run: echo "short_sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
 
-        # The artifact name cannot include these characters: Double quote ", Colon :, Less than <, Greater than >, Vertical bar |, Asterisk *, Question mark ?, Carriage return \r, Line feed \n, Backslash \, Forward slash /
       - name: Sanitize branch name
         id: sanitize-branch-name
         run: |
           raw="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
           echo "branch_name=$(echo "$raw" | sed 's/["<>:|*?\\\/\r\n]/_/g')" >> "$GITHUB_OUTPUT"
         
+  lint:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.target_env }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run linter
+        run: npm run lint
+
   test:
-    needs: 
-      - setup
-    if: needs.setup.result == 'success'
+    needs: [setup]
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
     timeout-minutes: 30
@@ -58,20 +76,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
-
-      - name: Run linter
-        run: npm run lint
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -88,6 +96,7 @@ jobs:
 
       - name: Upload unit test report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: unit-test-report_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
           path: test-results/
@@ -99,16 +108,15 @@ jobs:
 
       - name: Upload E2E test report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: e2e-test-report_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
           path: playwright-report/
           retention-days: 7
           overwrite: true
 
-  scan:
-    needs:
-      - setup
-    if: needs.setup.result == 'success'
+  sonar-scan:
+    needs: [setup]
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
     timeout-minutes: 30
@@ -122,65 +130,78 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Run ESLint
-        run: npm run lint
-
-      - name: Run SonarQube to scan code
-        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+      - name: Run SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # - name: Setup Trivy
-      #   uses: aquasecurity/setup-trivy@v0.2.6
-      #   with:
-      #     cache: true
-      #     version: v0.70.0
+  snyk-node-scan:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.target_env }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-      # - name: Run Trivy vulnerability scanner in IaC mode 
-      #   uses: aquasecurity/trivy-action@master
-      #   continue-on-error: true
-      #   with:
-      #     scan-type: 'config'
-      #     scan-ref: 'terraform/'
-      #     tf-vars: 'terraform/tfvars/${{ needs.setup.outputs.target_env }}.tfvars'
-      #     skip-setup-trivy: true
-      
-      # - name: Upload Trivy scan results to GitHub Security tab
-      #   uses: github/codeql-action/upload-sarif@v4
-      #   with:
-      #     sarif_file: 'trivy-results.sarif'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
 
-      - name: Run Snyk to check for vulnerabilities
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run Snyk Node to check for vulnerabilities
         uses: snyk/actions/node@master
-        continue-on-error: true # To make sure that SARIF upload gets called
+        id: snyk-node
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --sarif-file-output=snyk.sarif
+          args: --sarif-file-output=snyk-node.sarif --severity-threshold=high
 
-      - name: Upload result to GitHub Code Scanning
+      - name: Upload Snyk Node result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
+        if: always() && steps.snyk-node.outcome != 'skipped'
         with:
-          sarif_file: snyk.sarif
+          sarif_file: snyk-node.sarif
+
+  snyk-iac-scan:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.target_env }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Snyk IaC to check for vulnerabilities
+        uses: snyk/actions/iac@master
+        id: snyk-iac
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          file: terraform/
+          args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high
+
+      - name: Upload Snyk IaC result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && steps.snyk-iac.outcome != 'skipped'
+        with:
+          sarif_file: snyk-iac.sarif
   
   build:
-    needs:
-      - setup
-      - test
-      - scan
-    if: needs.setup.result == 'success' && needs.test.result == 'success' && needs.scan.result == 'success'
+    needs: [setup, lint, test, sonar-scan, snyk-node-scan, snyk-iac-scan]
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
     timeout-minutes: 30
@@ -194,18 +215,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'npm'
 
       - name: Set environment variable
         run: export $(grep -v '^#' .env.${{ needs.setup.outputs.target_env }} | xargs)
         
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-
-
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
