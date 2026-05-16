@@ -166,10 +166,10 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --sarif-file-output=snyk-node.sarif --severity-threshold=high
+          args: --fail-fast --sarif-file-output=snyk-node.sarif --severity-threshold=high
 
       - name: Upload Snyk Node result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && steps.snyk-node.outcome != 'skipped'
         with:
           sarif_file: snyk-node.sarif
@@ -192,10 +192,10 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           file: terraform/
-          args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high
+          args: --fail-fast --sarif-file-output=snyk-iac.sarif --severity-threshold=high
 
       - name: Upload Snyk IaC result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && steps.snyk-iac.outcome != 'skipped'
         with:
           sarif_file: snyk-iac.sarif

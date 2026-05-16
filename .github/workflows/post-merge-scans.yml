@@ -44,7 +44,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -61,6 +61,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: monitor
+          args: --fail-fast
 
   snyk-iac-monitor:
     runs-on: ubuntu-latest
@@ -68,6 +69,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Run Snyk Monitor (Terraform)
         uses: snyk/actions/iac@master
@@ -76,3 +79,4 @@ jobs:
         with:
           command: monitor
           file: terraform/
+          args: --fail-fast
