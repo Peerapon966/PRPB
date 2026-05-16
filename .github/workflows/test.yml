@@ -163,7 +163,6 @@ jobs:
       - name: Run Snyk Node to check for vulnerabilities
         uses: snyk/actions/node@master
         id: snyk-node
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -171,6 +170,7 @@ jobs:
 
       - name: Upload Snyk Node result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
+        if: always() && steps.snyk-node.outcome != 'skipped'
         with:
           sarif_file: snyk-node.sarif
 
@@ -192,7 +192,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           file: terraform/
-          args: --fail-fast --sarif-file-output=snyk-iac.sarif --severity-threshold=high
+          args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high
 
       - name: Upload Snyk IaC result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
