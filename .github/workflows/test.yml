@@ -196,7 +196,7 @@ jobs:
 
       - name: Upload Snyk IaC result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
-        if: always() && steps.snyk-iac.outcome != 'skipped'
+        if: always() && steps.snyk-iac.outcome == 'failure'
         with:
           sarif_file: snyk-iac.sarif
   
