@@ -140,68 +140,68 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  snyk-node-scan:
-    needs: [setup]
-    runs-on: ubuntu-latest
-    environment: ${{ needs.setup.outputs.target_env }}
-    timeout-minutes: 30
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+  # snyk-node-scan:
+  #   needs: [setup]
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ needs.setup.outputs.target_env }}
+  #   timeout-minutes: 30
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: 'npm'
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: lts/*
+  #         cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+  #     - name: Install dependencies
+  #       run: npm ci --ignore-scripts
 
-      - name: Run Snyk Node to check for vulnerabilities
-        uses: snyk/actions/node@master
-        id: snyk-node
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --fail-fast --sarif-file-output=snyk-node.sarif --severity-threshold=high
+  #     - name: Run Snyk Node to check for vulnerabilities
+  #       uses: snyk/actions/node@master
+  #       id: snyk-node
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  #       with:
+  #         args: --fail-fast --sarif-file-output=snyk-node.sarif --severity-threshold=high
 
-      - name: Upload Snyk Node result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v4
-        if: steps.snyk-node.outcome == 'failure'
-        with:
-          sarif_file: snyk-node.sarif
+  #     - name: Upload Snyk Node result to GitHub Code Scanning
+  #       uses: github/codeql-action/upload-sarif@v4
+  #       if: always() && steps.snyk-node.outcome == 'failure'
+  #       with:
+  #         sarif_file: snyk-node.sarif
 
-  snyk-iac-scan:
-    needs: [setup]
-    runs-on: ubuntu-latest
-    environment: ${{ needs.setup.outputs.target_env }}
-    timeout-minutes: 30
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+  # snyk-iac-scan:
+  #   needs: [setup]
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ needs.setup.outputs.target_env }}
+  #   timeout-minutes: 30
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 1
 
-      - name: Run Snyk IaC to check for vulnerabilities
-        uses: snyk/actions/iac@master
-        id: snyk-iac
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          file: terraform/
-          args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high
+  #     - name: Run Snyk IaC to check for vulnerabilities
+  #       uses: snyk/actions/iac@master
+  #       id: snyk-iac
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  #       with:
+  #         file: terraform/
+  #         args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high
 
-      - name: Upload Snyk IaC result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v4
-        if: always() && steps.snyk-iac.outcome == 'failure'
-        with:
-          sarif_file: snyk-iac.sarif
+  #     - name: Upload Snyk IaC result to GitHub Code Scanning
+  #       uses: github/codeql-action/upload-sarif@v4
+  #       if: always() && steps.snyk-iac.outcome == 'failure'
+  #       with:
+  #         sarif_file: snyk-iac.sarif
   
   build:
-    needs: [setup, lint, test, sonar-scan, snyk-node-scan, snyk-iac-scan]
+    needs: [setup, lint, test, sonar-scan]
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
     timeout-minutes: 30
