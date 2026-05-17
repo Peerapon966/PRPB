@@ -1,5 +1,5 @@
 name: Post-Merge Security Scans
-run-name: Update Sonar results on main branch
+run-name: Update Sonar and Snyk results on main branch
 
 on:
   push:
@@ -36,3 +36,20 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  snyk-iac-monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Snyk Monitor (Terraform)
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          file: terraform/

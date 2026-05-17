@@ -167,12 +167,7 @@ jobs:
           sarif_file: snyk-iac.sarif
   
   build:
-    needs:
-      - setup
-      - lint
-      - test
-      - sonar-scan
-      - snyk-iac-scan
+    needs: [setup, lint, test, sonar-scan, snyk-iac-scan]
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
     timeout-minutes: 30
