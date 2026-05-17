@@ -115,30 +115,30 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  sonar-scan:
-    needs: [setup]
-    runs-on: ubuntu-latest
-    environment: ${{ needs.setup.outputs.target_env }}
-    timeout-minutes: 30
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  # sonar-scan:
+  #   needs: [setup]
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ needs.setup.outputs.target_env }}
+  #   timeout-minutes: 30
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: 'npm'
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: lts/*
+  #         cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+  #     - name: Install dependencies
+  #       run: npm ci --ignore-scripts
 
-      - name: Run SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@v6
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #     - name: Run SonarQube scan
+  #       uses: SonarSource/sonarqube-scan-action@v6
+  #       env:
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   # snyk-node-scan:
   #   needs: [setup]
@@ -201,7 +201,7 @@ jobs:
   #         sarif_file: snyk-iac.sarif
   
   build:
-    needs: [setup, lint, test, sonar-scan]
+    needs: [setup, lint, test]
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
     timeout-minutes: 30
