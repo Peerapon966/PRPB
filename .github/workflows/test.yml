@@ -139,6 +139,32 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  snyk-iac-scan:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.target_env }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Snyk IaC to check for vulnerabilities
+        uses: snyk/actions/iac@master
+        id: snyk-iac
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          file: terraform/
+          args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high
+
+      - name: Upload Snyk IaC result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && steps.snyk-iac.outcome == 'failure'
+        with:
+          sarif_file: snyk-iac.sarif
   
   build:
     needs:
@@ -146,6 +172,7 @@ jobs:
       - lint
       - test
       - sonar-scan
+      - snyk-iac-scan
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
     timeout-minutes: 30
