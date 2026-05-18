@@ -158,7 +158,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           file: terraform/
-          args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high --report
+          args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high
 
       - name: Upload Snyk IaC result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
