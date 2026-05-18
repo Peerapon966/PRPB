@@ -160,6 +160,19 @@ jobs:
           file: terraform/
           args: --sarif-file-output=snyk-iac.sarif --severity-threshold=high
 
+      - name: Debug SARIF file location
+        if: always()
+        run: |
+          echo "=== 1. Checking /home/runner/work/PRPB/PRPB ==="
+          ls -la /home/runner/work/PRPB/PRPB || true
+          
+          echo "=== 2. Checking Current Directory ==="
+          pwd
+          ls -la || true
+          
+          echo "=== 3. Finding all .sarif files ==="
+          find /home/runner/work -name "*.sarif" 2>/dev/null || true
+
       - name: Upload Snyk IaC result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
         if: always() && steps.snyk-iac.outcome == 'failure'
