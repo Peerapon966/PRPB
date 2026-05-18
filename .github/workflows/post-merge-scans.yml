@@ -1,5 +1,5 @@
 name: Post-Merge Security Scans
-run-name: Update Sonar and Snyk results on main branch
+run-name: Update Sonar results on main branch
 
 on:
   push:

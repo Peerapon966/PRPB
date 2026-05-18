@@ -35,6 +35,7 @@ jobs:
         id: set-short-sha
         run: echo "short_sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
 
+        # The artifact name cannot include these characters: Double quote ", Colon :, Less than <, Greater than >, Vertical bar |, Asterisk *, Question mark ?, Carriage return \r, Line feed \n, Backslash \, Forward slash /
       - name: Sanitize branch name
         id: sanitize-branch-name
         run: |
