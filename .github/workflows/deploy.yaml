@@ -66,6 +66,7 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: lts/*
+          cache: npm
 
       - name: Set environment variable
         run: export $(grep -v '^#' .env.${{ needs.setup.outputs.target_env }} | xargs)
@@ -97,7 +98,6 @@ jobs:
     needs:
       - setup
       - build
-    if: needs.setup.result == 'success' && needs.build.result == 'success'
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
     timeout-minutes: 15
