@@ -18,11 +18,34 @@ elif [[ "${GITHUB_EVENT_NAME}" = 'workflow_dispatch' ]]; then
 fi
 echo "GITHUB_BASE_REF_SHA: $GITHUB_BASE_REF_SHA"
 
-NEW_BLOG_COUNT=0
+BLOGS_TO_UPDATE=""
 if [[ "${GITHUB_BASE_REF_SHA}" != 'null' ]]; then
-  NEW_BLOG_COUNT=$(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | (grep 'src/pages/blog/.*\.mdx$' || true) | wc -l)
+  # Add new blogs
+  NEW_BLOGS=$(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | (grep 'src/pages/blog/.*\.mdx$' || true))
+  if [[ -n "$NEW_BLOGS" ]]; then
+    echo "New blogs found:"
+    echo "$NEW_BLOGS"
+    BLOGS_TO_UPDATE="$NEW_BLOGS"
+  fi
+
+  # Add blogs with updated tags
+  MODIFIED_BLOGS=$(git diff --name-only --diff-filter=M $GITHUB_BASE_REF_SHA...HEAD | (grep 'src/pages/blog/.*\.mdx$' || true))
+  if [[ -n "$MODIFIED_BLOGS" ]]; then
+    echo "Modified blogs found:"
+    echo "$MODIFIED_BLOGS"
+    for BLOG in $MODIFIED_BLOGS; do
+      # Extract tags from the previous version of the file
+      OLD_TAGS=$(git show $GITHUB_BASE_REF_SHA:$BLOG | sed 10q | awk -F ': ' '/^tags/ {print $NF}' | tr -d '"')
+      # Extract tags from the current version of the file
+      NEW_TAGS=$(cat $BLOG | sed 10q | awk -F ': ' '/^tags/ {print $NF}' | tr -d '"')
+
+      if [[ "$OLD_TAGS" != "$NEW_TAGS" ]]; then
+        echo "Tags updated for $BLOG"
+        BLOGS_TO_UPDATE=$(echo -e "$BLOGS_TO_UPDATE\n$BLOG" | sed '/^$/d')
+      fi
+    done
+  fi
 fi
-echo "NEW_BLOG_COUNT: $NEW_BLOG_COUNT"
 
 # Deploy to the same AWS account as the assumed role
 echo ""
@@ -58,15 +81,15 @@ aws s3 sync ../dist/about/ "s3://${ORIGIN_BUCKET_NAME}/about" --delete --cache-c
 aws s3 sync ../dist/blogs/ "s3://${ORIGIN_BUCKET_NAME}/blogs" --delete --cache-control "no-cache, must-revalidate"
 aws s3 sync ../src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --cache-control "public, max-age=604800, must-revalidate"
 
-if [[ $NEW_BLOG_COUNT -gt 0 ]]; then
+if [[ -n "$BLOGS_TO_UPDATE" ]]; then
   echo ""
-  echo "============================="
-  echo "|  Register New Blog To DB  |"
-  echo "============================="
+  echo "================================="
+  echo "|  Register/Update Blogs To DB  |"
+  echo "================================="
   echo ""
 
-  echo "New Blogs"
-  git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$'
+  echo "Blogs to update:"
+  echo "$BLOGS_TO_UPDATE"
   echo ""
   while read -r BLOG; do
     SLUG="${BLOG#src/pages/blog/}"
@@ -100,7 +123,7 @@ if [[ $NEW_BLOG_COUNT -gt 0 ]]; then
 
         REFRESH MATERIALIZED VIEW blogs_with_tags;
       "
-  done < <(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$')
+  done < <(echo "$BLOGS_TO_UPDATE")
 fi
 
 echo ""

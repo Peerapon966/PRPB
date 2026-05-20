@@ -40,14 +40,44 @@ jobs:
         run: |
           raw="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
           echo "branch_name=$(echo "$raw" | sed 's/["<>:|*?\\\/\r\n]/_/g')" >> "$GITHUB_OUTPUT"
-        
+  
+  check-tags:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run unit tests
+        run: npm run test:unit -- --mode=${{ inputs.environment || 'staging' }}
+
+      - name: Upload unit test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-report_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
+          path: test-results/
+          retention-days: 7
+          overwrite: true
+
   build:
     needs: 
       - setup
-    if: |
-      needs.setup.result == 'success' &&
-      (github.event.pull_request.merged == true ||
-      github.event_name == 'workflow_dispatch')
+      - check-tags
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     steps:
@@ -90,8 +120,8 @@ jobs:
   deploy:
     needs:
       - setup
+      - check-tags
       - build
-    if: needs.setup.result == 'success' && needs.build.result == 'success'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     timeout-minutes: 60
