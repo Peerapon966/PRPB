@@ -4,13 +4,15 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev --port 43210",
+    "start": "supabase start; docker compose up -d",
+    "stop": "supabase stop; docker compose down",
+    "preview": "astro preview",
     "build": "astro build",
     "test:unit": "vitest run",
     "test:e2e": "playwright test --fully-parallel",
     "lint": "eslint",
-    "preview": "astro preview",
     "deploy": "bash scripts/deploy-dev.sh",
-    "astro": "astro"
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/internal-helpers": "^0.6.0",
@@ -51,6 +53,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.4",
     "globals": "^15.15.0",
+    "husky": "^9.1.7",
     "typescript-eslint": "^8.24.0",
     "vitest": "^4.1.4"
   }

@@ -7,7 +7,7 @@ services:
       - "43210:43210"
     working_dir: /home/node/app
     user: node
-    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+    command: ["npx", "astro", "dev", "--port", "43210", "--host", "0.0.0.0"]
     volumes:
       - ./:/home/node/app:rw
       - ./.env.local:/home/node/app/.env.development

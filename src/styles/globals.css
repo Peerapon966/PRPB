@@ -158,7 +158,11 @@
 
   table,
   th {
-    @apply mx-auto table-auto bg-table-odd text-center;
+    @apply mx-auto table-auto bg-table-odd !text-center;
+  }
+
+  th {
+    @apply px-4 py-2
   }
 
   tr:nth-child(even) {
