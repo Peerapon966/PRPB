@@ -166,7 +166,15 @@ file system อะไร application ก็แค่เรียก system call 
 partition ไหน แล้วถ้าไดรฟ์หรือ partition นั้นใช้ file system อะไร ก็จะไปเรียก driver ของ file system นั้นครับ 
 
 <Note>
-VFS ไม่ได้ทำแบบนี้ทุกรอบนะครับ แต่มันจะมีสิ่งที่เรียกว่า **Dentry (Directory Entry)** เป็นเหมือน cache ที่เก็บข้อมูล mapping ระหว่าง file path กับ [VFS inode](https://www.youtube.com) 
+VFS ไม่ได้ทำแบบนี้ทุกรอบนะครับ แต่มันจะมีสิ่งที่เรียกว่า **Dentry (Directory Entry)** เป็นเหมือน cache ที่เก็บข้อมูล mapping ระหว่าง file path กับ VFS inode (struct inode)
 เวลา VFS ต้องระบุ file system ของไฟล์อะไรก็จะมาดูใน Dentry นี้ก่อน ถ้าไม่เจอก็ค่อยไปไล่เช็ค mount table อีกทีแล้วเอาผลลัพธ์มาเก็บไว้ใน Dentry เพื่อใช้ในครั้งถัด ๆ ไป อีกทั้ง Dentry จะถูกเก็บเอาไว้ใน RAM 
 เลยทำให้การเรียกใช้เร็วมาก ๆ ด้วย
 </Note>
+
+หลังจากเลือก driver ได้และส่งต่อ request ไปให้ driver แล้ว เราก็หมดธุระกับ layer นี้แล้วครับ
+
+<Image slug={frontmatter.slug} filename="05.png" altText="05.png" />
+
+### 3. File System
+
+ุถัดจาก VFS ลงมาก็จะมาเจอกับ file system หรือถ้าจะพูดให้ชัดกว่านี้ก็คือ file system driver ครับ
