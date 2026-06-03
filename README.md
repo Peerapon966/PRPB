@@ -90,13 +90,6 @@ Infrastructure is defined in the `terraform/` directory.
 ### Deployments
 Deployments are handled automatically by GitHub Actions (`deploy.yml`). However, you can manually trigger a deployment to the `dev` environment locally using the provided shell script:
 
-Local development
-```sh
-supabase start
-docker compose up -d
-```
-
-deploy to dev env
 ```sh
 # Deploys to Dev, applies Terraform, and auto-approves changes
 npm run deploy
