@@ -1,5 +1,6 @@
 ---
-const { slug, filename, altText } = Astro.props;
+const { filename, altText } = Astro.props;
+const slug = Astro.url.pathname.split("/").filter(Boolean).pop();
 const imageSrc: string = `${import.meta.env.PUBLIC_SITE_URL + import.meta.env.PUBLIC_IMAGE_ASSET_PREFIX}/${slug}/${filename}`;
 ---
 

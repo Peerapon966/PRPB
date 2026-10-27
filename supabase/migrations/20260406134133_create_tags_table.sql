@@ -1,6 +1,0 @@
-CREATE TABLE IF NOT EXISTS tags (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(30) UNIQUE,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);

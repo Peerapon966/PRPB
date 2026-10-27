@@ -1,43 +1,20 @@
 #!/bin/bash
 set -eo pipefail
 
-echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
-echo ""
-echo "============================="
-echo "|   Setting up variables    |"
-echo "============================="
-echo ""
-if [[ "${GITHUB_EVENT_NAME}" = 'pull_request' ]]; then
-  GITHUB_BASE_REF_SHA=$(cat $GITHUB_EVENT_PATH | jq -r '.pull_request.base.sha')
-  git config user.name "github-actions[bot]"
-  git config user.email "github-actions[bot]@users.noreply.github.com"
-  git tag -f last-base-ref-sha $GITHUB_BASE_REF_SHA
-  git push -f origin last-base-ref-sha
-elif [[ "${GITHUB_EVENT_NAME}" = 'workflow_dispatch' ]]; then
-  GITHUB_BASE_REF_SHA=${BASE_REF_SHA:-$(git rev-parse last-base-ref-sha)}
-fi
-echo "GITHUB_BASE_REF_SHA: $GITHUB_BASE_REF_SHA"
-
-NEW_BLOG_COUNT=0
-if [[ "${GITHUB_BASE_REF_SHA}" != 'null' ]]; then
-  NEW_BLOG_COUNT=$(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | (grep 'src/pages/blog/.*\.mdx$' || true) | wc -l)
-fi
-echo "NEW_BLOG_COUNT: $NEW_BLOG_COUNT"
-
 # Deploy to the same AWS account as the assumed role
 echo ""
 echo "============================="
 echo "|     Deploy Terraform      |"
 echo "============================="
 echo ""
-echo "WORKSPACE: $WORKSPACE"
+echo "TF_WORKSPACE: $TF_WORKSPACE"
 echo "TF_INIT_FILE: init/backend-${ENVIRONMENT}.hcl"
 echo "TFVARS_FILE: tfvars/${ENVIRONMENT}.tfvars"
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 terraform init \
   -backend-config "init/backend-${ENVIRONMENT}.hcl" \
   -reconfigure
-terraform workspace select -or-create "$WORKSPACE"
+terraform workspace select -or-create "$TF_WORKSPACE"
 terraform validate
 terraform apply \
   -var-file "tfvars/${ENVIRONMENT}.tfvars" \
@@ -57,51 +34,7 @@ aws s3 sync ../dist/blog/ "s3://${ORIGIN_BUCKET_NAME}/blog" --delete --cache-con
 aws s3 sync ../dist/about/ "s3://${ORIGIN_BUCKET_NAME}/about" --delete --cache-control "no-cache, must-revalidate"
 aws s3 sync ../dist/blogs/ "s3://${ORIGIN_BUCKET_NAME}/blogs" --delete --cache-control "no-cache, must-revalidate"
 aws s3 sync ../src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --cache-control "public, max-age=604800, must-revalidate"
-
-if [[ $NEW_BLOG_COUNT -gt 0 ]]; then
-  echo ""
-  echo "============================="
-  echo "|  Register New Blog To DB  |"
-  echo "============================="
-  echo ""
-
-  echo "New Blogs"
-  git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$'
-  echo ""
-  while read -r BLOG; do
-    SLUG="${BLOG#src/pages/blog/}"
-    SLUG="${SLUG%.mdx}"
-    echo "Registering blog to DB: $SLUG"
-
-    METADATA=$(sed 10q "../src/pages/blog/$SLUG.mdx")
-    TITLE=$(echo "$METADATA" | awk -F ': ' '/^title/ {print $NF}' | tr -d '"')
-    DESCRIPTION=$(echo "$METADATA" | awk -F ': ' '/^description/ {print $NF}' | tr -d '"')
-    SLUG=$(echo "$METADATA" | awk -F ': ' '/^slug/ {print $NF}' | tr -d '"')
-    AUTHOR=$(echo "$METADATA" | awk -F ': ' '/^author/ {print $NF}' | tr -d '"')
-    PUBLISH_DATE=$(echo "$METADATA" | awk -F ': ' '/^date/ {print $NF}' | tr -d '"')
-    TAGS=$(echo "$METADATA" | awk -F ': ' '/^tags/ {print $NF}' | tr '"' "\'")
-    echo "TITLE: ${TITLE}"
-    echo "DESCRIPTION: ${DESCRIPTION}"
-    echo "SLUG: ${SLUG}"
-    echo "AUTHOR: ${AUTHOR}"
-    echo "PUBLISH_DATE: ${PUBLISH_DATE}"
-    echo "TAGS: ${TAGS}"
-
-    psql "${DB_CONNECTION_STRING}" \
-      -c "
-        CALL insert_blog(
-          p_title => '${TITLE}',
-          p_description => '${DESCRIPTION}',
-          p_slug => '${SLUG}',
-          p_author => '${AUTHOR}',
-          p_publish_date => '${PUBLISH_DATE}'::DATE,
-          p_tags => ARRAY${TAGS}
-        );
-
-        REFRESH MATERIALIZED VIEW blogs_with_tags;
-      "
-  done < <(git diff --name-only --diff-filter=A $GITHUB_BASE_REF_SHA...HEAD | grep 'src/pages/blog/.*\.mdx$')
-fi
+aws s3 sync ../data/index.json "s3://${ORIGIN_BUCKET_NAME}/data/index.json" --delete --cache-control "public, max-age=604800, must-revalidate"
 
 echo ""
 echo "============================="

@@ -1,12 +1,5 @@
 ---
 layout: ../../layouts/BlogLayout.astro
-title: "เรารันคำสั่ง cdk bootstrap ไปทำไม"
-author: "Peerapon Boonkaweenapanon"
-date: "2025-03-31"
-tags: ["AWS", "CDK"]
-description: "เรารันคำสั่ง cdk bootstrap ไปทำไม รันแล้วเกิดอะไรขึ้น บทความนี้มีคำตอบครับ"
-slug: "what-happens-when-we-bootstrap-cdk"
-thumbnail: true
 ---
 import { CodeBlock } from "@/components/blog/CodeBlock";
 import Image from "@/components/blog/Image.astro";
@@ -31,13 +24,13 @@ import Image from "@/components/blog/Image.astro";
 
 จากนั้นก็รันคำสั่ง cdk bootstrap ครั้งนี้ผมรันบน CloudShell จะได้ไม่ตัองเสียเวลาลง CDK
 
-<Image slug={frontmatter.slug} filename="01.png" altText="01.png" />
+<Image filename="01.png" altText="01.png" />
 
 หลังการ bootstrap เสร็จสิ้นก็จะเห็น resource ตามด้านบนถูกสร้างขึ้น
 
 ## S3 bucket
 
-<Image slug={frontmatter.slug} filename="02.png" altText="02.png" />
+<Image filename="02.png" altText="02.png" />
 
 S3 bucket อันนี้ตอนแรกผมก็คิดว่าเอาไว้เก็บไฟล์ CloudFormation template ที่ CDK สร้างขึ้นมา เพื่อที่ CDK จะได้มาหยิบไปใช้ deploy ในขั้นตอนต่อไป แต่จริง ๆ แล้วไม่เชิงเป็นแบบนั้นครับ เพราะพอ CDK สร้างไฟล์ CloudFormation เสร็จแล้ว มันก็โยนไปให้ CloudFormation ตรง ๆ เลย ไม่จำเป็นต้องเอามาพักไว้ที่ S3
 
@@ -45,13 +38,13 @@ S3 bucket อันนี้ตอนแรกผมก็คิดว่าเ�
 
 ## ECR repository
 
-<Image slug={frontmatter.slug} filename="03.png" altText="03.png" />
+<Image filename="03.png" altText="03.png" />
 
 ECR repository นี่ก็จะคล้าย ๆ กับ S3 ครับ แต่เอาไว้เก็บ container image แทน ซึ่ง container image พวกนีัจะเกิดขึ้นมาเวลาเราสร้าง resource ที่ต้องใช้ container image แล้วเราส่งพวก Dockerfile ให้กับ resource นั้นไปด้วย โดยตอน deploy CDK ก็จะ build image แล้ว push ขึ้นไปที่ ECR repository นี้ครับ
 
 ## IAM role
 
-<Image slug={frontmatter.slug} filename="04.png" altText="04.png" />
+<Image filename="04.png" altText="04.png" />
 
 iam role จะมีทั้งหมด 5 อัน ซึ่งจะมีชื่อขึ้นต้นด้วย “cdk-” ทั้งหมด แต่ละอันก็จะมี permission คนละแบบ สำหรับ task ที่แตกต่างกัน โดย CDK จะ assume role พวกนี้ในขณะที่ deploy IaC ของเรา
 
@@ -2699,7 +2692,7 @@ role ตัวนี้เป็น role สำหรับใช้ในกา
 
 role นี้เป็น role เพียงตัวเดียวที่เราสามารถกำหนด permission ได้ในตอน bootstrap ซึ่งการกำหนด permission ให้ role ตัวนี้ก็คือการกำหนดว่าจะอนุญาตให้ CDK deploy อะไรได้บ้าง (จริง ๆ คือคุม CloudFormation แต่คนที่ deploy CloudFormation ก็คือ CDK อยู่ดี) ซึ่งถ้าตอน bootstrap เราไม่ได้กำหนด permission อะไรเป็นพิเศษ role นี้จะมี permission เป็น AdministratorAccess ครับ
 
-<Image slug={frontmatter.slug} filename="05.png" altText="05.png" />
+<Image filename="05.png" altText="05.png" />
 
 แต่ถ้าสมมติผมอยากติด policy อื่น เช่น AmazonS3ReadOnlyAccess แทน AdministratorAccess เราก็แค่ระบุ ARN ของ policy ที่ต้องการเข้าไปที่ option `--cloudformation-execution-policies` ด้วยแค่นั้นก็พอครับ เช่น
 
@@ -2709,7 +2702,7 @@ cdk bootstrap aws://<account_id>/<region> --cloudformation-execution-policies ar
 ```
 </CodeBlock>
 
-<Image slug={frontmatter.slug} filename="06.png" altText="06.png" />
+<Image filename="06.png" altText="06.png" />
 
 ## แล้ว CDK จะ Assume role ยังไง
 
@@ -2746,7 +2739,7 @@ cdk bootstrap aws://<account_id>/<region> --cloudformation-execution-policies ar
 3. Assume role เพื่อเอาไฟล์ CloudFormation template ที่สร้างไป deploy บน CloudFormation พร้อมให้ execution role
 4. Cloudformation ใช้ execution role สร้าง resource
 
-<Image slug={frontmatter.slug} filename="07.png" altText="07.png" />
+<Image filename="07.png" altText="07.png" />
 
 ## Cross-account deployment
 
@@ -2756,7 +2749,7 @@ cdk bootstrap aws://<account_id>/<region> --cloudformation-execution-policies ar
 
 นั่นก็หมายความว่าถ้า CDK ของเราสามารถ assume role ที่อยู่ใน account อื่นได้ CDK ก็สามารถ deploy resource ใน account นั้นได้เหมือนกัน แต่ว่าโดย default แล้ว role ที่ถูกสร้างขึ้นจากการทำ bootstrap จะอนุญาตให้ principle ของ account ตัวเองเท่านั้นที่ assume ตัวมันได้
 
-<Image slug={frontmatter.slug} filename="08.png" altText="08.png" />
+<Image filename="08.png" altText="08.png" />
 
 ซึ่งเราสามารถเปลี่ยนเงื่อนไขนี้ได้ด้วยการใช้ option `--trust <account_id>` และ `--trust-for-lookup <account_id>` เพื่อให้ role ที่ถูกสร้างขึ้นจากการ bootstrap เหล่านี้อนุญาตให้ principle จากอีก account หนึ่งมา assume มันได้
 
@@ -2825,17 +2818,17 @@ CMD [ "index.handler" ]
 
 พอรันคำสั่ง `cdk deploy` ปุ๊ป CDK ก็จะ zip source code ของ Lambda แล้วอัพโหลดขึ้นไปที่ S3 bucket รวมถึง build Docker image แล้ว push ขึ้นไปที่ ECR repository
 
-<Image slug={frontmatter.slug} filename="09.png" altText="09.png" />
+<Image filename="09.png" altText="09.png" />
 
-<Image slug={frontmatter.slug} filename="10.png" altText="10.png" />
+<Image filename="10.png" altText="10.png" />
 
 ได้ Lambda function มา 2 ตัว package type เป็น zip (index.mjs) และ image (Dockerfile) ตามที่เขียนไว้ใน CDK
 
-<Image slug={frontmatter.slug} filename="11.png" altText="11.png" />
+<Image filename="11.png" altText="11.png" />
 
 ส่วน execution role ของ CloudFormation stack ก็เป็น cnf-exec-role ตามที่บอกไว้ก่อนหน้า
 
-<Image slug={frontmatter.slug} filename="12.png" altText="12.png" />
+<Image filename="12.png" altText="12.png" />
 
 ## อ้างอิง
 
