@@ -11,7 +11,6 @@ on:
         description: "Target environment"
         type: environment
         required: true
-        default: staging
       base-ref-sha:
         description: "Base/reference commit SHA-256"
         required: false
