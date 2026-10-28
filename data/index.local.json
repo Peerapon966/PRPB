@@ -4,7 +4,9 @@
     "CDK",
     "CloudFront",
     "S3",
-    "VPC"
+    "VPC",
+    "Linux",
+    "Filesystem"
   ],
   "blogs": {
     "s3-presigned-post-request": {
@@ -50,6 +52,17 @@
         "VPC"
       ],
       "publishDate": "2025-03-13",
+      "thumbnail": true
+    },
+    "linux-storage-stack-101": {
+      "title": "[Linux Storage Stack 101] รู้จักกับ Linux Storage Stack",
+      "description": "",
+      "author": "Peerapon Boonkaweenapanon",
+      "tags": [
+        "Linux",
+        "Filesystem"
+      ],
+      "publishDate": "2026-10-28",
       "thumbnail": true
     }
   }
