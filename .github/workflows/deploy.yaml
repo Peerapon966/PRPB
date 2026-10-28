@@ -128,5 +128,5 @@ jobs:
       - name: Deploy Application
         uses: ./.github/actions/deploy
         with:
-          tf-workspace: ${{ vars.TF_WORKSPACE }}
           environment: ${{ needs.setup.outputs.target_env }}
+          aws-region: ${{ vars.AWS_REGION }}

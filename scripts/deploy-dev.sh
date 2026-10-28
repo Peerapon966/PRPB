@@ -34,19 +34,20 @@ pushd ../terraform
 
 aws sts get-caller-identity --profile dev || { echo "Couldn't authenticate AWS profile 'dev'"; exit 1; }
 
-terraform init -backend-config=init/backend-development.hcl
+terraform init -backend-config=init/backend-dev.hcl
+terraform workspace select -or-create dev
 
 ORIGIN_BUCKET_NAME=$(terraform output -raw s3_origin_bucket_name)
 DISTRIBUTION_ID=$(terraform output -raw distribution_id)
 APP_DOMAIN_NAME=$(terraform output -raw app_domain_name)
 if [[ ${DEPLOY_TF} == true ]]; then
-  terraform apply -var-file=tfvars/development.tfvars "${AUTO_APPROVE_TF:+-auto-approve}"
+  terraform apply -var-file=tfvars/dev.tfvars "${AUTO_APPROVE_TF:+-auto-approve}"
 fi
 
 pushd ..
 
-export $(grep -v '^#' .env.development | xargs)
-npm run build -- --mode development
+export $(grep -v '^#' .env.dev | xargs)
+npm run build -- --mode dev
 
 aws s3 sync dist/ "s3://${ORIGIN_BUCKET_NAME}" --delete --cache-control "no-cache, must-revalidate" \
   --exclude "_astro/*" --exclude "blog/*" --exclude "about/*" --exclude "blogs/*" --exclude "assets/*" --profile dev
@@ -55,8 +56,9 @@ aws s3 sync dist/blog/ "s3://${ORIGIN_BUCKET_NAME}/blog" --delete --cache-contro
 aws s3 sync dist/about/ "s3://${ORIGIN_BUCKET_NAME}/about" --delete --cache-control "no-cache, must-revalidate" --profile dev
 aws s3 sync dist/blogs/ "s3://${ORIGIN_BUCKET_NAME}/blogs" --delete --cache-control "no-cache, must-revalidate" --profile dev
 aws s3 sync src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --cache-control "public, max-age=604800, must-revalidate" --profile dev
+aws s3 sync data/ "s3://${ORIGIN_BUCKET_NAME}/data/" --delete --cache-control "public, max-age=604800, must-revalidate" --exclude "*.local*" --profile dev
 aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*" --profile dev | tee /dev/null
 
 echo ""
-echo "Successfully deployed to development environment"
+echo "Successfully deployed to dev environment"
 echo "Application accessible via https://${APP_DOMAIN_NAME}"

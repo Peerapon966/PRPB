@@ -52,12 +52,15 @@ export function BlogList() {
 
   useEffect(() => {
     async function fetchIndexData() {
-      const response = await fetch(import.meta.env.PUBLIC_INDEX_FILE, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        import.meta.env.PUBLIC_INDEX_FILE ?? "/data/index.json",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
       const data = (await response.json()) as BlogIndexData;
       const blogsList: BlogItemProps[] = Object.entries(data.blogs).map(
         ([slug, blog]) => ({

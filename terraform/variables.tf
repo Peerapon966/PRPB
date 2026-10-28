@@ -62,25 +62,6 @@ variable "s3_bucket_cache_behavior" {
   }
 }
 
-variable "supabase_api_origin" {
-  type = object({
-    origin_domain = string
-    origin_path = string
-    origin_name = string
-    custom_headers = optional(map(string), {})
-  })
-  description = "(Required) Origin details for Supabase PostgREST API."
-}
-
-variable "supabase_api_cache_behavior" {
-  type = object({
-    cloudfront_cache_policy_name            = string
-    cloudfront_origin_request_policy_name   = optional(string)
-    cloudfront_response_headers_policy_name = optional(string)
-  })
-  description = "(Required) Cache behavior for Supabase PostgREST API."
-}
-
 variable "add_index_cf_function_source_code" {
   type        = string
   description = "(Optional) Path to the [add index.html to the request URI] CloudFront function source code file (relative to the Terraform root module directory)"

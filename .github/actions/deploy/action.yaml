@@ -1,11 +1,11 @@
 name: "Deploy"
 description: "Deploy application (Terraform and build artifacts) to AWS"
 inputs:
-  tf-workspace:
-    description: "Terraform workspace name to deploy resources"
-    required: true
   environment:
     description: "Target environment to deploy resources and application (workflow will use file 'tfvars/<environment>.tfvars' when deploying Terraform)"
+    required: true
+  aws-region:
+    description: "AWS region to deploy resources"
     required: true
 runs:
   using: "composite"
@@ -21,5 +21,5 @@ runs:
       shell: bash
       working-directory: ${{ github.workspace }}/terraform
       env:
-        TF_WORKSPACE: ${{ inputs.workspace }}
         ENVIRONMENT: ${{ inputs.environment }}
+        AWS_REGION: ${{ inputs.aws-region }}
