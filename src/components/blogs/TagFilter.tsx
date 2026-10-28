@@ -86,7 +86,7 @@ export function TagFilter({
     });
   }, [allTagOptions, debouncedTagSearch]);
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  function onSubmit(data: z.infer<typeof FormSchema>) {
     fetchBlogs({
       page: data.page,
       selectedTags: data.selectedTags,

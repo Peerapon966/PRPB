@@ -65,12 +65,14 @@ export function BlogList() {
           ...blog,
         }),
       );
-      allBlogs.current = blogsList.sort((a, b) =>
+      allBlogs.current = blogsList.toSorted((a, b) =>
         b.publishDate.localeCompare(a.publishDate),
       );
       setTags(data.tags);
     }
-    fetchIndexData();
+    fetchIndexData().catch((error: unknown) => {
+      console.error("Failed to load blog index:", error);
+    });
   }, []);
 
   function setPageQueryParam(nextPage: number) {
