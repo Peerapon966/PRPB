@@ -1,5 +1,5 @@
 name: Deploy
-run-name: Deploy commit '${{ github.head_ref && format('{0} ({1})', github.sha, github.head_ref) || github.sha }}' to ${{ inputs.environment || 'staging' }} environment
+run-name: Deploy commit '${{ github.sha }}' (${{ github.head_ref || github.ref_name }}) to ${{ inputs.environment || 'staging' }} environment
 
 on:
   pull_request:
