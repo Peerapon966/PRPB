@@ -21,8 +21,6 @@ module "cdn" {
   global_variables                    = local.global_variables
   s3_origin_bucket                    = module.s3.s3_origin_bucket
   s3_bucket_cache_behavior            = var.s3_bucket_cache_behavior
-  supabase_api_origin                 = var.supabase_api_origin
-  supabase_api_cache_behavior         = var.supabase_api_cache_behavior
   add_index_cf_function_source_code   = var.add_index_cf_function_source_code
   remove_path_cf_function_source_code = var.remove_path_cf_function_source_code
   hosted_zone_name                    = var.hosted_zone_name

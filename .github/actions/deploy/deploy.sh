@@ -1,24 +1,26 @@
 #!/bin/bash
 set -eo pipefail
 
-# Deploy to the same AWS account as the assumed role
 echo ""
 echo "============================="
 echo "|     Deploy Terraform      |"
 echo "============================="
 echo ""
-echo "TF_WORKSPACE: $TF_WORKSPACE"
+TF_INIT_FILE="init/backend-${ENVIRONMENT}.hcl"
+TFVARS_FILE="tfvars/${ENVIRONMENT}.tfvars"
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+echo "ENVIRONMENT: $ENVIRONMENT"
 echo "TF_INIT_FILE: init/backend-${ENVIRONMENT}.hcl"
 echo "TFVARS_FILE: tfvars/${ENVIRONMENT}.tfvars"
-ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 terraform init \
-  -backend-config "init/backend-${ENVIRONMENT}.hcl" \
+  -backend-config "$TF_INIT_FILE" \
   -reconfigure
 terraform workspace select -or-create "$TF_WORKSPACE"
 terraform validate
 terraform apply \
-  -var-file "tfvars/${ENVIRONMENT}.tfvars" \
+  -var-file "$TFVARS_FILE" \
   -var "account=$ACCOUNT_ID" \
+  -var "region=$AWS_REGION" \
   -auto-approve
 
 echo ""
@@ -34,7 +36,7 @@ aws s3 sync ../dist/blog/ "s3://${ORIGIN_BUCKET_NAME}/blog" --delete --cache-con
 aws s3 sync ../dist/about/ "s3://${ORIGIN_BUCKET_NAME}/about" --delete --cache-control "no-cache, must-revalidate"
 aws s3 sync ../dist/blogs/ "s3://${ORIGIN_BUCKET_NAME}/blogs" --delete --cache-control "no-cache, must-revalidate"
 aws s3 sync ../src/assets/ "s3://${ORIGIN_BUCKET_NAME}/assets" --delete --cache-control "public, max-age=604800, must-revalidate"
-aws s3 sync ../data/index.json "s3://${ORIGIN_BUCKET_NAME}/data/index.json" --delete --cache-control "public, max-age=604800, must-revalidate"
+aws s3 sync ../data/ "s3://${ORIGIN_BUCKET_NAME}/data" --delete --cache-control "public, max-age=604800, must-revalidate" --exclude "*.local*"
 
 echo ""
 echo "============================="

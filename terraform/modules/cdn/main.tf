@@ -53,26 +53,18 @@ resource "aws_route53_record" "cloudfront_cert_validation" {
 # CloudFront Distribution
 # ==========================================================================================
 
-locals {
-  cloudfront_origins = {
-    s3_bucket    = var.s3_bucket_cache_behavior,
-    supabase_api = var.supabase_api_cache_behavior
-  }
+data "aws_cloudfront_cache_policy" "s3_cache_policy" {
+  name     = var.s3_bucket_cache_behavior.cloudfront_cache_policy_name
 }
 
-data "aws_cloudfront_cache_policy" "cache_policy" {
-  for_each = { for k, v in local.cloudfront_origins : k => v.cloudfront_cache_policy_name }
-  name     = each.value
+data "aws_cloudfront_origin_request_policy" "s3_origin_request_policy" {
+  count = can(coalesce(var.s3_bucket_cache_behavior.cloudfront_origin_request_policy_name)) ? 1 : 0
+  name     = var.s3_bucket_cache_behavior.cloudfront_origin_request_policy_name
 }
 
-data "aws_cloudfront_origin_request_policy" "origin_request_policy" {
-  for_each = { for k, v in local.cloudfront_origins : k => v.cloudfront_origin_request_policy_name if trimspace(try(coalesce(v.cloudfront_origin_request_policy_name), "")) != "" }
-  name     = each.value
-}
-
-data "aws_cloudfront_response_headers_policy" "response_header_policy" {
-  for_each = { for k, v in local.cloudfront_origins : k => v.cloudfront_response_headers_policy_name if trimspace(try(coalesce(v.cloudfront_response_headers_policy_name), "")) != "" }
-  name     = each.value
+data "aws_cloudfront_response_headers_policy" "s3_response_header_policy" {
+  count = can(coalesce(var.s3_bucket_cache_behavior.cloudfront_response_headers_policy_name)) ? 1 : 0
+  name     = var.s3_bucket_cache_behavior.cloudfront_response_headers_policy_name
 }
 
 resource "aws_cloudfront_origin_access_control" "s3_oac" {
@@ -122,53 +114,14 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     cached_methods             = ["GET", "HEAD", "OPTIONS"]
     viewer_protocol_policy     = "redirect-to-https"
     target_origin_id           = var.s3_origin_bucket.id
-    cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["s3_bucket"].id
-    origin_request_policy_id   = trimspace(try(coalesce(var.s3_bucket_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["s3_bucket"].id : null
-    response_headers_policy_id = trimspace(try(coalesce(var.s3_bucket_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["s3_bucket"].id : null
+    cache_policy_id            = data.aws_cloudfront_cache_policy.s3_cache_policy.id
+    origin_request_policy_id   = can(coalesce(var.s3_bucket_cache_behavior.cloudfront_origin_request_policy_name)) ? data.aws_cloudfront_origin_request_policy.s3_origin_request_policy[0].id : null
+    response_headers_policy_id = can(coalesce(var.s3_bucket_cache_behavior.cloudfront_response_headers_policy_name)) ? data.aws_cloudfront_response_headers_policy.s3_response_header_policy[0].id : null
     compress                   = true
 
     function_association {
       event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.add_index_cf_function.arn
-    }
-  }
-
-  origin {
-    domain_name = trimsuffix(trimprefix(var.supabase_api_origin.origin_domain, "https://"), "/")
-    origin_id   = var.supabase_api_origin.origin_name
-    origin_path = "/${trimprefix(var.supabase_api_origin.origin_path, "/")}"
-
-    custom_origin_config {
-      http_port              = "80"
-      https_port             = "443"
-      origin_protocol_policy = "https-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
-    }
-
-    dynamic "custom_header" {
-      for_each = var.supabase_api_origin.custom_headers
-
-      content {
-        name  = custom_header.key
-        value = custom_header.value
-      }
-    }
-  }
-
-  ordered_cache_behavior {
-    path_pattern               = "/api/*"
-    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
-    cached_methods             = ["GET", "HEAD", "OPTIONS"]
-    viewer_protocol_policy     = "redirect-to-https"
-    target_origin_id           = var.supabase_api_origin.origin_name
-    cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy["supabase_api"].id
-    origin_request_policy_id   = trimspace(try(coalesce(var.supabase_api_cache_behavior.cloudfront_origin_request_policy_name), "")) != "" ? data.aws_cloudfront_origin_request_policy.origin_request_policy["supabase_api"].id : null
-    response_headers_policy_id = trimspace(try(coalesce(var.supabase_api_cache_behavior.cloudfront_response_headers_policy_name), "")) != "" ? data.aws_cloudfront_response_headers_policy.response_header_policy["supabase_api"].id : null
-    compress                   = true
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.remove_path_cf_function.arn
     }
   }
 
