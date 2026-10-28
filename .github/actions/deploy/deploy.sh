@@ -10,12 +10,13 @@ TF_INIT_FILE="init/backend-${ENVIRONMENT}.hcl"
 TFVARS_FILE="tfvars/${ENVIRONMENT}.tfvars"
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 echo "ENVIRONMENT: $ENVIRONMENT"
+echo "TF_WORKSPACE: $ENVIRONMENT"
 echo "TF_INIT_FILE: init/backend-${ENVIRONMENT}.hcl"
 echo "TFVARS_FILE: tfvars/${ENVIRONMENT}.tfvars"
 terraform init \
   -backend-config "$TF_INIT_FILE" \
   -reconfigure
-terraform workspace select -or-create "$TF_WORKSPACE"
+terraform workspace select -or-create "$ENVIRONMENT"
 terraform validate
 terraform apply \
   -var-file "$TFVARS_FILE" \
