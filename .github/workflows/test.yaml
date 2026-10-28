@@ -79,7 +79,7 @@ jobs:
           restore-keys: ${{ runner.os }}-playwright-
 
       - name: Install Playwright Browsers
-        run: npm install playwright@1.50.1 --with-deps --ignore-scripts
+        run: npx playwright@1.50.1 install --with-deps chromium
 
       - name: Run unit tests
         run: npm run test:unit -- --mode=${{ needs.setup.outputs.target_env }}

@@ -9,8 +9,14 @@ test.describe("Landing Page (/)", () => {
     await expect(page.locator(".right-text")).toContainText("KNOWLEDGE");
     await expect(page.locator(".right-text")).toContainText("ARCHIVE");
 
-    const blogsCard = page.getByRole("link", { name: "Go to BLOGS page" });
-    const aboutCard = page.getByRole("link", { name: "Go to ABOUT page" });
+    const blogsCard = page.getByRole("link", {
+      name: "Go to BLOGS page",
+      exact: true,
+    });
+    const aboutCard = page.getByRole("link", {
+      name: "Go to ABOUT page",
+      exact: true,
+    });
     await expect(blogsCard).toBeVisible();
     await expect(aboutCard).toBeVisible();
 
