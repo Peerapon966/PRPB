@@ -22,12 +22,8 @@ type TagOption = {
   label: string;
 };
 
-type FetchTagResponseItem = {
-  id: number;
-  name: string;
-};
-
 type TagFilterProps = {
+  tags: string[];
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   selectedTags: string[];
@@ -47,6 +43,7 @@ const FormSchema = z.object({
 });
 
 export function TagFilter({
+  tags,
   page,
   setPage,
   selectedTags,
@@ -57,7 +54,6 @@ export function TagFilter({
   setUseAndLogic,
   fetchBlogs,
 }: TagFilterProps) {
-  const [allTagOptions, setAllTagOptions] = useState<TagOption[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState("");
   const [debouncedTagSearch, setDebouncedTagSearch] = useState("");
@@ -72,6 +68,15 @@ export function TagFilter({
     },
   });
 
+  const allTagOptions = useMemo<TagOption[]>(
+    () =>
+      tags.map((tag) => ({
+        value: tag,
+        label: tag,
+      })),
+    [tags],
+  );
+
   const filteredOptions = useMemo(() => {
     const keyword = debouncedTagSearch.trim().toLowerCase();
     if (!keyword) return allTagOptions;
@@ -81,7 +86,7 @@ export function TagFilter({
     });
   }, [allTagOptions, debouncedTagSearch]);
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  function onSubmit(data: z.infer<typeof FormSchema>) {
     fetchBlogs({
       page: data.page,
       selectedTags: data.selectedTags,
@@ -89,27 +94,6 @@ export function TagFilter({
       useAndLogic: data.useAndLogic,
     });
   }
-
-  useEffect(() => {
-    async function fetchTags() {
-      const response = await fetch(
-        `${import.meta.env.PUBLIC_API_ENDPOINT}/tags?select=id,name`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      const fetchedTags = (await response.json()) as FetchTagResponseItem[];
-      const mappedTags = fetchedTags.map((tag) => ({
-        value: tag.name,
-        label: tag.name,
-      }));
-      setAllTagOptions(mappedTags);
-    }
-    fetchTags();
-  }, []);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -121,6 +105,7 @@ export function TagFilter({
   }, [tagSearch]);
 
   useEffect(() => {
+    if (allTagOptions.length === 0) return;
     const urlSearchParams = new URLSearchParams(window.location.search);
     const queryPage = Number(urlSearchParams.get("page") ?? "1");
     const pageFromQuery =
@@ -351,15 +336,23 @@ export function TagFilter({
                 className="h-11 flex-1 lg:flex-none"
                 onClick={() => {
                   form.reset({
+                    page: 1,
                     selectedTags: [],
                     searchText: "",
                     useAndLogic: false,
                   });
+                  setPage(1);
                   setSelectedTags([]);
                   setSearchText("");
                   setUseAndLogic(false);
                   setTagSearch("");
                   setIsDropdownOpen(false);
+                  fetchBlogs({
+                    page: 1,
+                    selectedTags: [],
+                    searchText: "",
+                    useAndLogic: false,
+                  });
                 }}
               >
                 Clear

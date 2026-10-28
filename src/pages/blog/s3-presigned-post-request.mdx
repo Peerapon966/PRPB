@@ -1,12 +1,5 @@
 ---
 layout: ../../layouts/BlogLayout.astro
-title: "S3 Presigned Post Request ขั้นกว่าของ S3 Presigned URL"
-author: "Peerapon Boonkaweenapanon"
-date: "2026-04-24"
-tags: ["AWS", "S3"]
-description: "เจาะลึกความต่างระหว่าง S3 Presigned URL และ Post Request พร้อมเหตุผลว่าทำไมการใช้ Post ถึงช่วยให้เราควบคุมการอัปโหลดไฟล์ (Policy) ได้ละเอียดและปลอดภัยกว่าเดิม"
-slug: "s3-presigned-post-request"
-thumbnail: true
 ---
 import { CodeBlock } from "@/components/blog/CodeBlock";
 import Image from "@/components/blog/Image.astro";
@@ -342,9 +335,9 @@ Response {
 
 ไปดูบน S3 ก็จะเจอไฟล์รูป `avatar/selfish.jpg`
 
-<Image slug={frontmatter.slug} filename="01.png" altText="01.png" />
+<Image filename="01.png" altText="01.png" />
 
-<Image slug={frontmatter.slug} filename="02.png" altText="02.png" />
+<Image filename="02.png" altText="02.png" />
 
 ลองใช้ presigned post request เดิมอีกรอบกับไฟล์ชื่อ peanut.jpg
 
@@ -385,9 +378,9 @@ Response {
 ```
 </CodeBlock>
 
-<Image slug={frontmatter.slug} filename="03.png" altText="03.png" />
+<Image filename="03.png" altText="03.png" />
 
-<Image slug={frontmatter.slug} filename="04.png" altText="04.png" />
+<Image filename="04.png" altText="04.png" />
 
 แต่ถ้าลองเปลี่ยน key จาก `avatar/peanut.jpg` เป็น `peanut.jpg` เฉย ๆ แล้วอัปโหลด จะได้ 403 กลับมาเพราะ key ไม่ตรงกับ condition ที่ระบุไว้
 
@@ -410,7 +403,7 @@ Error: Upload failed: 403 - <?xml version="1.0" encoding="UTF-8"?>
 ```
 </CodeBlock>
 
-<Image slug={frontmatter.slug} filename="05.png" altText="05.png" />
+<Image filename="05.png" altText="05.png" />
 
 ## ใช้งาน S3 Presigned Post Request ผ่าน web form
 
@@ -475,13 +468,13 @@ Error: Upload failed: 403 - <?xml version="1.0" encoding="UTF-8"?>
 
 ทีนี้พอผมลองอัปโหลดไฟล์รูปภาพอีกซักอันที่ชื่อว่า `sawfish.jpg` ผ่านฟอร์มตัวนี้ก็จะพบว่ามีไฟล์รูปภาพที่เลือกไว้อยู่บน S3 เหมือนกับการใช้ FormData ใน JavaScript ครับ (เพราะจริง ๆ แล้วมันก็คือฟอร์มเหมือนกัน 555)
 
-<Image slug={frontmatter.slug} filename="06.png" altText="06.png" />
+<Image filename="06.png" altText="06.png" />
 
-<Image slug={frontmatter.slug} filename="07.png" altText="07.png" />
+<Image filename="07.png" altText="07.png" />
 
-<Image slug={frontmatter.slug} filename="08.png" altText="08.png" />
+<Image filename="08.png" altText="08.png" />
 
-<Image slug={frontmatter.slug} filename="09.png" altText="09.png" />
+<Image filename="09.png" altText="09.png" />
 
 สำหรับบทความนี้คิดว่าคงต้องขอจบไว้เท่านี้ครับ ที่จริงเท่านี้ก็ยาวเกินความตั้งใจตอนแรกไปมากแล้ว แล้วพบกันโอกาสหน้าครับ
 

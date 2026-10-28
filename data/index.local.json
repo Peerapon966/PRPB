@@ -1,0 +1,56 @@
+{
+  "tags": [
+    "AWS",
+    "CDK",
+    "CloudFront",
+    "S3",
+    "VPC"
+  ],
+  "blogs": {
+    "s3-presigned-post-request": {
+      "title": "S3 Presigned Post Request ขั้นกว่าของ S3 Presigned URL",
+      "description": "เจาะลึกความต่างระหว่าง S3 Presigned URL และ Post Request พร้อมเหตุผลว่าทำไมการใช้ Post ถึงช่วยให้เราควบคุมการอัปโหลดไฟล์ (Policy) ได้ละเอียดและปลอดภัยกว่าเดิม",
+      "author": "Peerapon Boonkaweenapanon",
+      "tags": [
+        "AWS",
+        "S3"
+      ],
+      "publishDate": "2026-04-24",
+      "thumbnail": true
+    },
+    "s3-presigned-url-vs-cloudfront-signed-url": {
+      "title": "S3 Presigned URL VS CloudFront Signed URL",
+      "description": "อธิบายเครื่องมือ 2 อย่างจาก 2 service ที่ชื่อคล้ายจนแทบนึกว่าเป็นญาติกัน",
+      "author": "Peerapon Boonkaweenapanon",
+      "tags": [
+        "AWS",
+        "S3",
+        "CloudFront"
+      ],
+      "publishDate": "2025-04-15",
+      "thumbnail": true
+    },
+    "what-happens-when-we-bootstrap-cdk": {
+      "title": "เรารันคำสั่ง cdk bootstrap ไปทำไม",
+      "description": "เรารันคำสั่ง cdk bootstrap ไปทำไม รันแล้วเกิดอะไรขึ้น ไม่รันได้มั้ย",
+      "author": "Peerapon Boonkaweenapanon",
+      "tags": [
+        "AWS",
+        "CDK"
+      ],
+      "publishDate": "2025-03-31",
+      "thumbnail": true
+    },
+    "how-private-resources-resolve-dns": {
+      "title": "resource ที่อยู่ใน private subnet สามารถ resolve DNS หากันได้ยังไง",
+      "description": "resource ใน private subnet ที่เชื่อมต่อ internet ไม่ได้ สามารถเข้าถึง DNS resolve ได้ยังไง",
+      "author": "Peerapon Boonkaweenapanon",
+      "tags": [
+        "AWS",
+        "VPC"
+      ],
+      "publishDate": "2025-03-13",
+      "thumbnail": true
+    }
+  }
+}

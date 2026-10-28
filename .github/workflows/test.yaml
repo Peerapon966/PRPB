@@ -1,10 +1,21 @@
-name: Test PR
-run-name: Build, test and scan '${{ github.head_ref }}' (${{ github.sha }})
+name: Test
+run-name: Test, scan, and build '${{ github.head_ref }}' (${{ github.sha }})
 
 on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: environment
+        required: true
+        default: staging
+      base-ref-sha:
+        description: "Base/reference commit SHA-256"
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,11 +23,6 @@ concurrency:
 
 permissions:
   contents: read
-  security-events: write
-
-# Specify target environment to run this workflow
-env:
-  TARGET_ENV: staging
 
 jobs:
   # Propagate TARGET_ENV variable and other data to other jobs by its output
@@ -29,7 +35,7 @@ jobs:
     steps:
       - name: Set target environment
         id: set-target-env
-        run: echo "target_env=${{ env.TARGET_ENV }}" >> $GITHUB_OUTPUT
+        run: echo "target_env=${{ inputs.environment || 'staging' }}" >> $GITHUB_OUTPUT
 
       - name: Set short commit SHA
         id: set-short-sha
@@ -41,20 +47,23 @@ jobs:
         run: |
           raw="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
           echo "branch_name=$(echo "$raw" | sed 's/["<>:|*?\\\/\r\n]/_/g')" >> "$GITHUB_OUTPUT"
-        
-  lint:
-    needs: [setup]
+
+  test:
+    needs: setup
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
+    timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.base-ref-sha || github.sha }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: lts/*
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
@@ -62,73 +71,58 @@ jobs:
       - name: Run linter
         run: npm run lint
 
-  test:
-    needs: [setup]
-    runs-on: ubuntu-latest
-    environment: ${{ needs.setup.outputs.target_env }}
-    timeout-minutes: 30
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-playwright-
 
       - name: Install Playwright Browsers
-        run: npx playwright@1.50.1 install --with-deps
+        run: npm install playwright@1.50.1 --with-deps --ignore-scripts
 
       - name: Run unit tests
         run: npm run test:unit -- --mode=${{ needs.setup.outputs.target_env }}
 
       - name: Upload unit test report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: unit-test-report_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
+          name: unit-test-report__${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
           path: test-results/
           retention-days: 7
+          if-no-files-found: error
           overwrite: true
 
       - name: Run E2E tests
         run: npm run test:e2e
 
       - name: Upload E2E test report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: e2e-test-report_${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
+          name: e2e-test-report__${{ needs.setup.outputs.branch_name }}#${{ needs.setup.outputs.short_sha }}
           path: playwright-report/
           retention-days: 7
+          if-no-files-found: error
           overwrite: true
 
   snyk-iac-scan:
-    needs: [setup]
+    needs: setup
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
-    timeout-minutes: 30
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          fetch-depth: 1
+          ref: ${{ inputs.base-ref-sha || github.sha }}
 
       - name: Run Snyk IaC to check for vulnerabilities
-        uses: snyk/actions/iac@master
+        uses: snyk/actions/iac@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
         id: snyk-iac
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -138,30 +132,33 @@ jobs:
 
       - name: Upload Snyk IaC result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
-        if: always() && steps.snyk-iac.outcome == 'failure'
+        if: always()
         with:
           sarif_file: snyk.sarif
-  
+
   build:
-    needs: [setup, lint, test, snyk-iac-scan]
+    needs:
+      - setup
+      - test
+      - snyk-iac-scan
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.target_env }}
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          fetch-depth: 2
+          ref: ${{ inputs.base-ref-sha || github.sha }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: lts/*
-          cache: 'npm'
+          cache: "npm"
 
       - name: Set environment variable
         run: export $(grep -v '^#' .env.${{ needs.setup.outputs.target_env }} | xargs)
-        
+
       - name: Install dependencies
         run: npm ci --ignore-scripts
 

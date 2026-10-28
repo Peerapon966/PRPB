@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { TagFilter } from "@/components/blogs/TagFilter";
 import { BlogItem } from "@/components/blogs/BlogItem";
@@ -10,13 +10,22 @@ const BLOG_PER_REQUEST = Number(
   import.meta.env.PUBLIC_BLOG_ITEMS_PER_PAGE ?? 12,
 );
 
-export type BlogItemProps = {
+export type BlogDetail = {
   title: string;
   description: string;
-  slug: string;
   author: string;
   publishDate: string;
   tags: string[];
+  thumbnail?: boolean;
+};
+
+export type BlogItemProps = BlogDetail & {
+  slug: string;
+};
+
+export type BlogIndexData = {
+  tags: string[];
+  blogs: Record<string, BlogDetail>;
 };
 
 export type FetchBlogsProps = {
@@ -28,70 +37,43 @@ export type FetchBlogsProps = {
 
 export function BlogList() {
   const [blogs, setBlogs] = useState<BlogItemProps[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
   const [maxPage, setMaxPage] = useState<number>(1);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [useAndLogic, setUseAndLogic] = useState<boolean>(false);
+  const allBlogs = useRef<BlogItemProps[]>([]);
   const hasFetchedOnce = useRef<boolean>(false);
   const prevPage = useRef<number | null>(null);
   const prevSelectedTags = useRef<string[] | null>(null);
   const prevSearchText = useRef<string | null>(null);
   const prevUseAndLogic = useRef<boolean | null>(null);
 
-  /* eslint-disable react/prop-types */
-  function getQueryString(
-    props: FetchBlogsProps = {
-      page: 1,
-      searchText: "",
-      selectedTags: [],
-      useAndLogic: false,
-    },
-  ): string {
-    const limit = BLOG_PER_REQUEST;
-    let queryString = `?select=*,publishDate:publish_date&order=publish_date.desc&limit=${limit}&offset=${limit * (props.page - 1)}`;
-    if (props.searchText !== "")
-      queryString += `&title=ilike.*${props.searchText}*`;
-    if (props.selectedTags.length > 0) {
-      queryString += props.useAndLogic
-        ? `&tags=cs.{${props.selectedTags.join(",")}}` // contains (@>)
-        : `&tags=ov.{${props.selectedTags.join(",")}}`; // overlap (&&)
-    }
-
-    return queryString;
-  }
-
-  function getCountQueryString(props: FetchBlogsProps): string {
-    let queryString = "?select=slug";
-    if (props.searchText !== "") {
-      queryString += `&title=ilike.*${props.searchText}*`;
-    }
-    if (props.selectedTags.length > 0) {
-      queryString += props.useAndLogic
-        ? `&tags=cs.{${props.selectedTags.join(",")}}`
-        : `&tags=ov.{${props.selectedTags.join(",")}}`;
-    }
-    return queryString;
-  }
-
-  async function fetchTotalPages(props: FetchBlogsProps): Promise<number> {
-    const response = await fetch(
-      `${import.meta.env.PUBLIC_API_ENDPOINT}/blogs_with_tags${getCountQueryString(props)}`,
-      {
+  useEffect(() => {
+    async function fetchIndexData() {
+      const response = await fetch(import.meta.env.PUBLIC_INDEX_FILE, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Range-Unit": "items",
-          Range: "0-0",
-          Prefer: "count=exact",
         },
-      },
-    );
-    const contentRange = response.headers.get("content-range");
-    const totalCount = Number(contentRange?.split("/")?.[1] ?? "0");
-    if (!Number.isFinite(totalCount) || totalCount <= 0) return 1;
-    return Math.ceil(totalCount / BLOG_PER_REQUEST);
-  }
+      });
+      const data = (await response.json()) as BlogIndexData;
+      const blogsList: BlogItemProps[] = Object.entries(data.blogs).map(
+        ([slug, blog]) => ({
+          slug,
+          ...blog,
+        }),
+      );
+      allBlogs.current = blogsList.toSorted((a, b) =>
+        b.publishDate.localeCompare(a.publishDate),
+      );
+      setTags(data.tags);
+    }
+    fetchIndexData().catch((error: unknown) => {
+      console.error("Failed to load blog index:", error);
+    });
+  }, []);
 
   function setPageQueryParam(nextPage: number) {
     const searchParams = new URLSearchParams(window.location.search);
@@ -104,7 +86,8 @@ export function BlogList() {
     );
   }
 
-  async function fetchBlogs(
+  /* eslint-disable react/prop-types */
+  function fetchBlogs(
     props: FetchBlogsProps = {
       page: 1,
       searchText: "",
@@ -133,30 +116,39 @@ export function BlogList() {
       return;
     }
 
-    const nextMaxPage = await fetchTotalPages(props);
+    const filteredBlogs = allBlogs.current.filter((blog) => {
+      const matchesSearch =
+        props.searchText === "" ||
+        blog.title.toLowerCase().includes(props.searchText.toLowerCase());
+      const matchesTags =
+        props.selectedTags.length === 0 ||
+        (props.useAndLogic
+          ? props.selectedTags.every((tag) => blog.tags.includes(tag))
+          : props.selectedTags.some((tag) => blog.tags.includes(tag)));
+      return matchesSearch && matchesTags;
+    });
+
+    const totalCount = filteredBlogs.length;
+    const nextMaxPage =
+      totalCount <= 0 ? 1 : Math.ceil(totalCount / BLOG_PER_REQUEST);
     setMaxPage(nextMaxPage);
 
     const normalizedPage = Math.min(props.page, nextMaxPage);
-    const queryString = getQueryString({ ...props, page: normalizedPage });
-    const response = await fetch(
-      `${import.meta.env.PUBLIC_API_ENDPOINT}/blogs_with_tags${queryString}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
+    const offset = BLOG_PER_REQUEST * (normalizedPage - 1);
+    const paginatedBlogs = filteredBlogs.slice(
+      offset,
+      offset + BLOG_PER_REQUEST,
     );
-    const blogs = (await response.json()) as BlogItemProps[];
+
     hasFetchedOnce.current = true;
     if (normalizedPage !== page) {
       setPage(normalizedPage);
       setPageQueryParam(normalizedPage);
     }
 
-    setBlogs(filterChanged ? blogs : (oldBlogs) => [...oldBlogs, ...blogs]);
+    setBlogs(paginatedBlogs);
 
-    if (pageChanged) prevPage.current = normalizedPage;
+    prevPage.current = normalizedPage;
     if (searchTextChanged) prevSearchText.current = props.searchText ?? "";
     if (selectedTagsChanged)
       prevSelectedTags.current = props.selectedTags ?? [];
@@ -167,6 +159,7 @@ export function BlogList() {
   return (
     <div className="w-full min-w-[300px] max-w-[1440px] flex flex-col items-center mt-8">
       <TagFilter
+        tags={tags}
         page={page}
         setPage={setPage}
         selectedTags={selectedTags}

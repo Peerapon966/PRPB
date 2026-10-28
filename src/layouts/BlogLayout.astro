@@ -1,4 +1,6 @@
 ---
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import "@/styles/globals.css";
 import "@fontsource/prompt/300.css";
 import "@fontsource/prompt/400.css";
@@ -9,10 +11,20 @@ import { Header } from "@/components/header/Header";
 import { Footer } from "@/components/footer/Footer";
 import { Tag } from "@/components/blogs/Tag";
 import { TOC } from "@/components/blog/TOC";
+import { type BlogIndexData } from "@/components/blogs/BlogList";
 
-const { frontmatter, headings } = Astro.props;
+const { file, headings } = Astro.props;
+const slug = path.basename(file, ".mdx");
+const indexFilePath = path.join(
+  process.cwd(),
+  import.meta.env.PUBLIC_INDEX_FILE ?? "/data/index.json",
+);
+const indexData = JSON.parse(
+  readFileSync(indexFilePath, "utf-8"),
+) as BlogIndexData;
+const blog = indexData.blogs[slug];
 const keywords = [
-  ...new Set(["AWS", "blog", "cloud", ...frontmatter.tags]),
+  ...new Set(["AWS", "blog", "cloud", ...(blog?.tags ?? [])]),
 ].join(", ");
 ---
 
@@ -25,9 +37,9 @@ const keywords = [
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={frontmatter?.description} />
+    <meta name="description" content={blog?.description} />
     <meta name="keywords" content={keywords} />
-    <meta name="author" content={frontmatter?.author} />
+    <meta name="author" content={blog?.author} />
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow" />
     <meta name="bingbot" content="index, follow" />
@@ -36,7 +48,7 @@ const keywords = [
       name="sitemap"
       content={import.meta.env.PUBLIC_SITE_URL + "/sitemap-index.xml"}
     />
-    <title>{frontmatter?.title + " | PRPB"}</title>
+    <title>{blog?.title + " | PRPB"}</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
@@ -80,12 +92,12 @@ const keywords = [
       >
         <div id="content" class="py-4 md:py-6">
           {
-            frontmatter?.thumbnail && (
+            blog?.thumbnail && (
               <div class="w-full mx-auto border rounded-xl">
                 <img
-                  src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.PUBLIC_IMAGE_ASSET_PREFIX}/${frontmatter?.slug}/thumbnail.png`}
+                  src={`${import.meta.env.PUBLIC_SITE_URL + import.meta.env.PUBLIC_IMAGE_ASSET_PREFIX}/${slug}/thumbnail.png`}
                   data-image-component="true"
-                  alt={frontmatter?.title + " thumbnail"}
+                  alt={blog?.title + " thumbnail"}
                   loading="eager"
                   fetchpriority="high"
                   decoding="async"
@@ -100,19 +112,19 @@ const keywords = [
           <div
             class="text-4xl md:text-3xl font-semibold py-6 leading-snug md:leading-relaxed"
           >
-            {frontmatter?.title}
+            {blog?.title}
           </div>
           <div class="flex pb-6 justify-between items-center">
             <div class="flex">
               {
-                frontmatter.tags.map((tag: string) => (
+                blog?.tags.map((tag: string) => (
                   <div class="mr-2">
                     <Tag value={tag} />
                   </div>
                 ))
               }
             </div>
-            <p class="text-xs opacity-70">{frontmatter?.date}</p>
+            <p class="text-xs opacity-70">{blog?.publishDate}</p>
           </div>
           <slot />
         </div>
